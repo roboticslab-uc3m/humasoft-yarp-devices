@@ -1,0 +1,61 @@
+
+/**
+ * @brief The main, catch-all namespace for HUMASoft UC3M.
+ */
+namespace humasoft {}
+
+/**
+ * @defgroup yarp_devices_libraries HUMASoft/yarp-devices Libraries
+ *
+ * @brief yarp-devices libraries.
+ *
+ */
+
+/**
+ * @ingroup yarp_devices_libraries
+ * @defgroup YarpPlugins YarpPlugins
+ *
+ * @brief Contains libraries that implement YARP device interfaces
+ * and therefore can be invoked as YARP plugins.
+ *
+ */
+
+/**
+ * @defgroup yarp_devices_programs HUMASoft/yarp-devices Programs
+ *
+ * @brief yarp-devices programs.
+ */
+
+/**
+ * @defgroup yarp_devices_tests HUMASoft/yarp-devices Tests
+ *
+ * @brief yarp-devices tests.
+ */
+
+/**
+ * @defgroup yarp_devices_applications HUMASoft/yarp-devices Applications (Collections of Programs)
+ *
+ * @brief yarp-devices applications (collections of programs).
+ */
+
+/**
+ * @defgroup yarp_devices_examples HUMASoft/yarp-devices Examples
+ *
+ * @brief yarp-devices examples.
+ */
+
+/**
+ * @ingroup yarp_devices_examples
+ * @defgroup yarp_devices_examples_cpp HUMASoft/yarp-devices C++ examples
+ */
+
+/**
+ * @ingroup yarp_devices_examples
+ * @defgroup yarp_devices_examples_py HUMASoft/yarp-devices Python examples
+ */
+
+/**
+ * @defgroup yarp_devices_tests HUMASoft/yarp-devices Tests
+ *
+ * @brief yarp-devices tests.
+ */
