@@ -36,7 +36,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake
                               ${CMAKE_SOURCE_DIR}/cmake/find-modules)
 
 # Hard dependencies.
-#find_package(YCM 0.10 REQUIRED)
+find_package(YCM 0.10 REQUIRED)
 find_package(YARP 3.2 REQUIRED COMPONENTS OS dev sig)
 
 # Soft dependencies.
