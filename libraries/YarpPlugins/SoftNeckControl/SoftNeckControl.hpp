@@ -3,13 +3,17 @@
 #ifndef __SOFT_NECK_CONTROL_HPP__
 #define __SOFT_NECK_CONTROL_HPP__
 
-#include <yarp/os/all.h>
 #include <yarp/dev/Drivers.h>
+#include <yarp/dev/IEncoders.h>
+#include <yarp/dev/IControlMode.h>
+#include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/PolyDriver.h>
-#include <yarp/dev/ControlBoardInterfaces.h>
-#include <yarp/dev/PreciselyTimed.h>
 
 #include <ICartesianControl.h>
+
+#define DEFAULT_PREFIX "/softNeckControl"
+#define DEFAULT_REMOTE_ROBOT "/teo/head"
+#define NUM_ROBOT_JOINTS 3
 
 namespace humasoft
 {
@@ -61,6 +65,12 @@ public:
     virtual bool close();
 
 private:
+
+    yarp::dev::PolyDriver robotDevice;
+
+    yarp::dev::IControlMode * iControlMode;
+    yarp::dev::IEncoders * iEncoders;
+    yarp::dev::IPositionControl * iPositionControl;
 };
 
 } // namespace humasoft
