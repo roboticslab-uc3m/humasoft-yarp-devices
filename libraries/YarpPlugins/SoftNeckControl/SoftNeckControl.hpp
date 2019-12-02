@@ -3,16 +3,26 @@
 #ifndef __SOFT_NECK_CONTROL_HPP__
 #define __SOFT_NECK_CONTROL_HPP__
 
+#include <mutex>
+#include <vector>
+
+#include <yarp/os/Bottle.h>
+#include <yarp/os/BufferedPort.h>
+#include <yarp/os/PortReaderBuffer.h>
+
 #include <yarp/dev/Drivers.h>
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/PolyDriver.h>
+#include <yarp/dev/SerialInterfaces.h>
 
 #include <ICartesianControl.h>
 
-#define DEFAULT_PREFIX "/softNeckControl"
+#define DEFAULT_PREFIX "/SoftNeckControl"
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
+#define DEFAULT_REMOTE_SERIAL "/softimu"
+#define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
 #define NUM_ROBOT_JOINTS 3
 
 namespace humasoft
@@ -27,6 +37,26 @@ namespace humasoft
 
 /**
  * @ingroup SoftNeckControl
+ * @brief Responds to streaming serial bottles.
+ */
+class SerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+{
+public:
+
+    SerialStreamResponder(double timeout);
+    void onRead(yarp::os::Bottle & b);
+    bool getLastData(std::vector<double> & data);
+
+private:
+
+    const double timeout;
+    double localArrivalTime;
+    std::vector<double> data;
+    mutable std::mutex mutex;
+};
+
+/**
+ * @ingroup SoftNeckControl
  * @brief The SoftNeckControl class implements ICartesianControl.
  */
 class SoftNeckControl : public yarp::dev::DeviceDriver,
@@ -35,6 +65,10 @@ class SoftNeckControl : public yarp::dev::DeviceDriver,
 public:
 
     SoftNeckControl()
+        : iControlMode(0),
+          iEncoders(0),
+          iPositionControl(0),
+          serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -67,10 +101,12 @@ public:
 private:
 
     yarp::dev::PolyDriver robotDevice;
-
     yarp::dev::IControlMode * iControlMode;
     yarp::dev::IEncoders * iEncoders;
     yarp::dev::IPositionControl * iPositionControl;
+
+    yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
+    SerialStreamResponder serialStreamResponder;
 };
 
 } // namespace humasoft

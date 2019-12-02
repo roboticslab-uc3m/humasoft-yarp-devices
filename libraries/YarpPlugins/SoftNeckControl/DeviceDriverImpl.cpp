@@ -2,6 +2,7 @@
 
 #include "SoftNeckControl.hpp"
 
+#include <yarp/os/Network.h>
 #include <yarp/os/Property.h>
 
 #include <ColorDebug.h>
@@ -16,6 +17,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     std::string prefix = config.check("prefix", yarp::os::Value(DEFAULT_PREFIX), "local port prefix").asString();
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
+    std::string remoteSerial = config.check("remoteSerial", yarp::os::Value(DEFAULT_REMOTE_SERIAL), "remote serial port").asString();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
@@ -61,6 +63,20 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
+    if (!serialPort.open(prefix + "/imu:i"))
+    {
+        CD_ERROR("Unable to open local serial port.\n");
+        return false;
+    }
+
+    if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
+    {
+        CD_ERROR("Unable to connect to remote serial port.\n");
+        return false;
+    }
+
+    serialPort.useCallback(serialStreamResponder);
+
     return true;
 }
 
@@ -68,7 +84,11 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
 bool SoftNeckControl::close()
 {
-    return stopControl() && robotDevice.close();
+    stopControl();
+    serialPort.interrupt();
+    serialPort.close();
+    robotDevice.close();
+    return true;
 }
 
 // -----------------------------------------------------------------------------

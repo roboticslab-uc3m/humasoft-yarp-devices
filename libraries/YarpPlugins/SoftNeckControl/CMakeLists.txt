@@ -11,7 +11,8 @@ if(NOT SKIP_SoftNeckControl)
 
     yarp_add_plugin(SoftNeckControl SoftNeckControl.hpp
                                     DeviceDriverImpl.cpp
-                                    ICartesianControlImpl.cpp)
+                                    ICartesianControlImpl.cpp
+                                    SerialStreamResponder)
 
     target_link_libraries(SoftNeckControl YARP::YARP_OS
                                           YARP::YARP_dev
