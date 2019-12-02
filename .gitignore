@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Eclipse IDE
+/.settings/
+/.project
+/.cproject
+
+# Miscellanea
+**/build*/
+CMakeLists.txt.user
+*~
+*.swp
+/doc/html/
