@@ -8,6 +8,7 @@
 
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/PeriodicThread.h>
 #include <yarp/os/PortReaderBuffer.h>
 
 #include <yarp/dev/Drivers.h>
@@ -23,6 +24,7 @@
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
 #define DEFAULT_REMOTE_SERIAL "/softimu"
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
+#define DEFAULT_PERIOD 0.05 // seconds
 #define NUM_ROBOT_JOINTS 3
 
 namespace humasoft
@@ -60,15 +62,16 @@ private:
  * @brief The SoftNeckControl class implements ICartesianControl.
  */
 class SoftNeckControl : public yarp::dev::DeviceDriver,
-                        public roboticslab::ICartesianControl
+                        public roboticslab::ICartesianControl,
+                        public yarp::os::PeriodicThread
 {
 public:
 
-    SoftNeckControl()
-        : iControlMode(0),
-          iEncoders(0),
-          iPositionControl(0),
-          serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
+    SoftNeckControl() : yarp::os::PeriodicThread(DEFAULT_PERIOD),
+                        iControlMode(0),
+                        iEncoders(0),
+                        iPositionControl(0),
+                        serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -93,12 +96,19 @@ public:
     virtual bool setParameters(const std::map<int, double> & params);
     virtual bool getParameters(std::map<int, double> & params);
 
+    // -------- PeriodicThread declarations. Implementation in PeriodicThreadImpl.cpp --------
+
+    virtual void run();
+
     // -------- DeviceDriver declarations. Implementation in IDeviceImpl.cpp --------
 
     virtual bool open(yarp::os::Searchable& config);
     virtual bool close();
 
 private:
+
+    int getCurrentState() const;
+    void setCurrentState(int value);
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -107,6 +117,9 @@ private:
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
     SerialStreamResponder serialStreamResponder;
+
+    int currentState;
+    mutable std::mutex stateMutex;
 };
 
 } // namespace humasoft

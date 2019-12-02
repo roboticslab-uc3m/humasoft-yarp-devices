@@ -10,9 +10,11 @@ if(NOT SKIP_SoftNeckControl)
     set(CMAKE_INCLUDE_CURRENT_DIR TRUE) # yarp plugin builder needs this
 
     yarp_add_plugin(SoftNeckControl SoftNeckControl.hpp
+                                    SoftNeckControl.cpp
                                     DeviceDriverImpl.cpp
                                     ICartesianControlImpl.cpp
-                                    SerialStreamResponder)
+                                    PeriodicThreadImpl.cpp
+                                    SerialStreamResponder.cpp)
 
     target_link_libraries(SoftNeckControl YARP::YARP_OS
                                           YARP::YARP_dev
