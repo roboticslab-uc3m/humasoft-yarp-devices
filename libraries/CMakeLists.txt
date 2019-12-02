@@ -1,0 +1,2 @@
+add_subdirectory(ColorDebug)
+add_subdirectory(YarpPlugins)

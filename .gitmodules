@@ -1,0 +1,3 @@
+[submodule "libraries/ColorDebug"]
+	path = libraries/ColorDebug
+	url = https://github.com/roboticslab-uc3m/color-debug
