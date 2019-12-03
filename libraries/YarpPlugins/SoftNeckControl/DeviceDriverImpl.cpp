@@ -19,6 +19,10 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
     std::string remoteSerial = config.check("remoteSerial", yarp::os::Value(DEFAULT_REMOTE_SERIAL), "remote serial port").asString();
 
+    double serialTimeout = config.check("serialTimeout", yarp::os::Value(DEFAULT_SERIAL_TIMEOUT), "serial timeout (seconds)").asFloat64();
+    cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "CMC period (seconds)").asFloat64();
+    waitPeriod = config.check("waitPeriod", yarp::os::Value(DEFAULT_WAIT_PERIOD), "CMC wait check period (seconds)").asFloat64();
+
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
     robotOptions.put("remote", remoteRobot);
@@ -89,9 +93,15 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
-    serialPort.useCallback(serialStreamResponder);
+    serialStreamResponder = new SerialStreamResponder(serialTimeout);
+    serialPort.useCallback(*serialStreamResponder);
 
-    return true;
+    if (cmcPeriod != DEFAULT_CMC_PERIOD)
+    {
+        yarp::os::PeriodicThread::setPeriod(cmcPeriod);
+    }
+
+    return yarp::os::PeriodicThread::start();
 }
 
 // -----------------------------------------------------------------------------
@@ -99,8 +109,9 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 bool SoftNeckControl::close()
 {
     stopControl();
-    serialPort.interrupt();
+    yarp::os::PeriodicThread::stop();
     serialPort.close();
+    delete serialStreamResponder;
     robotDevice.close();
     return true;
 }

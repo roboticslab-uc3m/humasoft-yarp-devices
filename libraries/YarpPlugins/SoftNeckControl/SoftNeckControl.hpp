@@ -77,7 +77,9 @@ public:
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),
-                        serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
+                        cmcPeriod(DEFAULT_CMC_PERIOD),
+                        waitPeriod(DEFAULT_WAIT_PERIOD),
+                        serialStreamResponder(0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -127,11 +129,13 @@ private:
     yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
-    SerialStreamResponder serialStreamResponder;
+    SerialStreamResponder * serialStreamResponder;
 
     int currentState;
     bool cmcSuccess;
     int streamingCommand;
+    double cmcPeriod;
+    double waitPeriod;
     std::vector<double> qRefSpeeds;
     mutable std::mutex stateMutex;
 };

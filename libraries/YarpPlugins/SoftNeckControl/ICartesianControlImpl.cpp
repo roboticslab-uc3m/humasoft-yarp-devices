@@ -149,7 +149,7 @@ bool SoftNeckControl::wait(double timeout)
             break;
         }
 
-        yarp::os::Time::delay(DEFAULT_WAIT_PERIOD);
+        yarp::os::Time::delay(waitPeriod);
         state = getCurrentState();
     }
 
@@ -222,6 +222,22 @@ bool SoftNeckControl::setParameter(int vocab, double value)
 
     switch (vocab)
     {
+    case VOCAB_CC_CONFIG_CMC_PERIOD:
+        if (!yarp::os::PeriodicThread::setPeriod(value * 0.001))
+        {
+            CD_ERROR("Cannot set new CMC period.\n");
+            return false;
+        }
+        cmcPeriod = value * 0.001;
+        break;
+    case VOCAB_CC_CONFIG_WAIT_PERIOD:
+        if (value <= 0.0)
+        {
+            CD_ERROR("Wait period cannot be negative nor zero.\n");
+            return false;
+        }
+        waitPeriod = value * 0.001;
+        break;
     case VOCAB_CC_CONFIG_STREAMING_CMD:
         if (!presetStreamingCommand(value))
         {
@@ -244,6 +260,12 @@ bool SoftNeckControl::getParameter(int vocab, double * value)
 {
     switch (vocab)
     {
+    case VOCAB_CC_CONFIG_CMC_PERIOD:
+        *value = cmcPeriod * 1000.0;
+        break;
+    case VOCAB_CC_CONFIG_WAIT_PERIOD:
+        *value = waitPeriod * 1000.0;
+        break;
     case VOCAB_CC_CONFIG_STREAMING_CMD:
         *value = streamingCommand;
         break;
@@ -279,6 +301,8 @@ bool SoftNeckControl::setParameters(const std::map<int, double> & params)
 
 bool SoftNeckControl::getParameters(std::map<int, double> & params)
 {
+    params.insert(std::make_pair(VOCAB_CC_CONFIG_CMC_PERIOD, cmcPeriod * 1000.0));
+    params.insert(std::make_pair(VOCAB_CC_CONFIG_WAIT_PERIOD, waitPeriod * 1000.0));
     params.insert(std::make_pair(VOCAB_CC_CONFIG_STREAMING_CMD, streamingCommand));
     return true;
 }
