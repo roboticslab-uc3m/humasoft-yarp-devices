@@ -38,4 +38,3 @@ bool SerialStreamResponder::getLastData(std::vector<double> & data)
 }
 
 // -----------------------------------------------------------------------------
-

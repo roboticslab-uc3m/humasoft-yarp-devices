@@ -2,6 +2,10 @@
 
 #include "SoftNeckControl.hpp"
 
+#include <cmath>
+
+#include <ColorDebug.h>
+
 using namespace humasoft;
 
 // -----------------------------------------------------------------------------
@@ -22,3 +26,76 @@ void SoftNeckControl::setCurrentState(int value)
 
 // -----------------------------------------------------------------------------
 
+bool SoftNeckControl::setControlModes(int mode)
+{
+    std::vector<int> modes(NUM_ROBOT_JOINTS);
+
+    if (!iControlMode->getControlModes(modes.data()))
+    {
+        CD_WARNING("getControlModes failed.\n");
+        return false;
+    }
+
+    std::vector<int> jointIds;
+
+    for (unsigned int i = 0; i < modes.size(); i++)
+    {
+        if (modes[i] != mode)
+        {
+            jointIds.push_back(i);
+        }
+    }
+
+    if (!jointIds.empty())
+    {
+        modes.assign(jointIds.size(), mode);
+
+        if (!iControlMode->setControlModes(jointIds.size(), jointIds.data(), modes.data()))
+        {
+            CD_WARNING("setControlModes failed (%s).\n", yarp::os::Vocab::decode(mode).c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// -----------------------------------------------------------------------------
+
+void SoftNeckControl::computeIsocronousSpeeds(const std::vector<double> & q, const std::vector<double> & qd,
+        std::vector<double> & qdot)
+{
+    std::vector<double> distances(NUM_ROBOT_JOINTS);
+    double maxTime = 0.0;
+
+    //-- Find out the maximum time to move
+
+    for (int joint = 0; joint < NUM_ROBOT_JOINTS; joint++)
+    {
+        if (qRefSpeeds[joint] <= 0.0)
+        {
+            CD_WARNING("Zero or negative velocities sent at joint %d, not moving: %f.\n", joint, qRefSpeeds[joint]);
+            return;
+        }
+
+        distances[joint] = std::abs(qd[joint] - q[joint]);
+        CD_INFO("Distance (joint %d): %f\n", joint, distances[joint]);
+        double targetTime = distances[joint] / qRefSpeeds[joint];
+
+        if (targetTime > maxTime)
+        {
+            maxTime = targetTime;
+            CD_INFO("Candidate: %f\n", maxTime);
+        }
+    }
+
+    //-- Compute, store old and set joint velocities given this time
+
+    for (int joint = 0; joint < NUM_ROBOT_JOINTS; joint++)
+    {
+        qdot[joint] = distances[joint] / maxTime;
+        CD_INFO("qdot[%d] = %f\n", joint, qdot[joint]);
+    }
+}
+
+// -----------------------------------------------------------------------------

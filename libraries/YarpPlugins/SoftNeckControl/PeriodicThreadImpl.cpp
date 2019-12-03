@@ -2,6 +2,8 @@
 
 #include "SoftNeckControl.hpp"
 
+#include <ColorDebug.h>
+
 using namespace humasoft;
 
 // ------------------- PeriodicThread Related ------------------------------------
@@ -10,11 +12,39 @@ void SoftNeckControl::run()
 {
     const int currentState = getCurrentState();
 
-    if (currentState == VOCAB_CC_NOT_CONTROLLING)
+    switch (currentState)
     {
-        return;
+    case VOCAB_CC_MOVJ_CONTROLLING:
+        handleMovj();
+        break;
+    default:
+        break;
     }
 }
 
 // -----------------------------------------------------------------------------
 
+void SoftNeckControl::handleMovj()
+{
+    bool done;
+
+    if (!iPositionControl->checkMotionDone(&done))
+    {
+        CD_ERROR("Unable to query current robot state.\n");
+        cmcSuccess = false;
+        stopControl();
+        return;
+    }
+
+    if (done)
+    {
+        setCurrentState(VOCAB_CC_NOT_CONTROLLING);
+
+        if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
+        {
+             CD_WARNING("setRefSpeeds (to restore) failed.\n");
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------

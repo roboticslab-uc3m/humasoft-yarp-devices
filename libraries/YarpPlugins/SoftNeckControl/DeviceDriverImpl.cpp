@@ -63,6 +63,14 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
+    qRefSpeeds.resize(numRobotJoints);
+
+    if (!iPositionControl->getRefSpeeds(qRefSpeeds.data()))
+    {
+        CD_ERROR("Unable to retrieve reference speeds.\n");
+        return false;
+    }
+
     if (!serialPort.open(prefix + "/imu:i"))
     {
         CD_ERROR("Unable to open local serial port.\n");
@@ -92,4 +100,3 @@ bool SoftNeckControl::close()
 }
 
 // -----------------------------------------------------------------------------
-

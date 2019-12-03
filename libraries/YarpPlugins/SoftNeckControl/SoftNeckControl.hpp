@@ -24,7 +24,8 @@
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
 #define DEFAULT_REMOTE_SERIAL "/softimu"
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
-#define DEFAULT_PERIOD 0.05 // seconds
+#define DEFAULT_CMC_PERIOD 0.05 // seconds
+#define DEFAULT_WAIT_PERIOD 0.03 // seconds
 #define NUM_ROBOT_JOINTS 3
 
 namespace humasoft
@@ -67,10 +68,12 @@ class SoftNeckControl : public yarp::dev::DeviceDriver,
 {
 public:
 
-    SoftNeckControl() : yarp::os::PeriodicThread(DEFAULT_PERIOD),
+    SoftNeckControl() : yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD),
                         iControlMode(0),
                         iEncoders(0),
                         iPositionControl(0),
+                        currentState(VOCAB_CC_NOT_CONTROLLING),
+                        cmcSuccess(true),
                         serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
     {}
 
@@ -109,6 +112,9 @@ private:
 
     int getCurrentState() const;
     void setCurrentState(int value);
+    bool setControlModes(int mode);
+    void computeIsocronousSpeeds(const std::vector<double> & q, const std::vector<double> & qd, std::vector<double> & qdot);
+    void handleMovj();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -119,6 +125,8 @@ private:
     SerialStreamResponder serialStreamResponder;
 
     int currentState;
+    bool cmcSuccess;
+    std::vector<double> qRefSpeeds;
     mutable std::mutex stateMutex;
 };
 
