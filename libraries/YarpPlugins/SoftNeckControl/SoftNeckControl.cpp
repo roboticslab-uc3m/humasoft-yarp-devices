@@ -26,6 +26,26 @@ void SoftNeckControl::setCurrentState(int value)
 
 // -----------------------------------------------------------------------------
 
+bool SoftNeckControl::presetStreamingCommand(int command)
+{
+    setCurrentState(VOCAB_CC_NOT_CONTROLLING);
+
+    switch (command)
+    {
+    case VOCAB_CC_TWIST:
+    case VOCAB_CC_POSE:
+        return setControlModes(VOCAB_CM_VELOCITY);
+    case VOCAB_CC_MOVI:
+        return setControlModes(VOCAB_CM_POSITION_DIRECT);
+    default:
+        CD_ERROR("Unrecognized or unsupported streaming command vocab.\n");
+    }
+
+    return false;
+}
+
+// -----------------------------------------------------------------------------
+
 bool SoftNeckControl::setControlModes(int mode)
 {
     std::vector<int> modes(NUM_ROBOT_JOINTS);

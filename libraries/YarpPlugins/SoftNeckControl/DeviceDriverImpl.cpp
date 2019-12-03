@@ -49,6 +49,12 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
+    if (!robotDevice.view(iPositionDirect))
+    {
+        CD_ERROR("Unable to view IPositionDirect in robot device.\n");
+        return false;
+    }
+
     int numRobotJoints;
 
     if (!iEncoders->getAxes(&numRobotJoints))

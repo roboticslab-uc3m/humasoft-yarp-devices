@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <yarp/os/Time.h>
+#include <yarp/os/Vocab.h>
 
 #include <ColorDebug.h>
 
@@ -189,39 +190,97 @@ void SoftNeckControl::pose(const std::vector<double> & x, double interval)
 
 void SoftNeckControl::movi(const std::vector<double> & x)
 {
-    CD_WARNING("Not implemented.\n");
+    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
+    {
+        CD_ERROR("Streaming command not preset.\n");
+        return;
+    }
+
+    std::vector<double> qd(NUM_ROBOT_JOINTS);
+
+    if (!inv(x, qd))
+    {
+        CD_ERROR("invKin failed.\n");
+        return;
+    }
+
+    if (!iPositionDirect->setPositions(qd.data()))
+    {
+        CD_ERROR("setPositions failed.\n");
+    }
 }
 
 // -----------------------------------------------------------------------------
 
 bool SoftNeckControl::setParameter(int vocab, double value)
 {
-    CD_WARNING("Not implemented.\n");
-    return false;
+    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING)
+    {
+        CD_ERROR("Unable to set config parameter while controlling.\n");
+        return false;
+    }
+
+    switch (vocab)
+    {
+    case VOCAB_CC_CONFIG_STREAMING_CMD:
+        if (!presetStreamingCommand(value))
+        {
+            CD_ERROR("Unable to preset streaming command.\n");
+            return false;
+        }
+        streamingCommand = value;
+        break;
+    default:
+        CD_ERROR("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        return false;
+    }
+
+    return true;
 }
 
 // -----------------------------------------------------------------------------
 
 bool SoftNeckControl::getParameter(int vocab, double * value)
 {
-    CD_WARNING("Not implemented.\n");
-    return false;
+    switch (vocab)
+    {
+    case VOCAB_CC_CONFIG_STREAMING_CMD:
+        *value = streamingCommand;
+        break;
+    default:
+        CD_ERROR("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        return false;
+    }
+
+    return true;
 }
 
 // -----------------------------------------------------------------------------
 
 bool SoftNeckControl::setParameters(const std::map<int, double> & params)
 {
-    CD_WARNING("Not implemented.\n");
-    return false;
+    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING)
+    {
+        CD_ERROR("Unable to set config parameters while controlling.\n");
+        return false;
+    }
+
+    bool ok = true;
+
+    for (std::map<int, double>::const_iterator it = params.begin(); it != params.end(); ++it)
+    {
+        ok &= setParameter(it->first, it->second);
+    }
+
+    return ok;
 }
 
 // -----------------------------------------------------------------------------
 
 bool SoftNeckControl::getParameters(std::map<int, double> & params)
 {
-    CD_WARNING("Not implemented.\n");
-    return false;
+    params.insert(std::make_pair(VOCAB_CC_CONFIG_STREAMING_CMD, streamingCommand));
+    return true;
 }
 
 // -----------------------------------------------------------------------------

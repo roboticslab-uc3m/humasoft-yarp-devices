@@ -15,6 +15,7 @@
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/IPositionDirect.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/SerialInterfaces.h>
 
@@ -72,8 +73,10 @@ public:
                         iControlMode(0),
                         iEncoders(0),
                         iPositionControl(0),
+                        iPositionDirect(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
+                        streamingCommand(VOCAB_CC_NOT_SET),
                         serialStreamResponder(DEFAULT_SERIAL_TIMEOUT)
     {}
 
@@ -112,6 +115,7 @@ private:
 
     int getCurrentState() const;
     void setCurrentState(int value);
+    bool presetStreamingCommand(int command);
     bool setControlModes(int mode);
     void computeIsocronousSpeeds(const std::vector<double> & q, const std::vector<double> & qd, std::vector<double> & qdot);
     void handleMovj();
@@ -120,12 +124,14 @@ private:
     yarp::dev::IControlMode * iControlMode;
     yarp::dev::IEncoders * iEncoders;
     yarp::dev::IPositionControl * iPositionControl;
+    yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
     SerialStreamResponder serialStreamResponder;
 
     int currentState;
     bool cmcSuccess;
+    int streamingCommand;
     std::vector<double> qRefSpeeds;
     mutable std::mutex stateMutex;
 };
