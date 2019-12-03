@@ -17,7 +17,6 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     std::string prefix = config.check("prefix", yarp::os::Value(DEFAULT_PREFIX), "local port prefix").asString();
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
-    std::string remoteSerial = config.check("remoteSerial", yarp::os::Value(DEFAULT_REMOTE_SERIAL), "remote serial port").asString();
 
     double serialTimeout = config.check("serialTimeout", yarp::os::Value(DEFAULT_SERIAL_TIMEOUT), "serial timeout (seconds)").asFloat64();
     cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "CMC period (seconds)").asFloat64();
@@ -81,20 +80,25 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
-    if (!serialPort.open(prefix + "/imu:i"))
+    if (config.check("remoteSerial", "remote serial port"))
     {
-        CD_ERROR("Unable to open local serial port.\n");
-        return false;
-    }
+        std::string remoteSerial = config.find("remoteSerial").asString();
 
-    if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
-    {
-        CD_ERROR("Unable to connect to remote serial port.\n");
-        return false;
-    }
+        if (!serialPort.open(prefix + "/imu:i"))
+        {
+            CD_ERROR("Unable to open local serial port.\n");
+            return false;
+        }
 
-    serialStreamResponder = new SerialStreamResponder(serialTimeout);
-    serialPort.useCallback(*serialStreamResponder);
+        if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
+        {
+            CD_ERROR("Unable to connect to remote serial port.\n");
+            return false;
+        }
+
+        serialStreamResponder = new SerialStreamResponder(serialTimeout);
+        serialPort.useCallback(*serialStreamResponder);
+    }
 
     if (cmcPeriod != DEFAULT_CMC_PERIOD)
     {

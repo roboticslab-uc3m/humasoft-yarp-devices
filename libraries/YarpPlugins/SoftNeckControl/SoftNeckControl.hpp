@@ -23,7 +23,6 @@
 
 #define DEFAULT_PREFIX "/SoftNeckControl"
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
-#define DEFAULT_REMOTE_SERIAL "/softimu"
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
 #define DEFAULT_CMC_PERIOD 0.05 // seconds
 #define DEFAULT_WAIT_PERIOD 0.03 // seconds
