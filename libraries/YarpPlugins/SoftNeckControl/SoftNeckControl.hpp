@@ -49,13 +49,17 @@ public:
 
     SerialStreamResponder(double timeout);
     void onRead(yarp::os::Bottle & b);
-    bool getLastData(std::vector<double> & data);
+    bool getLastData(double * inc, double * orient);
 
 private:
 
+    bool accumulateStuff(const std::string & s);
+
     const double timeout;
     double localArrivalTime;
-    std::vector<double> data;
+    double incl;
+    double orient;
+    std::string accumulator;
     mutable std::mutex mutex;
 };
 
