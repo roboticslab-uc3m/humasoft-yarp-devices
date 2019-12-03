@@ -1,0 +1,15 @@
+<application>
+    <name>SoftNeckControl App</name>
+    <module>
+        <name>serialport</name>
+        <parameters>--comport /dev/ttyACM0 --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1</parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+    <module>
+        <name>SoftNeckControl</name>
+        <parameters>--remoteRobot /teo/head --remoteSerial /softimu </parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+</application>
