@@ -1,6 +1,0 @@
-[submodule "libraries/ColorDebug"]
-	path = libraries/ColorDebug
-	url = https://github.com/roboticslab-uc3m/color-debug
-[submodule "libraries/KinematicsDynamics"]
-	path = libraries/KinematicsDynamics
-	url = https://github.com/roboticslab-uc3m/kinematics-dynamics

@@ -3,7 +3,7 @@ yarp_prepare_plugin(SoftNeckControl
                     TYPE humasoft::SoftNeckControl
                     INCLUDE SoftNeckControl.hpp
                     DEFAULT ON
-                    DEPENDS EIGEN3_FOUND
+                    DEPENDS "EIGEN3_FOUND;ROBOTICSLAB_KINEMATICS_DYNAMICS_FOUND"
                     EXTRA_CONFIG WRAPPER=CartesianControlServer)
 
 if(NOT SKIP_SoftNeckControl)

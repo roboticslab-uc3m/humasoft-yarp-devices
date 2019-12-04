@@ -1,3 +1,1 @@
-add_subdirectory(ColorDebug)
-add_subdirectory(KinematicsDynamics)
 add_subdirectory(YarpPlugins)
