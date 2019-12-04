@@ -23,7 +23,13 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    computeIk(xd[3], xd[4], q);
+    if (xd.size() != 2)
+    {
+        CD_ERROR("Expected 2 elements, got %d.\n", xd.size());
+        return false;
+    }
+
+    computeIk(xd[0], xd[1], q);
     return true;
 }
 

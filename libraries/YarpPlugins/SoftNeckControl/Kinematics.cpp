@@ -10,8 +10,17 @@ using namespace humasoft;
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & lengths)
+void SoftNeckControl::computeIk(double incl, double orient, std::vector<double> & lengths)
 {
+    double theta = incl * M_PI / 180.0;
+
+    if (theta == 0.0)
+    {
+        theta = 0.001 * M_PI / 180.0;
+    }
+
+    double phi = orient * M_PI / 180.0;
+
     if (std::abs(theta) < 1e-6)
     {
         theta = 0.001 * M_PI / 180.0;
@@ -42,7 +51,7 @@ void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & 
     double ctheta2 = std::pow(std::sin(theta), 2.0);
 
     double t11 = sphi2 + std::cos(theta) * ctheta2;
-    double t12 = (std::cos(theta) - 1) * std::cos(phi) * std::sin(phi);
+    double t12 = (std::cos(theta) - 1.0) * std::cos(phi) * std::sin(phi);
     double t21 = t12;
     double t13 = std::sin(theta) * std::cos(phi);
     double t31 = -t13;
@@ -56,7 +65,7 @@ void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & 
          t31, t32, t33;
 
     // s0 and t0
-    double s0 = geomL0 * (1 - std::cos(theta)) / theta;
+    double s0 = geomL0 * (1.0 - std::cos(theta)) / theta;
     double t0 = geomL0 * std::sin(theta) / theta;
 
     // Matrix P traslation
@@ -77,6 +86,7 @@ void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & 
     L = T * B - A;
 
     // Total Length
+    lengths.resize(NUM_ROBOT_JOINTS);
     lengths[0] = std::sqrt(std::pow(L(0, 0), 2) + std::pow(L(1, 0), 2) + std::pow(L(2, 0), 2)); // L1
     lengths[1] = std::sqrt(std::pow(L(0, 1), 2) + std::pow(L(1, 1), 2) + std::pow(L(2, 1), 2)); // L2
     lengths[2] = std::sqrt(std::pow(L(0, 2), 2) + std::pow(L(1, 2), 2) + std::pow(L(2, 2), 2)); // L3
