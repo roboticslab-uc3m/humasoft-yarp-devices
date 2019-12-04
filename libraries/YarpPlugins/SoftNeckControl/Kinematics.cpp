@@ -87,9 +87,9 @@ void SoftNeckControl::computeIk(double incl, double orient, std::vector<double> 
 
     // Total Length
     lengths.resize(NUM_ROBOT_JOINTS);
-    lengths[0] = geomLg0 - std::sqrt(std::pow(L(0, 0), 2) + std::pow(L(1, 0), 2) + std::pow(L(2, 0), 2)); // L1
-    lengths[1] = geomLg0 - std::sqrt(std::pow(L(0, 1), 2) + std::pow(L(1, 1), 2) + std::pow(L(2, 1), 2)); // L2
-    lengths[2] = geomLg0 - std::sqrt(std::pow(L(0, 2), 2) + std::pow(L(1, 2), 2) + std::pow(L(2, 2), 2)); // L3
+    lengths[0] = geomL0 + geomLg0 - std::sqrt(std::pow(L(0, 0), 2) + std::pow(L(1, 0), 2) + std::pow(L(2, 0), 2)); // L1
+    lengths[1] = geomL0 + geomLg0 - std::sqrt(std::pow(L(0, 1), 2) + std::pow(L(1, 1), 2) + std::pow(L(2, 1), 2)); // L2
+    lengths[2] = geomL0 + geomLg0 - std::sqrt(std::pow(L(0, 2), 2) + std::pow(L(1, 2), 2) + std::pow(L(2, 2), 2)); // L3
 }
 
 // -----------------------------------------------------------------------------
