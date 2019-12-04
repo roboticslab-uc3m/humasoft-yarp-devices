@@ -78,7 +78,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
     CD_SUCCESS("Waiting\n");
 
-    return false;
+    return true;
 }
 
 // -----------------------------------------------------------------------------

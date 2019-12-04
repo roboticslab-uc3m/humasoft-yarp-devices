@@ -19,6 +19,7 @@ void SoftNeckControl::computeIk(double incl, double orient, std::vector<double> 
         theta = 0.001 * M_PI / 180.0;
     }
 
+    orient -= 30.0;
     double phi = orient * M_PI / 180.0;
 
     if (std::abs(theta) < 1e-6)
