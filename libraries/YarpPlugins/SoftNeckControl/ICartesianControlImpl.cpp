@@ -15,7 +15,25 @@ using namespace humasoft;
 
 bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timestamp)
 {
-    CD_WARNING("Not implemented.\n");
+    if (!serialPort.isClosed())
+    {
+        double incl, orient;
+
+        if (!serialStreamResponder->getLastData(&incl, &orient))
+        {
+            CD_ERROR("Serial stream timed out.\n");
+            return false;
+        }
+
+        x.resize(2);
+        x[0] = incl;
+        x[1] = orient;
+        *state = getCurrentState();
+        *timestamp = yarp::os::Time::now();
+        return true;
+    }
+
+    CD_WARNING("Serial stream not available.\n");
     return false;
 }
 
