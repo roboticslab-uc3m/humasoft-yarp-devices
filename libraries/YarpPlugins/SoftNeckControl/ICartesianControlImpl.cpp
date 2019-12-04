@@ -23,8 +23,8 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    CD_WARNING("Not implemented.\n");
-    return false;
+    computeIk(xd[3], xd[4], q);
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -43,6 +43,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
 
     if (!inv(xd, qd))
     {
+        CD_ERROR("inv failed.\n");
         return false;
     }
 
@@ -200,7 +201,7 @@ void SoftNeckControl::movi(const std::vector<double> & x)
 
     if (!inv(x, qd))
     {
-        CD_ERROR("invKin failed.\n");
+        CD_ERROR("inv failed.\n");
         return;
     }
 

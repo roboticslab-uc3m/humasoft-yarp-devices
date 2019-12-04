@@ -3,6 +3,7 @@ yarp_prepare_plugin(SoftNeckControl
                     TYPE humasoft::SoftNeckControl
                     INCLUDE SoftNeckControl.hpp
                     DEFAULT ON
+                    DEPENDS EIGEN3_FOUND
                     EXTRA_CONFIG WRAPPER=CartesianControlServer)
 
 if(NOT SKIP_SoftNeckControl)
@@ -14,10 +15,12 @@ if(NOT SKIP_SoftNeckControl)
                                     DeviceDriverImpl.cpp
                                     ICartesianControlImpl.cpp
                                     PeriodicThreadImpl.cpp
-                                    SerialStreamResponder.cpp)
+                                    SerialStreamResponder.cpp
+                                    Kinematics.cpp)
 
     target_link_libraries(SoftNeckControl YARP::YARP_OS
                                           YARP::YARP_dev
+                                          Eigen3::Eigen
                                           ROBOTICSLAB::ColorDebug
                                           ROBOTICSLAB::KinematicsDynamicsInterfaces)
 

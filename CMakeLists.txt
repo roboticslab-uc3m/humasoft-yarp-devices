@@ -40,7 +40,7 @@ find_package(YCM 0.10 REQUIRED)
 find_package(YARP 3.2 REQUIRED COMPONENTS OS dev sig)
 
 # Soft dependencies.
-#find_package(... QUIET)
+find_package(Eigen3 QUIET)
 
 # Always build YARP devices as MODULE libraries.
 set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "Force dynamic plugins")

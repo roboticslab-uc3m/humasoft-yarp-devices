@@ -22,6 +22,10 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "CMC period (seconds)").asFloat64();
     waitPeriod = config.check("waitPeriod", yarp::os::Value(DEFAULT_WAIT_PERIOD), "CMC wait check period (seconds)").asFloat64();
 
+    geomA = config.check("geomA", yarp::os::Value(DEFAULT_GEOM_A), "distance between A and base (meters)").asFloat64();
+    geomB = config.check("geomB", yarp::os::Value(DEFAULT_GEOM_B), "distance between B and mobile platform (meters)").asFloat64();
+    geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "neck length (meters)").asFloat64();
+
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
     robotOptions.put("remote", remoteRobot);

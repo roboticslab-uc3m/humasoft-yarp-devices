@@ -26,6 +26,10 @@
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
 #define DEFAULT_CMC_PERIOD 0.05 // seconds
 #define DEFAULT_WAIT_PERIOD 0.03 // seconds
+#define DEFAULT_GEOM_A 0.052 // meters
+#define DEFAULT_GEOM_B 0.052 // meters
+#define DEFAULT_GEOM_L0 0.107 // meters
+
 #define NUM_ROBOT_JOINTS 3
 
 namespace humasoft
@@ -77,12 +81,15 @@ public:
                         iEncoders(0),
                         iPositionControl(0),
                         iPositionDirect(0),
+                        serialStreamResponder(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),
                         cmcPeriod(DEFAULT_CMC_PERIOD),
                         waitPeriod(DEFAULT_WAIT_PERIOD),
-                        serialStreamResponder(0)
+                        geomA(DEFAULT_GEOM_A),
+                        geomB(DEFAULT_GEOM_B),
+                        geomL0(DEFAULT_GEOM_L0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -118,6 +125,8 @@ public:
 
 private:
 
+    void computeIk(double theta, double phi, std::vector<double> & lengths);
+
     int getCurrentState() const;
     void setCurrentState(int value);
     bool presetStreamingCommand(int command);
@@ -139,7 +148,13 @@ private:
     int streamingCommand;
     double cmcPeriod;
     double waitPeriod;
+
     std::vector<double> qRefSpeeds;
+
+    double geomA;
+    double geomB;
+    double geomL0;
+
     mutable std::mutex stateMutex;
 };
 
