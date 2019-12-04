@@ -10,6 +10,14 @@ using namespace humasoft;
 
 // -----------------------------------------------------------------------------
 
+void SoftNeckControl::resetController()
+{
+    delete controller;
+    controller = new FPDBlock(controlKp, controlKd, controlExp, cmcPeriod);
+}
+
+// -----------------------------------------------------------------------------
+
 int SoftNeckControl::getCurrentState() const
 {
     std::lock_guard<std::mutex> lock(stateMutex);
@@ -99,7 +107,6 @@ void SoftNeckControl::computeIsocronousSpeeds(const std::vector<double> & q, con
         }
 
         distances[joint] = std::abs(qd[joint] - q[joint]);
-        CD_INFO("Distance (joint %d): %f\n", joint, distances[joint]);
         double targetTime = distances[joint] / qRefSpeeds[joint];
 
         if (targetTime > maxTime)
@@ -114,8 +121,45 @@ void SoftNeckControl::computeIsocronousSpeeds(const std::vector<double> & q, con
     for (int joint = 0; joint < NUM_ROBOT_JOINTS; joint++)
     {
         qdot[joint] = distances[joint] / maxTime;
-        CD_INFO("qdot[%d] = %f\n", joint, qdot[joint]);
     }
+}
+
+// -----------------------------------------------------------------------------
+
+bool SoftNeckControl::sendTargets(const std::vector<double> & xd)
+{
+    std::vector<double> q(NUM_ROBOT_JOINTS);
+
+    if (!iEncoders->getEncoders(q.data()))
+    {
+        CD_ERROR("getEncoders failed.\n");
+        return false;
+    }
+
+    std::vector<double> qd;
+
+    if (!inv(xd, qd))
+    {
+        CD_ERROR("inv failed.\n");
+        return false;
+    }
+
+    std::vector<double> vmo(NUM_ROBOT_JOINTS);
+    computeIsocronousSpeeds(q, qd, vmo);
+
+    if (!iPositionControl->setRefSpeeds(vmo.data()))
+    {
+         CD_ERROR("setRefSpeeds failed.\n");
+         return false;
+    }
+
+    if (!iPositionControl->positionMove(qd.data()))
+    {
+        CD_ERROR("positionMove failed.\n");
+        return false;
+    }
+
+    return false;
 }
 
 // -----------------------------------------------------------------------------

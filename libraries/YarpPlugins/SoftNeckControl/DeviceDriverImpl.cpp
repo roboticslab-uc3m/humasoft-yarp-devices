@@ -27,6 +27,12 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "neck length (meters)").asFloat64();
     geomLg0 = config.check("geomLg0", yarp::os::Value(DEFAULT_GEOM_LG0), "neck offset (meters)").asFloat64();
 
+    controlKp = config.check("controlKp", yarp::os::Value(DEFAULT_CONTROLLER_KP), "controller Kp param").asFloat64();
+    controlKd = config.check("controlKd", yarp::os::Value(DEFAULT_CONTROLLER_KD), "controller Kd param").asFloat64();
+    controlExp = config.check("controlExp", yarp::os::Value(DEFAULT_CONTROLLER_EXP), "controller exp param").asFloat64();
+    controlTimeout = config.check("controlTimeout", yarp::os::Value(DEFAULT_CONTROLLER_TIMEOUT), "controller timeout (seconds)").asFloat64();
+    controlEpsilon = config.check("controlEpsilon", yarp::os::Value(DEFAULT_CONTROLLER_EPSILON), "controller epsilon (degrees)").asFloat64();
+
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
     robotOptions.put("remote", remoteRobot);
@@ -110,6 +116,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         yarp::os::PeriodicThread::setPeriod(cmcPeriod);
     }
 
+    resetController();
     return yarp::os::PeriodicThread::start();
 }
 
@@ -119,9 +126,13 @@ bool SoftNeckControl::close()
 {
     stopControl();
     yarp::os::PeriodicThread::stop();
+    delete controller;
+
     serialPort.close();
     delete serialStreamResponder;
+
     robotDevice.close();
+
     return true;
 }
 

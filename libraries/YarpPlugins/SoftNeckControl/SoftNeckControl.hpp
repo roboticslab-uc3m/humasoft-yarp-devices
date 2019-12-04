@@ -21,15 +21,24 @@
 
 #include <ICartesianControl.h>
 
+#include "fcontrol.h"
+
 #define DEFAULT_PREFIX "/SoftNeckControl"
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
-#define DEFAULT_CMC_PERIOD 0.05 // seconds
-#define DEFAULT_WAIT_PERIOD 0.03 // seconds
+#define DEFAULT_CMC_PERIOD 0.02 // seconds
+#define DEFAULT_WAIT_PERIOD 0.01 // seconds
+
 #define DEFAULT_GEOM_A 0.052 // meters
 #define DEFAULT_GEOM_B 0.052 // meters
 #define DEFAULT_GEOM_L0 0.1085 // meters
 #define DEFAULT_GEOM_LG0 0.003 // meters
+
+#define DEFAULT_CONTROLLER_KP 0.0
+#define DEFAULT_CONTROLLER_KD 0.9636125
+#define DEFAULT_CONTROLLER_EXP -0.89
+#define DEFAULT_CONTROLLER_TIMEOUT 5.0 // seconds
+#define DEFAULT_CONTROLLER_EPSILON 0.5 // degrees // FIXME?
 
 #define NUM_ROBOT_JOINTS 3
 
@@ -53,7 +62,7 @@ public:
 
     SerialStreamResponder(double timeout);
     void onRead(yarp::os::Bottle & b);
-    bool getLastData(double * inc, double * orient);
+    bool getLastData(double * incl, double * orient);
 
 private:
 
@@ -91,7 +100,14 @@ public:
                         geomA(DEFAULT_GEOM_A),
                         geomB(DEFAULT_GEOM_B),
                         geomL0(DEFAULT_GEOM_L0),
-                        geomLg0(DEFAULT_GEOM_LG0)
+                        geomLg0(DEFAULT_GEOM_LG0),
+                        controlKp(DEFAULT_CONTROLLER_KP),
+                        controlKd(DEFAULT_CONTROLLER_KD),
+                        controlExp(DEFAULT_CONTROLLER_EXP),
+                        controlTimeout(DEFAULT_CONTROLLER_TIMEOUT),
+                        controlEpsilon(DEFAULT_CONTROLLER_EPSILON),
+                        controller(0),
+                        targetStart(0.0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -129,12 +145,16 @@ private:
 
     void computeIk(double theta, double phi, std::vector<double> & lengths);
 
+    void resetController();
     int getCurrentState() const;
     void setCurrentState(int value);
     bool presetStreamingCommand(int command);
     bool setControlModes(int mode);
     void computeIsocronousSpeeds(const std::vector<double> & q, const std::vector<double> & qd, std::vector<double> & qdot);
-    void handleMovj();
+    bool sendTargets(const std::vector<double> & xd);
+
+    void handleMovjOpenLoop();
+    void handleMovjClosedLoop();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -157,6 +177,17 @@ private:
     double geomB;
     double geomL0;
     double geomLg0;
+
+    double controlKp;
+    double controlKd;
+    double controlExp;
+    double controlTimeout;
+    double controlEpsilon;
+
+    FPDBlock * controller;
+
+    std::vector<double> targetPosition;
+    double targetStart;
 
     mutable std::mutex stateMutex;
 };

@@ -41,13 +41,13 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    if (xd.size() != 2)
+    if (xd.size() != 2) // FIXME
     {
         CD_ERROR("Expected 2 elements, got %d.\n", xd.size());
         return false;
     }
 
-    computeIk(xd[0], xd[1], q);
+    computeIk(xd[0], xd[1], q); // FIXME
     return true;
 }
 
@@ -55,47 +55,28 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    std::vector<double> q(NUM_ROBOT_JOINTS);
-
-    if (!iEncoders->getEncoders(q.data()))
-    {
-        CD_ERROR("getEncoders failed.\n");
-        return false;
-    }
-
-    std::vector<double> qd;
-
-    if (!inv(xd, qd))
-    {
-        CD_ERROR("inv failed.\n");
-        return false;
-    }
-
-    std::vector<double> vmo(NUM_ROBOT_JOINTS);
-    computeIsocronousSpeeds(q, qd, vmo);
-
-    if (!iPositionControl->setRefSpeeds(vmo.data()))
-    {
-         CD_ERROR("setRefSpeeds failed.\n");
-         return false;
-    }
-
     if (!setControlModes(VOCAB_CM_POSITION))
     {
         CD_ERROR("Unable to set position mode.\n");
         return false;
     }
 
-    if (!iPositionControl->positionMove(qd.data()))
+    if (serialPort.isClosed())
     {
-        CD_ERROR("positionMove failed.\n");
-        return false;
+        if (!sendTargets(xd))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        resetController();
+        targetPosition = xd;
+        targetStart = yarp::os::Time::now();
     }
 
     cmcSuccess = true;
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
-    CD_SUCCESS("Waiting\n");
-
     return true;
 }
 

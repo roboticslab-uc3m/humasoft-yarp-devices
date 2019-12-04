@@ -21,6 +21,7 @@ if(NOT SKIP_SoftNeckControl)
     target_link_libraries(SoftNeckControl YARP::YARP_OS
                                           YARP::YARP_dev
                                           Eigen3::Eigen
+                                          fcontrol
                                           ROBOTICSLAB::ColorDebug
                                           ROBOTICSLAB::KinematicsDynamicsInterfaces)
 
