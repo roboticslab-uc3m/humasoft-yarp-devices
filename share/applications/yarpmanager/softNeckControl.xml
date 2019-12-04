@@ -2,7 +2,7 @@
     <name>SoftNeckControl App</name>
     <module>
         <name>serialport</name>
-        <parameters>--comport /dev/ttyACM0 --name /softimu --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1</parameters>
+        <parameters>--name /softimu --comport /dev/ttyACM0 --name /softimu --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
