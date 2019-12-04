@@ -28,7 +28,8 @@
 #define DEFAULT_WAIT_PERIOD 0.03 // seconds
 #define DEFAULT_GEOM_A 0.052 // meters
 #define DEFAULT_GEOM_B 0.052 // meters
-#define DEFAULT_GEOM_L0 0.107 // meters
+#define DEFAULT_GEOM_L0 0.1085 // meters
+#define DEFAULT_GEOM_LG0 0.003 // meters
 
 #define NUM_ROBOT_JOINTS 3
 
@@ -89,7 +90,8 @@ public:
                         waitPeriod(DEFAULT_WAIT_PERIOD),
                         geomA(DEFAULT_GEOM_A),
                         geomB(DEFAULT_GEOM_B),
-                        geomL0(DEFAULT_GEOM_L0)
+                        geomL0(DEFAULT_GEOM_L0),
+                        geomLg0(DEFAULT_GEOM_LG0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -154,6 +156,7 @@ private:
     double geomA;
     double geomB;
     double geomL0;
+    double geomLg0;
 
     mutable std::mutex stateMutex;
 };

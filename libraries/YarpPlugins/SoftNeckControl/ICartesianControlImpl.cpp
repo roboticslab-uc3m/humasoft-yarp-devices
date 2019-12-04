@@ -45,7 +45,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
         return false;
     }
 
-    std::vector<double> qd(NUM_ROBOT_JOINTS);
+    std::vector<double> qd;
 
     if (!inv(xd, qd))
     {
@@ -203,7 +203,7 @@ void SoftNeckControl::movi(const std::vector<double> & x)
         return;
     }
 
-    std::vector<double> qd(NUM_ROBOT_JOINTS);
+    std::vector<double> qd;
 
     if (!inv(x, qd))
     {
