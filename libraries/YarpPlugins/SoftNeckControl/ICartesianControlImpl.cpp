@@ -54,7 +54,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
         return false;
     }
 
-    computeIk(xd[1], xd[2], q);
+    computeIk(x_out[1], x_out[2], q);
     return true;
 }
 
