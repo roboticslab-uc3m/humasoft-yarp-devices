@@ -1,15 +1,39 @@
 <application>
+
     <name>SoftNeckControl App</name>
+
     <module>
         <name>serialport</name>
         <parameters>--name /softimu --comport /dev/ttyACM0 --name /softimu --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
+
     <module>
         <name>SoftNeckControl</name>
-        <parameters>--remoteRobot /teo/head --remoteSerial /softimu</parameters>
+        <parameters>--name /SoftNeckControl --remoteRobot /teo/head --fkPeriod 0 --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
+
+    <module>
+        <name>SoftNeckControl</name>
+        <parameters>--name /SoftNeckControl --remoteRobot /teo/head --remoteSerial /softimu --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+
+    <module>
+        <name>SpaceNavigator</name>
+        <parameters>--period 5 --name /spacenavigator --ports "(mouse buttons)" --channels 8 --mouse 0 5 0 5 --buttons 6 7 0 1</parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+
+    <module>
+        <name>streamingDeviceController</name>
+        <parameters>--streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.01 --SpaceNavigator::fixedAxes "(x y z)" --period 0.02</parameters>
+        <node>localhost</node>
+    </module>
+
 </application>
