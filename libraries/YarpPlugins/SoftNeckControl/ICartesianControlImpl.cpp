@@ -257,6 +257,13 @@ bool SoftNeckControl::setParameter(int vocab, double value)
         }
         waitPeriod = value * 0.001;
         break;
+    case VOCAB_CC_CONFIG_FRAME:
+        if (value != roboticslab::ICartesianSolver::BASE_FRAME)
+        {
+            CD_ERROR("Unrecognized or unsupported reference frame vocab.\n");
+            return false;
+        }
+        break;
     case VOCAB_CC_CONFIG_STREAMING_CMD:
         if (!presetStreamingCommand(value))
         {
@@ -284,6 +291,9 @@ bool SoftNeckControl::getParameter(int vocab, double * value)
         break;
     case VOCAB_CC_CONFIG_WAIT_PERIOD:
         *value = waitPeriod * 1000.0;
+        break;
+    case VOCAB_CC_CONFIG_FRAME:
+        *value = roboticslab::ICartesianSolver::BASE_FRAME;
         break;
     case VOCAB_CC_CONFIG_STREAMING_CMD:
         *value = streamingCommand;
@@ -322,6 +332,7 @@ bool SoftNeckControl::getParameters(std::map<int, double> & params)
 {
     params.insert(std::make_pair(VOCAB_CC_CONFIG_CMC_PERIOD, cmcPeriod * 1000.0));
     params.insert(std::make_pair(VOCAB_CC_CONFIG_WAIT_PERIOD, waitPeriod * 1000.0));
+    params.insert(std::make_pair(VOCAB_CC_CONFIG_FRAME, roboticslab::ICartesianSolver::BASE_FRAME));
     params.insert(std::make_pair(VOCAB_CC_CONFIG_STREAMING_CMD, streamingCommand));
     return true;
 }
