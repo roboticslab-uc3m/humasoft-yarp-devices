@@ -10,17 +10,14 @@ using namespace humasoft;
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::computeIk(double incl, double orient, std::vector<double> & lengths)
+void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & lengths)
 {
-    double theta = incl * M_PI / 180.0;
-
     if (theta == 0.0)
     {
         theta = 0.001 * M_PI / 180.0;
     }
 
-    orient -= 30.0;
-    double phi = orient * M_PI / 180.0;
+    phi -= 30.0 * M_PI / 180.0; // offset
 
     if (std::abs(theta) < 1e-6)
     {

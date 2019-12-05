@@ -13,8 +13,7 @@ using namespace humasoft;
 SerialStreamResponder::SerialStreamResponder(double _timeout)
     : timeout(_timeout),
       localArrivalTime(0.0),
-      incl(0.0),
-      orient(0.0)
+      rpy(3, 0.0)
 {}
 
 // -----------------------------------------------------------------------------
@@ -54,8 +53,8 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 
     if (i == 0 && o != std::string::npos && o > i)
     {
-        incl = std::atof(accumulator.substr(i + 1, o).c_str());
-        orient = std::atof(accumulator.substr(o + 1, accumulator.size()).c_str());
+        rpy[1] = std::atof(accumulator.substr(i + 1, o).c_str());
+        rpy[2] = std::atof(accumulator.substr(o + 1, accumulator.size()).c_str());
         parsed = true;
     }
 
@@ -65,11 +64,10 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 
 // -----------------------------------------------------------------------------
 
-bool SerialStreamResponder::getLastData(double * incl, double * orient)
+bool SerialStreamResponder::getLastData(std::vector<double> & rpy)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    *incl = this->incl;
-    *orient = this->orient;
+    rpy = this->rpy;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
 

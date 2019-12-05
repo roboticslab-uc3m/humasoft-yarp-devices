@@ -23,7 +23,8 @@ if(NOT SKIP_SoftNeckControl)
                                           Eigen3::Eigen
                                           fcontrol
                                           ROBOTICSLAB::ColorDebug
-                                          ROBOTICSLAB::KinematicsDynamicsInterfaces)
+                                          ROBOTICSLAB::KinematicsDynamicsInterfaces
+                                          ROBOTICSLAB::KinematicRepresentationLib)
 
     yarp_install(TARGETS SoftNeckControl
                  LIBRARY DESTINATION ${HUMASOFT-YARP-DEVICES_DYNAMIC_PLUGINS_INSTALL_DIR}

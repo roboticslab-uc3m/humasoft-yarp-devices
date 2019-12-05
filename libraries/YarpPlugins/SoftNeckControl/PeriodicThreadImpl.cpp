@@ -6,9 +6,11 @@
 
 #include <yarp/os/Time.h>
 
+#include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
 using namespace humasoft;
+using namespace roboticslab::KinRepresentation;
 
 // ------------------- PeriodicThread Related ------------------------------------
 
@@ -46,7 +48,7 @@ void SoftNeckControl::handleMovjOpenLoop()
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {
-             CD_WARNING("setRefSpeeds (to restore) failed.\n");
+            CD_WARNING("setRefSpeeds (to restore) failed.\n");
         }
     }
 }
@@ -63,15 +65,14 @@ void SoftNeckControl::handleMovjClosedLoop()
         return;
     }
 
-    double incl, orient;
+    std::vector<double> rpy;
 
-    if (!serialStreamResponder->getLastData(&incl, &orient))
+    if (!serialStreamResponder->getLastData(rpy))
     {
         CD_WARNING("Outdated serial stream data.\n");
     }
 
-    double targetIncl = targetPosition[0]; // FIXME
-    double error = targetIncl - incl;
+    double error = targetRPY[1] - rpy[1];
 
     if (std::abs(error) < controlEpsilon)
     {
@@ -80,7 +81,7 @@ void SoftNeckControl::handleMovjClosedLoop()
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {
-             CD_WARNING("setRefSpeeds (to restore) failed.\n");
+            CD_WARNING("setRefSpeeds (to restore) failed.\n");
         }
 
         return;
@@ -93,10 +94,21 @@ void SoftNeckControl::handleMovjClosedLoop()
         cs = 0.0;
     }
 
-    CD_DEBUG("incl: target %f, sensor %f, error %f, cs: %f\n", targetIncl, incl, error, cs);
+    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", targetRPY[1], rpy[1], error, cs);
 
-    std::vector<double> xd(targetPosition);
-    targetPosition[0] = cs; // FIXME
+    rpy[0] = targetRPY[0];
+    rpy[1] = cs;
+    rpy[2] = targetRPY[2];
+
+    std::vector<double> xd;
+
+    if (!encodePose(rpy, xd, coordinate_system::NONE, orientation_system::RPY, angular_units::DEGREES))
+    {
+        CD_ERROR("encodePose failed.\n");
+        cmcSuccess = false;
+        stopControl();
+        return;
+    }
 
     if (!sendTargets(xd))
     {

@@ -7,9 +7,11 @@
 #include <yarp/os/Time.h>
 #include <yarp/os/Vocab.h>
 
+#include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
 using namespace humasoft;
+using namespace roboticslab::KinRepresentation;
 
 // ------------------- ICartesianControl Related ------------------------------------
 
@@ -17,17 +19,20 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 {
     if (!serialPort.isClosed())
     {
-        double incl, orient;
+        std::vector<double> rpy;
 
-        if (!serialStreamResponder->getLastData(&incl, &orient))
+        if (!serialStreamResponder->getLastData(rpy))
         {
             CD_ERROR("Serial stream timed out.\n");
             return false;
         }
 
-        x.resize(2);
-        x[0] = incl;
-        x[1] = orient;
+        if (!encodePose(rpy, x, coordinate_system::NONE, orientation_system::RPY, angular_units::DEGREES))
+        {
+            CD_ERROR("encodePose failed.\n");
+            return false;
+        }
+
         *state = getCurrentState();
         *timestamp = yarp::os::Time::now();
         return true;
@@ -41,13 +46,15 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    if (xd.size() != 2) // FIXME
+    std::vector<double> x_out;
+
+    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::RPY, angular_units::DEGREES))
     {
-        CD_ERROR("Expected 2 elements, got %d.\n", xd.size());
+        CD_ERROR("decodePose failed.\n");
         return false;
     }
 
-    computeIk(xd[0], xd[1], q); // FIXME
+    computeIk(xd[1], xd[2], q);
     return true;
 }
 
@@ -71,7 +78,13 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     else
     {
         resetController();
-        targetPosition = xd;
+
+        if (!decodePose(xd, targetRPY, coordinate_system::NONE, orientation_system::RPY, angular_units::DEGREES))
+        {
+            CD_ERROR("decodePose failed.\n");
+            return false;
+        }
+
         targetStart = yarp::os::Time::now();
     }
 
