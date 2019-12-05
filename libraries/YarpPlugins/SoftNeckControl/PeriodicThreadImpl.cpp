@@ -59,7 +59,7 @@ void SoftNeckControl::handleMovjClosedLoop()
 {
     if (yarp::os::Time::now() - targetStart > controlTimeout)
     {
-        CD_ERROR("Control timeout (did not reach target in %d seconds).\n", controlTimeout);
+        CD_ERROR("Control timeout (did not reach target in %f seconds).\n", controlTimeout);
         cmcSuccess = false;
         stopControl();
         return;
@@ -77,7 +77,7 @@ void SoftNeckControl::handleMovjClosedLoop()
     if (std::abs(error) < controlEpsilon)
     {
         CD_SUCCESS("Target reached.\n");
-        setCurrentState(VOCAB_CC_NOT_CONTROLLING);
+        stopControl();
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {

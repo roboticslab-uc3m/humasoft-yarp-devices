@@ -112,7 +112,6 @@ void SoftNeckControl::computeIsocronousSpeeds(const std::vector<double> & q, con
         if (targetTime > maxTime)
         {
             maxTime = targetTime;
-            CD_INFO("Candidate: %f\n", maxTime);
         }
     }
 
@@ -159,7 +158,7 @@ bool SoftNeckControl::sendTargets(const std::vector<double> & xd)
         return false;
     }
 
-    return false;
+    return true;
 }
 
 // -----------------------------------------------------------------------------
