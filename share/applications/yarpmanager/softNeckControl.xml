@@ -32,7 +32,7 @@
 
     <module>
         <name>streamingDeviceController</name>
-        <parameters>--streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.01 --SpaceNavigator::fixedAxes "(x y z)" --period 0.02</parameters>
+        <parameters>--streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.1 --SpaceNavigator::fixedAxes "(x y z)" --period 0.02</parameters>
         <node>localhost</node>
     </module>
 
