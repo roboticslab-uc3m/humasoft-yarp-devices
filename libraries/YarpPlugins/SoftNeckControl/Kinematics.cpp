@@ -12,18 +12,12 @@ using namespace humasoft;
 
 void SoftNeckControl::computeIk(double theta, double phi, std::vector<double> & lengths)
 {
-    if (theta == 0.0)
-    {
-        theta = 0.001 * M_PI / 180.0;
-    }
-
-    phi -= 30.0 * M_PI / 180.0; // offset
-
     if (std::abs(theta) < 1e-6)
     {
         theta = 0.001 * M_PI / 180.0;
     }
 
+    phi -= 30.0 * M_PI / 180.0; // offset
     double factor = std::sqrt(3.0) / 2.0;
 
     // Matrix A

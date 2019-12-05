@@ -48,7 +48,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 {
     std::vector<double> x_out;
 
-    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::RPY, angular_units::DEGREES))
+    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::RPY, angular_units::RADIANS))
     {
         CD_ERROR("decodePose failed.\n");
         return false;
