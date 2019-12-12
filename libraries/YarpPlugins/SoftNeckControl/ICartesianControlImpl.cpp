@@ -51,7 +51,7 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    if (std::abs(xd[2]) > EPSILON)
+    if (std::abs(xd[5]) > EPSILON)
     {
         CD_ERROR("Non-null z-axis component: %f.\n", xd[2]);
         return false;
@@ -73,7 +73,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if (std::abs(xd[2]) > EPSILON)
+    if (std::abs(xd[5]) > EPSILON)
     {
         CD_ERROR("Non-null z-axis component: %f.\n", xd[2]);
         return false;
@@ -226,7 +226,7 @@ void SoftNeckControl::pose(const std::vector<double> & x, double interval)
 
 void SoftNeckControl::movi(const std::vector<double> & x)
 {
-    if (std::abs(x[2]) > EPSILON)
+    if (std::abs(x[5]) > EPSILON)
     {
         CD_ERROR("Non-null z-axis component: %f.\n", x[2]);
         return;
