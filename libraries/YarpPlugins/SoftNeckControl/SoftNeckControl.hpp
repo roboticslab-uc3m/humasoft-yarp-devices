@@ -62,7 +62,7 @@ public:
 
     SerialStreamResponder(double timeout);
     void onRead(yarp::os::Bottle & b);
-    bool getLastData(std::vector<double> & rpy);
+    bool getLastData(std::vector<double> & x);
 
 private:
 
@@ -70,7 +70,7 @@ private:
 
     const double timeout;
     double localArrivalTime;
-    std::vector<double> rpy;
+    std::vector<double> x;
     std::string accumulator;
     mutable std::mutex mutex;
 };
@@ -185,7 +185,7 @@ private:
 
     FPDBlock * controller;
 
-    std::vector<double> targetRPY;
+    std::vector<double> targetPose;
     double targetStart;
 
     mutable std::mutex stateMutex;
