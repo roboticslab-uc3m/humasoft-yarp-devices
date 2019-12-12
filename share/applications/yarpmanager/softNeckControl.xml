@@ -10,15 +10,21 @@
     </module>
 
     <module>
+        <name>oneCanBusOneWrapper</name>
+        <parameters>--from softNeck.ini</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
         <name>SoftNeckControl</name>
-        <parameters>--name /SoftNeckControl --remoteRobot /teo/head --fkPeriod 0 --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
+        <parameters>--name /SoftNeckControl --remoteRobot /softneck --fkPeriod 0 --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
 
     <module>
         <name>SoftNeckControl</name>
-        <parameters>--name /SoftNeckControl --remoteRobot /teo/head --remoteSerial /softimu --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
+        <parameters>--name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr RPY --angularUnits degrees</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
