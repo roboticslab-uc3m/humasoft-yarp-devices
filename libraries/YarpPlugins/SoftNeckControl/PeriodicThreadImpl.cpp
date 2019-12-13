@@ -81,6 +81,14 @@ void SoftNeckControl::handleMovjClosedLoop()
         CD_SUCCESS("Pitch reference reached.\n");
         xd[0] = x_imu[0];
 
+        if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+        {
+            CD_ERROR("encodePose failed.\n");
+            cmcSuccess = false;
+            stopControl();
+            return;
+        }
+
         if (!sendTargets(xd))
         {
             CD_ERROR("Unable to toggle open-loop control.\n");
@@ -100,7 +108,7 @@ void SoftNeckControl::handleMovjClosedLoop()
         cs = 0.0;
     }
 
-    CD_DEBUG("pitch: target %f, sensor %f, polarError %f, cs: %f\n", xd[0], x_imu[0], error, cs);
+    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], error, cs);
 
     xd[0] = cs;
 
