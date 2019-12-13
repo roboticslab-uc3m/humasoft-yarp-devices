@@ -146,6 +146,7 @@ bool SoftNeckControl::stopControl()
     }
 
     setCurrentState(VOCAB_CC_NOT_CONTROLLING);
+    toggleOpenLoop = false;
     return true;
 }
 

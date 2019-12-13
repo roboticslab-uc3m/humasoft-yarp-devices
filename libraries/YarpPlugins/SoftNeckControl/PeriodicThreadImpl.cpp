@@ -21,7 +21,7 @@ void SoftNeckControl::run()
     switch (currentState)
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
-        serialPort.isClosed() ? handleMovjOpenLoop() : handleMovjClosedLoop();
+        !serialPort.isClosed() && !toggleOpenLoop ? handleMovjClosedLoop() : handleMovjOpenLoop();
         break;
     default:
         break;
@@ -45,6 +45,7 @@ void SoftNeckControl::handleMovjOpenLoop()
     if (done)
     {
         setCurrentState(VOCAB_CC_NOT_CONTROLLING);
+        toggleOpenLoop = false;
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {
@@ -65,6 +66,7 @@ void SoftNeckControl::handleMovjClosedLoop()
         return;
     }
 
+    std::vector<double> xd = targetPose;
     std::vector<double> x_imu;
 
     if (!serialStreamResponder->getLastData(x_imu))
@@ -72,18 +74,22 @@ void SoftNeckControl::handleMovjClosedLoop()
         CD_WARNING("Outdated serial stream data.\n");
     }
 
-    double error = targetPose[0] - x_imu[0];
+    double error = xd[0] - x_imu[0];
 
     if (std::abs(error) < controlEpsilon)
     {
-        CD_SUCCESS("Target reached.\n");
-        stopControl();
+        CD_SUCCESS("Pitch reference reached.\n");
+        xd[0] = x_imu[0];
 
-        if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
+        if (!sendTargets(xd))
         {
-            CD_WARNING("setRefSpeeds (to restore) failed.\n");
+            CD_ERROR("Unable to toggle open-loop control.\n");
+            cmcSuccess = false;
+            stopControl();
+            return;
         }
 
+        toggleOpenLoop = true;
         return;
     }
 
@@ -94,9 +100,8 @@ void SoftNeckControl::handleMovjClosedLoop()
         cs = 0.0;
     }
 
-    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], error, cs);
+    CD_DEBUG("pitch: target %f, sensor %f, polarError %f, cs: %f\n", xd[0], x_imu[0], error, cs);
 
-    std::vector<double> xd = targetPose;
     xd[0] = cs;
 
     if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))

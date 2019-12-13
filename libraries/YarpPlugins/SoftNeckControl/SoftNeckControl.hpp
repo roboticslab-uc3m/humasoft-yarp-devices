@@ -106,7 +106,8 @@ public:
                         controlTimeout(DEFAULT_CONTROLLER_TIMEOUT),
                         controlEpsilon(DEFAULT_CONTROLLER_EPSILON),
                         controller(0),
-                        targetStart(0.0)
+                        targetStart(0.0),
+                        toggleOpenLoop(false)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -187,6 +188,7 @@ private:
 
     std::vector<double> targetPose;
     double targetStart;
+    bool toggleOpenLoop;
 
     mutable std::mutex stateMutex;
 };
