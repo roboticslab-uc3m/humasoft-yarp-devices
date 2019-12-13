@@ -2,8 +2,6 @@
 
 #include "SoftNeckControl.hpp"
 
-#include <cmath>
-
 #include <yarp/os/Time.h>
 #include <yarp/os/Vocab.h>
 
@@ -32,7 +30,7 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             return false;
         }
 
-        if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::AXIS_ANGLE, angular_units::DEGREES))
+        if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
             CD_ERROR("encodePose failed.\n");
             return false;
@@ -51,21 +49,15 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
 bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    if (std::abs(xd[5]) > EPSILON)
-    {
-        CD_ERROR("Non-null z-axis component: %f.\n", xd[5]);
-        return false;
-    }
-
     std::vector<double> x_out;
 
-    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::AXIS_ANGLE, angular_units::RADIANS))
+    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::RADIANS))
     {
         CD_ERROR("decodePose failed.\n");
         return false;
     }
 
-    computeIk(x_out[3], std::atan2(-x_out[0], x_out[1]), q);
+    computeIk(x_out[0], x_out[1], q);
     return true;
 }
 
@@ -73,12 +65,6 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if (std::abs(xd[5]) > EPSILON)
-    {
-        CD_ERROR("Non-null z-axis component: %f.\n", xd[5]);
-        return false;
-    }
-
     if (!setControlModes(VOCAB_CM_POSITION))
     {
         CD_ERROR("Unable to set position mode.\n");
@@ -96,7 +82,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     {
         resetController();
 
-        if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::AXIS_ANGLE, angular_units::DEGREES))
+        if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
             CD_ERROR("decodePose failed.\n");
             return false;
@@ -226,12 +212,6 @@ void SoftNeckControl::pose(const std::vector<double> & x, double interval)
 
 void SoftNeckControl::movi(const std::vector<double> & x)
 {
-    if (std::abs(x[5]) > EPSILON)
-    {
-        CD_ERROR("Non-null z-axis component: %f.\n", x[5]);
-        return;
-    }
-
     if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
     {
         CD_ERROR("Streaming command not preset.\n");

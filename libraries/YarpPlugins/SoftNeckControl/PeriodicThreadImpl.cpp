@@ -72,7 +72,7 @@ void SoftNeckControl::handleMovjClosedLoop()
         CD_WARNING("Outdated serial stream data.\n");
     }
 
-    double error = targetPose[3] - x_imu[3];
+    double error = targetPose[0] - x_imu[0];
 
     if (std::abs(error) < controlEpsilon)
     {
@@ -94,12 +94,12 @@ void SoftNeckControl::handleMovjClosedLoop()
         cs = 0.0;
     }
 
-    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[3], x_imu[3], error, cs);
+    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], error, cs);
 
     std::vector<double> xd = targetPose;
-    xd[3] = cs;
+    xd[0] = cs;
 
-    if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::AXIS_ANGLE, angular_units::DEGREES))
+    if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
         CD_ERROR("encodePose failed.\n");
         cmcSuccess = false;

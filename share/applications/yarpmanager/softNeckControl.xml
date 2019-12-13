@@ -17,14 +17,14 @@
 
     <module>
         <name>SoftNeckControl</name>
-        <parameters>--name /SoftNeckControl --remoteRobot /softneck --fkPeriod 0 --coordRepr none --angleRepr axisAngle --angularUnits degrees</parameters>
+        <parameters>--name /SoftNeckControl --remoteRobot /softneck --fkPeriod 0 --coordRepr none --angleRepr polarAzimuth --angularUnits degrees</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>
 
     <module>
         <name>SoftNeckControl</name>
-        <parameters>--name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr axisAngle --angularUnits degrees</parameters>
+        <parameters>--name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees</parameters>
         <node>localhost</node>
         <deployer>yarpdev</deployer>
     </module>

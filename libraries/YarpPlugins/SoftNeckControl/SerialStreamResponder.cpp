@@ -2,7 +2,6 @@
 
 #include "SoftNeckControl.hpp"
 
-#include <cmath>
 #include <cstdlib> // std::atof
 
 #include <yarp/os/Time.h>
@@ -14,7 +13,7 @@ using namespace humasoft;
 SerialStreamResponder::SerialStreamResponder(double _timeout)
     : timeout(_timeout),
       localArrivalTime(0.0),
-      x(4, 0.0)
+      x(2, 0.0)
 {}
 
 // -----------------------------------------------------------------------------
@@ -54,10 +53,8 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 
     if (i == 0 && o != std::string::npos && o > i)
     {
-        double orient = std::atof(accumulator.substr(o + 1, accumulator.size()).c_str()) * M_PI / 180.0;
-        x[0] = -std::sin(orient);
-        x[1] = std::cos(orient);
-        x[3] = std::atof(accumulator.substr(i + 1, o).c_str());
+        x[0] = std::atof(accumulator.substr(i + 1, o).c_str());
+        x[1] = std::atof(accumulator.substr(o + 1, accumulator.size()).c_str());
         parsed = true;
     }
 
