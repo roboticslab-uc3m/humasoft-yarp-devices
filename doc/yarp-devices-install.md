@@ -6,7 +6,11 @@ First install the dependencies:
 - [Install YCM 0.10+](https://github.com/roboticslab-uc3m/installation-guides/blob/master/install-ycm.md/)
 - [Install YARP 3.2+](https://github.com/roboticslab-uc3m/installation-guides/blob/master/install-yarp.md/)
 - [Install color-debug](https://github.com/roboticslab-uc3m/color-debug)
-- [Install kinematics-dynamics](https://github.com/roboticslab-uc3m/kinematics-dynamics) (required for SoftNeckControl device)
+
+The SoftNeckControl YARP device requires the following additional packages:
+- [Install Eigen3](https://github.com/roboticslab-uc3m/installation-guides/blob/master/install-eigen.md)
+- [Install kinematics-dynamics](https://github.com/roboticslab-uc3m/kinematics-dynamics)
+- [Install fcontrol](https://github.com/munozyanez/fcontrol)
 
 For unit testing, you'll need the googletest source package. Refer to [Install googletest](https://github.com/roboticslab-uc3m/installation-guides/blob/master/install-googletest.md/).
 
