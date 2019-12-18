@@ -5,6 +5,7 @@
 # fcontrol_FOUND        - system has fcontrol
 # fcontrol_INCLUDE_DIRS - fcontrol include directories
 # fcontrol_LIBRARIES    - fcontrol libraries
+# fcontrol_CXX_FLAGS    - fcontrol C++ compiler flags
 #
 # ...and the following imported targets:
 #
@@ -26,13 +27,14 @@ find_package_handle_standard_args(fcontrol DEFAULT_MSG fcontrol_INCLUDE_DIR fcon
 if(fcontrol_FOUND)
     set(fcontrol_INCLUDE_DIRS ${fcontrol_INCLUDE_DIR})
     set(fcontrol_LIBRARIES ${fcontrol_LIBRARY})
+    set(fcontrol_CXX_FLAGS "-std=c++11")
 
     if(NOT TARGET FControl::fcontrol)
         add_library(FControl::fcontrol UNKNOWN IMPORTED)
 
         set_target_properties(FControl::fcontrol PROPERTIES IMPORTED_LOCATION "${fcontrol_LIBRARY}"
                                                             INTERFACE_INCLUDE_DIRECTORIES "${fcontrol_INCLUDE_DIR}"
-                                                            INTERFACE_COMPILE_OPTIONS "-std=c++11")
+                                                            INTERFACE_COMPILE_OPTIONS "${fcontrol_CXX_FLAGS}")
     endif()
 endif()
 
