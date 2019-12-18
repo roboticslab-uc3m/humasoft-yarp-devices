@@ -3,7 +3,7 @@ yarp_prepare_plugin(SoftNeckControl
                     TYPE humasoft::SoftNeckControl
                     INCLUDE SoftNeckControl.hpp
                     DEFAULT ON
-                    DEPENDS "EIGEN3_FOUND;ROBOTICSLAB_KINEMATICS_DYNAMICS_FOUND"
+                    #DEPENDS "EIGEN3_FOUND;ROBOTICSLAB_KINEMATICS_DYNAMICS_FOUND"
                     EXTRA_CONFIG WRAPPER=CartesianControlServer)
 
 if(NOT SKIP_SoftNeckControl)
@@ -21,7 +21,7 @@ if(NOT SKIP_SoftNeckControl)
     target_link_libraries(SoftNeckControl YARP::YARP_OS
                                           YARP::YARP_dev
                                           Eigen3::Eigen
-                                          fcontrol
+                                          FControl::fcontrol
                                           ROBOTICSLAB::ColorDebug
                                           ROBOTICSLAB::KinematicsDynamicsInterfaces
                                           ROBOTICSLAB::KinematicRepresentationLib)

@@ -32,17 +32,17 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Pick up our CMake modules.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake
-                              ${CMAKE_SOURCE_DIR}/cmake/find-modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/find-modules)
 
 # Hard dependencies.
 find_package(YCM 0.10 REQUIRED)
 find_package(YARP 3.2 REQUIRED COMPONENTS OS dev)
 find_package(COLOR_DEBUG REQUIRED)
 
-# Soft dependencies.
-find_package(Eigen3 QUIET)
-find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS QUIET)
+# SoftNeckControl dependencies.
+find_package(Eigen3 REQUIRED)
+find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
+find_package(fcontrol REQUIRED)
 
 # Always build YARP devices as MODULE libraries.
 set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "Force dynamic plugins")
