@@ -87,8 +87,6 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             CD_ERROR("decodePose failed.\n");
             return false;
         }
-
-        targetStart = yarp::os::Time::now();
     }
 
     cmcSuccess = true;
@@ -146,7 +144,6 @@ bool SoftNeckControl::stopControl()
     }
 
     setCurrentState(VOCAB_CC_NOT_CONTROLLING);
-    toggleOpenLoop = false;
     return true;
 }
 

@@ -30,8 +30,6 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     controlKp = config.check("controlKp", yarp::os::Value(DEFAULT_CONTROLLER_KP), "controller Kp param").asFloat64();
     controlKd = config.check("controlKd", yarp::os::Value(DEFAULT_CONTROLLER_KD), "controller Kd param").asFloat64();
     controlExp = config.check("controlExp", yarp::os::Value(DEFAULT_CONTROLLER_EXP), "controller exp param").asFloat64();
-    controlTimeout = config.check("controlTimeout", yarp::os::Value(DEFAULT_CONTROLLER_TIMEOUT), "controller timeout (seconds)").asFloat64();
-    controlEpsilon = config.check("controlEpsilon", yarp::os::Value(DEFAULT_CONTROLLER_EPSILON), "controller epsilon (degrees)").asFloat64();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");

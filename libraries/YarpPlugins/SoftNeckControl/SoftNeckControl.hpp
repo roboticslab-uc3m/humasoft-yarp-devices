@@ -43,8 +43,6 @@
 #define DEFAULT_CONTROLLER_KP 0.0
 #define DEFAULT_CONTROLLER_KD 0.9636125
 #define DEFAULT_CONTROLLER_EXP -0.89
-#define DEFAULT_CONTROLLER_TIMEOUT 5.0 // seconds
-#define DEFAULT_CONTROLLER_EPSILON 0.5 // degrees
 
 #define NUM_ROBOT_JOINTS 3
 
@@ -109,11 +107,7 @@ public:
                         controlKp(DEFAULT_CONTROLLER_KP),
                         controlKd(DEFAULT_CONTROLLER_KD),
                         controlExp(DEFAULT_CONTROLLER_EXP),
-                        controlTimeout(DEFAULT_CONTROLLER_TIMEOUT),
-                        controlEpsilon(DEFAULT_CONTROLLER_EPSILON),
-                        controller(0),
-                        targetStart(0.0),
-                        toggleOpenLoop(false)
+                        controller(0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -187,14 +181,10 @@ private:
     double controlKp;
     double controlKd;
     double controlExp;
-    double controlTimeout;
-    double controlEpsilon;
 
     FPDBlock * controller;
 
     std::vector<double> targetPose;
-    double targetStart;
-    bool toggleOpenLoop;
 
     mutable std::mutex stateMutex;
 };

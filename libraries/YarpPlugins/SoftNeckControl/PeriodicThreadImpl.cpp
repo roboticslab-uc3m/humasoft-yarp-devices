@@ -4,8 +4,6 @@
 
 #include <cmath> // std::isnormal
 
-#include <yarp/os/Time.h>
-
 #include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
@@ -16,12 +14,10 @@ using namespace roboticslab::KinRepresentation;
 
 void SoftNeckControl::run()
 {
-    const int currentState = getCurrentState();
-
-    switch (currentState)
+    switch (getCurrentState())
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
-        !serialPort.isClosed() && !toggleOpenLoop ? handleMovjClosedLoop() : handleMovjOpenLoop();
+        !serialPort.isClosed() ? handleMovjClosedLoop() : handleMovjOpenLoop();
         break;
     default:
         break;
@@ -45,7 +41,6 @@ void SoftNeckControl::handleMovjOpenLoop()
     if (done)
     {
         setCurrentState(VOCAB_CC_NOT_CONTROLLING);
-        toggleOpenLoop = false;
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {
@@ -58,15 +53,6 @@ void SoftNeckControl::handleMovjOpenLoop()
 
 void SoftNeckControl::handleMovjClosedLoop()
 {
-    if (yarp::os::Time::now() - targetStart > controlTimeout)
-    {
-        CD_ERROR("Control timeout (did not reach target in %f seconds).\n", controlTimeout);
-        cmcSuccess = false;
-        stopControl();
-        return;
-    }
-
-    std::vector<double> xd = targetPose;
     std::vector<double> x_imu;
 
     if (!serialStreamResponder->getLastData(x_imu))
@@ -74,33 +60,8 @@ void SoftNeckControl::handleMovjClosedLoop()
         CD_WARNING("Outdated serial stream data.\n");
     }
 
+    std::vector<double> xd = targetPose;
     double error = xd[0] - x_imu[0];
-
-    if (std::abs(error) < controlEpsilon)
-    {
-        CD_SUCCESS("Pitch reference reached.\n");
-        xd[0] = x_imu[0];
-
-        if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
-        {
-            CD_ERROR("encodePose failed.\n");
-            cmcSuccess = false;
-            stopControl();
-            return;
-        }
-
-        if (!sendTargets(xd))
-        {
-            CD_ERROR("Unable to toggle open-loop control.\n");
-            cmcSuccess = false;
-            stopControl();
-            return;
-        }
-
-        toggleOpenLoop = true;
-        return;
-    }
-
     double cs = error > *controller;
 
     if (!std::isnormal(cs))
