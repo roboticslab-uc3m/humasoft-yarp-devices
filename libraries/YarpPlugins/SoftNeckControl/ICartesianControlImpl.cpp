@@ -65,14 +65,14 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if (!setControlModes(VOCAB_CM_POSITION))
-    {
-        CD_ERROR("Unable to set position mode.\n");
-        return false;
-    }
-
     if (serialPort.isClosed())
     {
+        if (!setControlModes(VOCAB_CM_POSITION))
+        {
+            CD_ERROR("Unable to set position mode.\n");
+            return false;
+        }
+
         if (!sendTargets(xd))
         {
             return false;
@@ -80,6 +80,12 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else
     {
+        if (!setControlModes(VOCAB_CM_POSITION_DIRECT))
+        {
+            CD_ERROR("Unable to set position direct mode.\n");
+            return false;
+        }
+
         resetController();
 
         if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
