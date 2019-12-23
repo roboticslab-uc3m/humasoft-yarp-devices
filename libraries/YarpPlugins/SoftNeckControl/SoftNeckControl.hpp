@@ -65,6 +65,7 @@ class SerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bot
 public:
 
     SerialStreamResponder(double timeout);
+    ~SerialStreamResponder();
     void onRead(yarp::os::Bottle & b);
     bool getLastData(std::vector<double> & x);
 
@@ -77,6 +78,7 @@ private:
     std::vector<double> x;
     std::string accumulator;
     mutable std::mutex mutex;
+    SystemBlock * filterSensor;
 };
 
 /**

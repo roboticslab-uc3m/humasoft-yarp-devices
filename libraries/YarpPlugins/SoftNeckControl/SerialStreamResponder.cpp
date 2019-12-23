@@ -14,7 +14,15 @@ SerialStreamResponder::SerialStreamResponder(double _timeout)
     : timeout(_timeout),
       localArrivalTime(0.0),
       x(2, 0.0)
-{}
+{
+    // Para una frecuencua de corte de 8 rad/s y tiempo de muestreo 0,02s.
+    filterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
+}
+
+SerialStreamResponder::~SerialStreamResponder()
+    {
+        delete filterSensor;
+    }
 
 // -----------------------------------------------------------------------------
 
@@ -68,6 +76,7 @@ bool SerialStreamResponder::getLastData(std::vector<double> & x)
 {
     std::lock_guard<std::mutex> lock(mutex);
     x = this->x;
+    x[1] = filterSensor->OutputUpdate(this->x[1]);
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
 
