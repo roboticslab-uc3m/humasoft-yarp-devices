@@ -60,7 +60,8 @@ void SoftNeckControl::handleMovjClosedLoop()
         CD_WARNING("Outdated serial stream data.\n");
     }
 
-    double error = targetPose[0] - x_imu[0];
+    std::vector<double> xd = targetPose;
+    double error = xd[0] - x_imu[0];
     double cs = error > *controller;
 
     if (!std::isnormal(cs))
@@ -68,11 +69,22 @@ void SoftNeckControl::handleMovjClosedLoop()
         cs = 0.0;
     }
 
-    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], error, cs);
+    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], error, cs);
 
-    std::vector<double> qd;
-    computeIk(cs, targetPose[1], qd);
-    iPositionDirect->setPositions(qd.data());
+    xd[0] = cs;
+
+    if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+    {
+        CD_ERROR("encodePose failed.\n");
+        cmcSuccess = false;
+        stopControl();
+        return;
+    }
+
+    if (!sendTargets(xd))
+    {
+        CD_WARNING("Command error, not updating control this iteration.\n");
+    }
 }
 
 // -----------------------------------------------------------------------------
