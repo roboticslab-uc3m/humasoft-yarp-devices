@@ -82,7 +82,8 @@ private:
     std::vector<double> x;
     std::string accumulator;
     mutable std::mutex mutex;
-    SystemBlock * filterSensor;
+    SystemBlock * polarFilterSensor;
+    SystemBlock * azimuthFilterSensor;
 };
 
 /**
