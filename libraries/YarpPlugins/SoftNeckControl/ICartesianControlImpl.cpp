@@ -85,6 +85,8 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             CD_ERROR("decodePose failed.\n");
             return false;
         }
+
+        if(targetPose[1]<0.0) targetPose[1]+= 360;
     }
 
     cmcSuccess = true;
