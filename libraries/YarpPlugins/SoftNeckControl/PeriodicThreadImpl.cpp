@@ -61,17 +61,27 @@ void SoftNeckControl::handleMovjClosedLoop()
     }
 
     std::vector<double> xd = targetPose;
-    double error = xd[0] - x_imu[0];
-    double cs = error > *controllerPolar;
+    double polarError   = xd[0] - x_imu[0];
+    double azimuthError = xd[1] - x_imu[1];
 
-    if (!std::isnormal(cs))
+    double polarCs   = polarError   > *controllerPolar;
+    double azimuthCs = azimuthError > *controllerAzimuth;
+
+    if (!std::isnormal(polarCs))
     {
-        cs = 0.0;
+        polarCs = 0.0;
     }
 
-    CD_DEBUG("pitch: target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], error, cs);
+    if (!std::isnormal(azimuthCs))
+    {
+        azimuthCs = 0.0;
+    }
 
-    xd[0] = cs;
+    CD_DEBUG("- Polar:   target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], polarError, polarCs);
+    CD_DEBUG("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], azimuthError, azimuthCs);
+
+    xd[0] = polarCs;
+    xd[1] = azimuthCs;
 
     if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
