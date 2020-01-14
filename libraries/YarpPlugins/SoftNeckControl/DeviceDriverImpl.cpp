@@ -27,9 +27,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "neck length (meters)").asFloat64();
     geomLg0 = config.check("geomLg0", yarp::os::Value(DEFAULT_GEOM_LG0), "neck offset (meters)").asFloat64();
 
-    controlKp = config.check("controlKp", yarp::os::Value(DEFAULT_CONTROLLER_KP), "controller Kp param").asFloat64();
-    controlKd = config.check("controlKd", yarp::os::Value(DEFAULT_CONTROLLER_KD), "controller Kd param").asFloat64();
-    controlExp = config.check("controlExp", yarp::os::Value(DEFAULT_CONTROLLER_EXP), "controller exp param").asFloat64();
+    controlPolarKp = config.check("controlPolarKp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KP), "polar controller Kp param").asFloat64();
+    controlPolarKd = config.check("controlPolarKd", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KD), "polar controller Kd param").asFloat64();
+    controlPolarExp = config.check("controlPolarExp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_EXP), "polar controller exp param").asFloat64();
+
+    controlAzimuthKp = config.check("controlAzimuthKp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KP), "azimuth controller Kp param").asFloat64();
+    controlAzimuthKd = config.check("controlAzimuthKd", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KD), "azimuth controller Kd param").asFloat64();
+    controlAzimuthExp = config.check("controlAzimuthExp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_EXP), "azimuth controller exp param").asFloat64();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
@@ -114,7 +118,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         yarp::os::PeriodicThread::setPeriod(cmcPeriod);
     }
 
-    resetController();
+    setupControllers();
     return yarp::os::PeriodicThread::start();
 }
 
@@ -124,7 +128,8 @@ bool SoftNeckControl::close()
 {
     stopControl();
     yarp::os::PeriodicThread::stop();
-    delete controller;
+    delete controllerPolar;
+    delete controllerAzimuth;
 
     serialPort.close();
     delete serialStreamResponder;

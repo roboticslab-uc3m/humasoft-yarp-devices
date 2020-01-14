@@ -10,10 +10,10 @@ using namespace humasoft;
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::resetController()
+void SoftNeckControl::setupControllers()
 {
-    delete controller;
-    controller = new FPDBlock(controlKp, controlKd, controlExp, cmcPeriod);
+    controllerPolar   = new FPDBlock(controlPolarKp, controlPolarKd, controlPolarExp, cmcPeriod);
+    controllerAzimuth = new FPDBlock(controlAzimuthKp, controlAzimuthKd, controlAzimuthExp, cmcPeriod);
 }
 
 // -----------------------------------------------------------------------------

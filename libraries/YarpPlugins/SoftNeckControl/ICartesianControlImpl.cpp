@@ -80,8 +80,6 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else
     {
-        resetController();
-
         if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
             CD_ERROR("decodePose failed.\n");

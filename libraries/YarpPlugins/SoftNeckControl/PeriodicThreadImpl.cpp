@@ -62,7 +62,7 @@ void SoftNeckControl::handleMovjClosedLoop()
 
     std::vector<double> xd = targetPose;
     double error = xd[0] - x_imu[0];
-    double cs = error > *controller;
+    double cs = error > *controllerPolar;
 
     if (!std::isnormal(cs))
     {

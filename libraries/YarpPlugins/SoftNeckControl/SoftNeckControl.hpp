@@ -40,9 +40,13 @@
 #define DEFAULT_GEOM_L0 0.1085 // meters
 #define DEFAULT_GEOM_LG0 0.003 // meters
 
-#define DEFAULT_CONTROLLER_KP 0.0
-#define DEFAULT_CONTROLLER_KD 0.9636125
-#define DEFAULT_CONTROLLER_EXP -0.89
+#define DEFAULT_POLAR_CONTROLLER_KP 0.0
+#define DEFAULT_POLAR_CONTROLLER_KD 0.9636125
+#define DEFAULT_POLAR_CONTROLLER_EXP -0.89
+
+#define DEFAULT_AZIMUTH_CONTROLLER_KP 0.1
+#define DEFAULT_AZIMUTH_CONTROLLER_KD 0.2
+#define DEFAULT_AZIMUTH_CONTROLLER_EXP -0.9
 
 #define NUM_ROBOT_JOINTS 3
 
@@ -106,10 +110,14 @@ public:
                         geomB(DEFAULT_GEOM_B),
                         geomL0(DEFAULT_GEOM_L0),
                         geomLg0(DEFAULT_GEOM_LG0),
-                        controlKp(DEFAULT_CONTROLLER_KP),
-                        controlKd(DEFAULT_CONTROLLER_KD),
-                        controlExp(DEFAULT_CONTROLLER_EXP),
-                        controller(0)
+                        controlPolarKp(DEFAULT_POLAR_CONTROLLER_KP),
+                        controlPolarKd(DEFAULT_POLAR_CONTROLLER_KD),
+                        controlPolarExp(DEFAULT_POLAR_CONTROLLER_EXP),
+                        controlAzimuthKp(DEFAULT_AZIMUTH_CONTROLLER_KP),
+                        controlAzimuthKd(DEFAULT_AZIMUTH_CONTROLLER_KD),
+                        controlAzimuthExp(DEFAULT_AZIMUTH_CONTROLLER_EXP),
+                        controllerPolar(0),
+                        controllerAzimuth(0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -147,7 +155,7 @@ private:
 
     void computeIk(double theta, double phi, std::vector<double> & lengths);
 
-    void resetController();
+    void setupControllers();
     int getCurrentState() const;
     void setCurrentState(int value);
     bool presetStreamingCommand(int command);
@@ -180,11 +188,16 @@ private:
     double geomL0;
     double geomLg0;
 
-    double controlKp;
-    double controlKd;
-    double controlExp;
+    double controlPolarKp;
+    double controlPolarKd;
+    double controlPolarExp;
 
-    FPDBlock * controller;
+    double controlAzimuthKp;
+    double controlAzimuthKd;
+    double controlAzimuthExp;
+
+    FPDBlock * controllerPolar;
+    FPDBlock * controllerAzimuth;
 
     std::vector<double> targetPose;
 
