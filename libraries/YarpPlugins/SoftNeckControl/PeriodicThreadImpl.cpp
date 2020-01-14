@@ -78,7 +78,7 @@ void SoftNeckControl::handleMovjClosedLoop()
     }
 
     CD_DEBUG("- Polar:   target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], polarError, polarCs);
-    CD_DEBUG("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], azimuthError, azimuthCs);
+    CD_DEBUG("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", xd[1], x_imu[1], azimuthError, azimuthCs);
 
     xd[0] = polarCs;
     xd[1] = azimuthCs;
