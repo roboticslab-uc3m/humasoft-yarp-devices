@@ -16,12 +16,14 @@ SerialStreamResponder::SerialStreamResponder(double _timeout)
       x(2, 0.0)
 {
     // Para una frecuencua de corte de 8 rad/s y tiempo de muestreo 0,02s.
-    filterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
+    polarFilterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
+    azimuthFilterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
 }
 
 SerialStreamResponder::~SerialStreamResponder()
     {
-        delete filterSensor;
+        delete polarFilterSensor;
+        delete azimuthFilterSensor;
     }
 
 // -----------------------------------------------------------------------------
@@ -75,8 +77,12 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 bool SerialStreamResponder::getLastData(std::vector<double> & x)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    x = this->x;
-    x[1] = filterSensor->OutputUpdate(this->x[1]);
+    std::vector<double> v = this->x;
+    v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
+    v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
+    if(v[0]<5)   v[1] = 0.0;
+    if(v[1]>350) v[1] = 0.0;
+    x = v;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
 
