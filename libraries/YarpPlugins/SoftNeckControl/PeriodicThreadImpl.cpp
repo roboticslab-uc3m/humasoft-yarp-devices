@@ -54,34 +54,48 @@ void SoftNeckControl::handleMovjOpenLoop()
 void SoftNeckControl::handleMovjClosedLoop()
 {
     std::vector<double> x_imu;
+    double polarError,
+           azimuthError,
+           polarCs,
+           azimuthCs
+           = 0.0;
 
     if (!serialStreamResponder->getLastData(x_imu))
     {
         CD_WARNING("Outdated serial stream data.\n");
     }
 
-    std::vector<double> xd = targetPose;
-    double polarError   = xd[0] - x_imu[0];
-    double azimuthError = xd[1] - x_imu[1];
+    std::vector<double> xd = targetPose;   
+    polarError   = xd[0] - x_imu[0];
+    azimuthError = xd[1] - x_imu[1];
 
-    double polarCs   = polarError   > *controllerPolar;
-    double azimuthCs = azimuthError > *controllerAzimuth;
-
+    // controlamos siempre en inclinación
+    polarCs   = polarError   > *controllerPolar;
     if (!std::isnormal(polarCs))
     {
         polarCs = 0.0;
     }
 
-    if (!std::isnormal(azimuthCs))
+    xd[0] = polarCs;
+
+    /* control en orientacion solo si:
+     * (inclinacion > 5) && (8< orientacion <355)
+     */
+    if(targetPose[0]>5 && targetPose[1]>5 && targetPose[1]<355)
     {
-        azimuthCs = 0.0;
+        CD_INFO_NO_HEADER("> Controlando en orientación\n");
+        azimuthCs = azimuthError > *controllerAzimuth;
+
+        if (!std::isnormal(azimuthCs))
+        {
+            azimuthCs = 0.0;
+        }
+
+        xd[1] = azimuthCs;
     }
 
-    CD_DEBUG("- Polar:   target %f, sensor %f, error %f, cs: %f\n", xd[0], x_imu[0], polarError, polarCs);
-    CD_DEBUG("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", xd[1], x_imu[1], azimuthError, azimuthCs);
-
-    xd[0] = polarCs;
-    xd[1] = azimuthCs;
+    CD_DEBUG_NO_HEADER("- Polar:   target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], polarError, polarCs);
+    CD_DEBUG_NO_HEADER("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], azimuthError, azimuthCs);
 
     if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
