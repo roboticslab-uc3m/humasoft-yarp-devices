@@ -25,7 +25,6 @@
 
 #include <ColorDebug.h>
 
-
 int main(int argc, char *argv[])
 {
     yarp::os::Network yarp;
@@ -36,10 +35,23 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    FILE *file = 0;
+    if(argc!=2)
+    {
+        CD_INFO_NO_HEADER("running demo without csv results..\n");
+    }
+
+    else if(argv[1]=="csv")
+    {
+        CD_INFO_NO_HEADER("running demo with csv results..\n");
+        file = fopen("../data.csv","w+");
+        fprintf(file, "inclination target, inclination sensor, orientation target, orientation sensor\n");
+    }
+
     yarp::os::Property options;
     options.put("device", "CartesianControlClient"); // our device (a dynamically loaded library)
     options.put("cartesianRemote", "/SoftNeckControl"); // remote port through which we'll talk to the server
-    options.put("cartesianLocal", "/ClosedLoopExample2");
+    options.put("cartesianLocal", "/ClosedLoopExample");
     options.put("transform", 1);  // Was yarp::os::Value::getNullValue()
 
     yarp::dev::PolyDriver dd(options);
@@ -60,28 +72,36 @@ int main(int argc, char *argv[])
 
     CD_SUCCESS("Acquired interface.\n");
 
-    std::vector<double> imu;
 
+    std::vector<double> pose[3];
 
-    while(true)
+    pose[0] = {15.0, 90.0};
+    pose[1] = {30.0, 90.0};
+    pose[2] = {30.0, 135.0};
+
+    double timeout = 5.0;
+
+    for(int i=0; i<3; i++)
     {
-        iCartesianControl->stat(imu);
-        CD_INFO("%d %d\n", imu[0], imu[1]);
-        yarp::os::Time::delay(0.020);
+        CD_INFO_NO_HEADER("moving to pose [%d]\n", i);
+        double initTime = yarp::os::Time::now();
+        iCartesianControl->movj(pose[i]);
+
+        if(file!=0)
+        {
+            while(yarp::os::Time::now() - initTime < timeout)
+            {
+                std::vector<double> imu;
+                iCartesianControl->stat(imu);
+                CD_INFO("%4f %4f\n", imu[0], imu[1]);
+                fprintf(file,"%.4f","%.4f",pose[i][0], imu[0]);
+                fprintf(file,"%.4f","%.4f",pose[i][1], imu[1]);
+                yarp::os::Time::delay(0.020);
+            }
+        }
+
+        yarp::os::Time::delay(5);
     }
-
-    /*
-    if (iCartesianControl->movj(position))
-    {
-        CD_SUCCESS_NO_HEADER("[ok]\n");
-        iCartesianControl->wait();
-    }
-    else
-    {
-        CD_ERROR_NO_HEADER("[error]\n");
-        return 1;
-    } 
-    */
 
     dd.close();
 
