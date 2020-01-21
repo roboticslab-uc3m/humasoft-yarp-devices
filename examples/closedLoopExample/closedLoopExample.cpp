@@ -41,11 +41,16 @@ int main(int argc, char *argv[])
         CD_INFO_NO_HEADER("running demo without csv results..\n");
     }
 
-    else if(argv[1]=="csv")
+    else if(argv[1]==std::string("csv"))
     {
         CD_INFO_NO_HEADER("running demo with csv results..\n");
         file = fopen("../data.csv","w+");
-        fprintf(file, "inclination target, inclination sensor, orientation target, orientation sensor\n");
+        fprintf(file, "time, inclination target, inclination sensor, orientation target, orientation sensor\n");
+    }
+    else
+    {
+        CD_ERROR("incorrect parameter\n");
+        return 0;
     }
 
     yarp::os::Property options;
@@ -79,29 +84,33 @@ int main(int argc, char *argv[])
     pose[1] = {30.0, 90.0};
     pose[2] = {30.0, 135.0};
 
-    double timeout = 5.0;
+    double timeout = 20.0;
 
-    for(int i=0; i<3; i++)
-    {
-        CD_INFO_NO_HEADER("moving to pose [%d]\n", i);
-        double initTime = yarp::os::Time::now();
-        iCartesianControl->movj(pose[i]);
-
-        if(file!=0)
+    while(true){
+        for(int i=0; i<3; i++)
         {
+            CD_INFO_NO_HEADER("moving to pose [%d]: [%f] [%f]\n", i, pose[i][0], pose[i][1]);
+            double initTime = yarp::os::Time::now();
+            iCartesianControl->movj(pose[i]);
             while(yarp::os::Time::now() - initTime < timeout)
             {
                 std::vector<double> imu;
                 iCartesianControl->stat(imu);
-                CD_INFO("%4f %4f\n", imu[0], imu[1]);
-                fprintf(file,"%.4f","%.4f",pose[i][0], imu[0]);
-                fprintf(file,"%.4f","%.4f",pose[i][1], imu[1]);
+                CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", pose[i][0], imu[0]);
+                CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", pose[i][1], imu[1]);
+                if(file!=0)
+                {
+                    fprintf(file,"%.2f, ", yarp::os::Time::now() - initTime);
+                    fprintf(file,"%.4f, %.4f, ",pose[i][0], imu[0]);
+                    fprintf(file,"%.4f, %.4f \n",pose[i][1], imu[1]);
+                }
+
                 yarp::os::Time::delay(0.020);
             }
-        }
 
-        yarp::os::Time::delay(5);
-    }
+
+        }
+    } // while
 
     dd.close();
 
