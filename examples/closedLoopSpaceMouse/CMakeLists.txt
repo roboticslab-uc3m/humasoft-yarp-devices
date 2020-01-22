@@ -12,9 +12,10 @@ add_executable(closedLoopSpaceMouse closedLoopSpaceMouse.cpp)
 
 target_link_libraries(closedLoopSpaceMouse YARP::YARP_OS
                                            YARP::YARP_init
-                                           YARP::YARP_dev
+                                           YARP::YARP_dev                                           
+                                           ROBOTICSLAB::ColorDebug
                                            ROBOTICSLAB::KinematicsDynamicsInterfaces
-                                           ROBOTICSLAB::ColorDebug)
+                                           ROBOTICSLAB::KinematicRepresentationLib)
 
 include(GNUInstallDirs)
 
