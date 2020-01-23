@@ -73,8 +73,8 @@ int main(int argc, char *argv[])
     }
 
     yarp::sig::Vector mouseValues;
-    std::vector<double> sumValues, outValues;
-    sumValues.resize(channels);
+    std::vector<double> inValues, outValues;
+    inValues.resize(channels);
 
     while(1)
     {
@@ -84,15 +84,23 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // suma
         for(int i=0; i< mouseValues.size(); i++)
-            sumValues[i] += mouseValues[i];
+        {
+            inValues[i] = mouseValues[i];
+            if(mouseValues[5]!=0.0)
+                inValues[5] = 0.0;
+        }
 
-        if (!decodePose(sumValues, outValues, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+
+        if (!decodePose(inValues, outValues, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
             CD_ERROR("decodePose failed.\n");
             return false;
         }
+
+        if(outValues[0]>40.0) outValues[0] = 40.0; // limitamos la inclinación
+
+        if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
 
         printf("Inclinacion (%f) Orientacion (%f)\n", outValues[0], outValues[1]);
 
