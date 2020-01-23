@@ -71,18 +71,27 @@ int main(int argc, char *argv[])
         CD_ERROR("Failed number of channels\n");
         return 1;
     }
-
+    bool sended = false;
     yarp::sig::Vector mouseValues;
     std::vector<double> inValues, outValues;
+    mouseValues.resize(channels);
     inValues.resize(channels);
 
     while(1)
     {
+
         if(iAnalogSensor->read(mouseValues) != yarp::dev::IAnalogSensor::AS_OK)
         {
             CD_ERROR("not values\n");
             break;
         }
+
+        if(mouseValues[7] == 0.0) sended = false; // flag para corregir la cola de lectura
+
+        // print
+        for(int i=0; i< mouseValues.size(); i++)
+            printf("%f ",mouseValues[i]);
+        printf("\n");
 
         for(int i=0; i< mouseValues.size(); i++)
         {
@@ -98,14 +107,24 @@ int main(int argc, char *argv[])
             return false;
         }
 
-        if(outValues[0]>40.0) outValues[0] = 40.0; // limitamos la inclinación
+        if(outValues[0]>20.0) outValues[0]-= 20; // limitamos la inclinación
 
         if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
 
-        printf("Inclinacion (%f) Orientacion (%f)\n", outValues[0], outValues[1]);
+        printf("Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
+
+        if(mouseValues[7]!=0.0 && !sended) // botón 1 pulsado
+        {
+            CD_SUCCESS_NO_HEADER("\nSending position I(%f) O(%f) to SoftNeckControl\n");
+
+            yarp::os::Time::delay(3);
+            sended = true;
+        }
 
         yarp::os::Time::delay(0.005);
+
     }
+
 
     return 0;
 }
