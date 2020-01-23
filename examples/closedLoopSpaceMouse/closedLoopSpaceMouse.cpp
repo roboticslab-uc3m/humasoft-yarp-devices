@@ -39,11 +39,37 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Config SpaceMouse
-    yarp::os::Property options;
-    options.put("device","SpaceNavigator");
+    // Config SoftNeckControl
+    yarp::os::Property snoptions;
+    snoptions.put("device", "CartesianControlClient"); // our device (a dynamically loaded library)
+    snoptions.put("cartesianRemote", "/SoftNeckControl"); // remote port through which we'll talk to the server
+    snoptions.put("cartesianLocal", "/ClosedLoopExample");
+    snoptions.put("transform", 1);  // Was yarp::os::Value::getNullValue()
 
-    yarp::dev::PolyDriver spaceMouse(options); // spaceMouse.open(options)
+    yarp::dev::PolyDriver device(snoptions);
+
+    if (!device.isValid())
+    {
+        CD_ERROR("Device not available.\n");
+        return 1;
+    }
+
+    roboticslab::ICartesianControl *iCartesianControl;
+
+    if (!device.view(iCartesianControl))
+    {
+        CD_ERROR("Problems acquiring interface.\n");
+        return 1;
+    }
+
+    CD_SUCCESS("Acquired interface.\n");
+
+
+    // Config SpaceMouse
+    yarp::os::Property smoptions;
+    smoptions.put("device","SpaceNavigator");
+
+    yarp::dev::PolyDriver spaceMouse(smoptions); // spaceMouse.open(options)
 
     if (!spaceMouse.isValid())
     {
@@ -71,10 +97,9 @@ int main(int argc, char *argv[])
         CD_ERROR("Failed number of channels\n");
         return 1;
     }
-    bool sended = false;
+    bool sended;
     yarp::sig::Vector mouseValues;
     std::vector<double> inValues, outValues;
-    mouseValues.resize(channels);
     inValues.resize(channels);
 
     while(1)
@@ -88,16 +113,10 @@ int main(int argc, char *argv[])
 
         if(mouseValues[7] == 0.0) sended = false; // flag para corregir la cola de lectura
 
-        // print
-        for(int i=0; i< mouseValues.size(); i++)
-            printf("%f ",mouseValues[i]);
-        printf("\n");
-
         for(int i=0; i< mouseValues.size(); i++)
         {
             inValues[i] = mouseValues[i];
-            if(mouseValues[5]!=0.0)
-                inValues[5] = 0.0;
+            if(mouseValues[5]!=0.0) inValues[5] = 0.0;
         }
 
 
@@ -107,7 +126,8 @@ int main(int argc, char *argv[])
             return false;
         }
 
-        if(outValues[0]>20.0) outValues[0]-= 20; // limitamos la inclinación
+        if(outValues[0]>15.0) outValues[0]-= 15; // empezando a leer a partir de 15º para mayor precisión en orientación
+        if(outValues[0]> 40)  outValues[0] = 40;
 
         if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
 
@@ -116,8 +136,8 @@ int main(int argc, char *argv[])
         if(mouseValues[7]!=0.0 && !sended) // botón 1 pulsado
         {
             CD_SUCCESS_NO_HEADER("\nSending position I(%f) O(%f) to SoftNeckControl\n");
-
-            yarp::os::Time::delay(3);
+            iCartesianControl->movj(outValues);
+            yarp::os::Time::delay(5);
             sended = true;
         }
 
