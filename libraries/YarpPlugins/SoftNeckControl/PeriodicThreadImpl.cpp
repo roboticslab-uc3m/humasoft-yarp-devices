@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
+﻿// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 #include "SoftNeckControl.hpp"
 
@@ -69,6 +69,14 @@ void SoftNeckControl::handleMovjClosedLoop()
     polarError   = xd[0] - x_imu[0];
     azimuthError = xd[1] - x_imu[1];
 
+    if(std::abs(azimuthError)> 180 )
+    {
+        if(azimuthError > 0)
+            azimuthError = azimuthError - 360.0;
+        else
+            azimuthError = azimuthError + 360.0;
+    }
+
     // controlamos siempre en inclinación
     polarCs   = polarError   > *controllerPolar;
     if (!std::isnormal(polarCs))
@@ -79,9 +87,9 @@ void SoftNeckControl::handleMovjClosedLoop()
     xd[0] = polarCs;
 
     /* control en orientacion solo si:
-     * (inclinacion > 5) && (8< orientacion <355)
+     * (inclinacion > 5)
      */
-    if(targetPose[0]>5 && targetPose[1]>5 && targetPose[1]<355)
+    if(targetPose[0]>5)
     {
         CD_INFO_NO_HEADER("> Controlando en orientación\n");
         azimuthCs = azimuthError > *controllerAzimuth;
