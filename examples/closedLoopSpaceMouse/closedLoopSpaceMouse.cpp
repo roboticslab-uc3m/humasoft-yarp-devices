@@ -30,9 +30,11 @@
 using namespace roboticslab::KinRepresentation;
 
 int main(int argc, char *argv[])
-{
-    yarp::os::Network yarp;
+{    
+    double timeout = 10.0; // configuring timeout (s)
+    std::vector<double> target = {0.0, 0.0};
 
+    yarp::os::Network yarp;
     if (!yarp::os::Network::checkNetwork())
     {
         CD_ERROR("Please start a yarp name server first.\n");
@@ -116,9 +118,10 @@ int main(int argc, char *argv[])
         for(int i=0; i< mouseValues.size(); i++)
         {
             inValues[i] = mouseValues[i];
-            if(mouseValues[5]!=0.0) inValues[5] = 0.0;
+                        if(mouseValues[5]!=0.0) inValues[5] = 0.0;
         }
 
+        printf("%f %f %f %f %f %f\n", inValues[0], inValues[1], inValues[2], inValues[3], inValues[4], inValues[5]);
 
         if (!decodePose(inValues, outValues, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
@@ -126,18 +129,33 @@ int main(int argc, char *argv[])
             return false;
         }
 
+        //printf("%f %f\n", outValues[0], outValues[1])
+
         if(outValues[0]>15.0) outValues[0]-= 15; // empezando a leer a partir de 15º para mayor precisión en orientación
+        else
+        {
+            outValues[0] = 0.0;
+            outValues[1] = 0.0;
+        }
+
         if(outValues[0]> 40)  outValues[0] = 40;
 
         if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
 
-        printf("Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
+        std::vector<double> imu;
+        iCartesianControl->stat(imu);
+        if(imu[1]< 0.0) imu[1] += 360; // corregimos la orientación negativa a partir de 180º
+
+        printf("-----------------------------------------------------------\n");
+        CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", target[0], imu[0]);
+        CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", target[1], imu[1]);
+        CD_WARNING_NO_HEADER("> NaveSpace: Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
 
         if(mouseValues[7]!=0.0 && !sended) // botón 1 pulsado
         {
             CD_SUCCESS_NO_HEADER("\nSending position I(%f) O(%f) to SoftNeckControl\n");
-            iCartesianControl->movj(outValues);
-            yarp::os::Time::delay(5);
+            target = outValues;
+            iCartesianControl->movj(target);
             sended = true;
         }
 
