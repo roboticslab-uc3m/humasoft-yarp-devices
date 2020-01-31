@@ -80,8 +80,9 @@ bool SerialStreamResponder::getLastData(std::vector<double> & x)
     std::vector<double> v = this->x;
     v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
     v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
+    if (!std::isnormal(this->x[1])) azimuthFilterSensor->Reset();
+    if(this->x[1] < 3 || this->x[1] > 357 ) v[1] = 0.0;
     if(v[0]<5)   v[1] = 0.0;
-    if(v[1]>355) v[1] = 0.0;
     x = v;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
