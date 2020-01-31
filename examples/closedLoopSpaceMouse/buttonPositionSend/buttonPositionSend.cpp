@@ -2,7 +2,7 @@
 
 /**
  * @ingroup yarp-devices-humasoft-examples
- * \defgroup closedLoopSpaceMouse closedLoopSpaceMouse
+ * \defgroup buttonPositionSend buttonPositionSend
  *
  * <b>Legal</b>
  *
