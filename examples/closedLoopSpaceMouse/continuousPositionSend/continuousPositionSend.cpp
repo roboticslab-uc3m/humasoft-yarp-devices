@@ -31,7 +31,7 @@ using namespace roboticslab::KinRepresentation;
 
 int main(int argc, char *argv[])
 {    
-    double timeout = 10.0; // configuring timeout (s)    
+    double timeout = 1.0; // configuring timeout (s)
 
     yarp::os::Network yarp;
     if (!yarp::os::Network::checkNetwork())
@@ -39,6 +39,25 @@ int main(int argc, char *argv[])
         CD_ERROR("Please start a yarp name server first.\n");
         return 1;
     }
+
+    // CSV configuration
+    FILE *file = 0;
+        if(argc!=2)
+        {
+            CD_INFO_NO_HEADER("running demo without csv results..\n");
+        }
+
+        else if(argv[1]==std::string("csv"))
+        {
+            CD_INFO_NO_HEADER("running demo with csv results..\n");
+            file = fopen("../data.csv","w+");
+            fprintf(file, "time, inclination mouse, inclination sensor, orientation mouse, orientation sensor\n");
+        }
+        else
+        {
+            CD_ERROR("incorrect parameter\n");
+            return 0;
+        }
 
     // Config SoftNeckControl
     yarp::os::Property snoptions;
@@ -102,7 +121,7 @@ int main(int argc, char *argv[])
     yarp::sig::Vector mouseValues;
     std::vector<double> inValues, outValues;
     inValues.resize(channels);
-
+    double initTime = yarp::os::Time::now();
     while(1)
     {
 
@@ -128,8 +147,8 @@ int main(int argc, char *argv[])
         if(outValues[0]>15.0) outValues[0]-= 15; // empezando a leer a partir de 15º para mayor precisión en orientación
         else
         {
-            outValues[0] = 0.0;
-            outValues[1] = 0.0;
+            outValues[0] = 6.0; // fuerzo inclinación a 5º para que no se vuelva loco
+            outValues[1] = 10.0;
         }
 
         if(outValues[0]> 40)  outValues[0] = 40;
@@ -144,12 +163,22 @@ int main(int argc, char *argv[])
         // CD_WARNING_NO_HEADER("> NaveSpace: Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
         CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", outValues[0], imu[0]);
         CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", outValues[1], imu[1]);
-        iCartesianControl->movj(outValues);
+
+        if(file!=0)
+        {
+           fprintf(file,"%.2f, ", yarp::os::Time::now() - initTime);
+           fprintf(file,"%.4f, %.4f, ",outValues[0], imu[0]);
+           fprintf(file,"%.4f, %.4f \n",outValues[1], imu[1]);
+        }
+
+        if(yarp::os::Time::now() - initTime > timeout)
+        {
+            CD_WARNING_NO_HEADER("> Sended inc(%.4f) or(%.4f)\n", outValues[0], outValues[1]);
+            iCartesianControl->movj(outValues);
+            initTime = yarp::os::Time::now();
+        }
 
         yarp::os::Time::delay(0.005);
-
     }
-
-
     return 0;
 }
