@@ -27,11 +27,12 @@
 
 #include <ColorDebug.h>
 
+#include "fcontrol.h"
+
 using namespace roboticslab::KinRepresentation;
 
 int main(int argc, char *argv[])
-{    
-    double timeout = 1.0; // configuring timeout (s)
+{
 
     yarp::os::Network yarp;
     if (!yarp::os::Network::checkNetwork())
@@ -39,6 +40,12 @@ int main(int argc, char *argv[])
         CD_ERROR("Please start a yarp name server first.\n");
         return 1;
     }
+
+    /* Sample time: 0.05 seconds
+     * Discrete-time transfer function.
+     */
+     SystemBlock *mouseIncFilter = new SystemBlock(0.04877, 0, - 0.9512, 1);
+     SystemBlock *mouseOriFilter = new SystemBlock(0.04877, 0, - 0.9512, 1);
 
     // CSV configuration
     FILE *file = 0;
@@ -60,6 +67,7 @@ int main(int argc, char *argv[])
         }
 
     // Config SoftNeckControl
+    /*
     yarp::os::Property snoptions;
     snoptions.put("device", "CartesianControlClient"); // our device (a dynamically loaded library)
     snoptions.put("cartesianRemote", "/SoftNeckControl"); // remote port through which we'll talk to the server
@@ -83,7 +91,7 @@ int main(int argc, char *argv[])
     }
 
     CD_SUCCESS("Acquired interface.\n");
-
+    */
 
     // Config SpaceMouse
     yarp::os::Property smoptions;
@@ -119,9 +127,11 @@ int main(int argc, char *argv[])
     }
 
     yarp::sig::Vector mouseValues;
-    std::vector<double> inValues, outValues;
+    std::vector<double> inValues, outValues, filterValues;
     inValues.resize(channels);
+    filterValues.resize(2);
     double initTime = yarp::os::Time::now();
+
     while(1)
     {
 
@@ -154,7 +164,7 @@ int main(int argc, char *argv[])
         if(outValues[0]> 40)  outValues[0] = 40;
 
         if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
-
+        /*
         std::vector<double> imu;
         iCartesianControl->stat(imu);
         if(imu[1]< 0.0) imu[1] += 360; // corregimos la orientación negativa a partir de 180º
@@ -177,6 +187,12 @@ int main(int argc, char *argv[])
             iCartesianControl->movj(outValues);
             initTime = yarp::os::Time::now();
         }
+        */
+        filterValues[0] = mouseIncFilter->OutputUpdate(outValues[0]);
+        filterValues[1] = mouseOriFilter->OutputUpdate(outValues[1]);
+        printf("-----------------------------------------------------------\n");
+        CD_INFO_NO_HEADER("> Inclination: mouse(%.4f) filtered(%.4f)\n", outValues[0], filterValues[0]);
+        CD_INFO_NO_HEADER("> Orientation: mouse(%.4f) filtered(%.4f)\n", outValues[1], filterValues[1]);
 
         yarp::os::Time::delay(0.005);
     }
