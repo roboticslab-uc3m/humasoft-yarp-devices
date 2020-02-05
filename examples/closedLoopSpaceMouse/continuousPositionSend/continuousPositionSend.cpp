@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
     /* Sample time: 0.05 seconds
      * Discrete-time transfer function.
      */
-     SystemBlock *mouseIncFilter = new SystemBlock(0.04877, 0, - 0.9512, 1);
-     SystemBlock *mouseOriFilter = new SystemBlock(0.04877, 0, - 0.9512, 1);
+     SystemBlock *mouseIncFilter = new SystemBlock(0.004988, 0, - 0.995, 1);
+     SystemBlock *mouseOriFilter = new SystemBlock(0.004988, 0, - 0.995, 1);
 
     // CSV configuration
     FILE *file = 0;
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         {
             CD_INFO_NO_HEADER("running demo with csv results..\n");
             file = fopen("../data.csv","w+");
-            fprintf(file, "time, inclination mouse, inclination sensor, orientation mouse, orientation sensor\n");
+            fprintf(file, "Time, Inclination mouse, Inclination filtered, Inclination sensor, Orientation mouse, Orientation filtered, Orientation sensor\n");
         }
         else
         {
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         }
 
     // Config SoftNeckControl
-    /*
+
     yarp::os::Property snoptions;
     snoptions.put("device", "CartesianControlClient"); // our device (a dynamically loaded library)
     snoptions.put("cartesianRemote", "/SoftNeckControl"); // remote port through which we'll talk to the server
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     }
 
     CD_SUCCESS("Acquired interface.\n");
-    */
+
 
     // Config SpaceMouse
     yarp::os::Property smoptions;
@@ -132,6 +132,9 @@ int main(int argc, char *argv[])
     filterValues.resize(2);
     double initTime = yarp::os::Time::now();
 
+    mouseIncFilter->Reset(6.0);
+    mouseOriFilter->Reset(10.0);
+
     while(1)
     {
 
@@ -164,23 +167,12 @@ int main(int argc, char *argv[])
         if(outValues[0]> 40)  outValues[0] = 40;
 
         if(outValues[1]< 0.0) outValues[1] += 360; // corregimos la orientación negativa a partir de 180º
-        /*
+
         std::vector<double> imu;
         iCartesianControl->stat(imu);
         if(imu[1]< 0.0) imu[1] += 360; // corregimos la orientación negativa a partir de 180º
 
-        printf("-----------------------------------------------------------\n");
-        // CD_WARNING_NO_HEADER("> NaveSpace: Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
-        CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", outValues[0], imu[0]);
-        CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", outValues[1], imu[1]);
-
-        if(file!=0)
-        {
-           fprintf(file,"%.2f, ", yarp::os::Time::now() - initTime);
-           fprintf(file,"%.4f, %.4f, ",outValues[0], imu[0]);
-           fprintf(file,"%.4f, %.4f \n",outValues[1], imu[1]);
-        }
-
+        /*
         if(yarp::os::Time::now() - initTime > timeout)
         {
             CD_WARNING_NO_HEADER("> Sended inc(%.4f) or(%.4f)\n", outValues[0], outValues[1]);
@@ -188,11 +180,22 @@ int main(int argc, char *argv[])
             initTime = yarp::os::Time::now();
         }
         */
+
         filterValues[0] = mouseIncFilter->OutputUpdate(outValues[0]);
         filterValues[1] = mouseOriFilter->OutputUpdate(outValues[1]);
+
+        if(file!=0)
+        {
+           fprintf(file,"%.2f, ", yarp::os::Time::now() - initTime);
+           fprintf(file,"%.4f, %.4f, %.4f, ",outValues[0], filterValues[0] ,imu[0]);
+           fprintf(file,"%.4f, %.4f, %.4f\n",outValues[1], filterValues[1] ,imu[1]);
+        }
+
         printf("-----------------------------------------------------------\n");
-        CD_INFO_NO_HEADER("> Inclination: mouse(%.4f) filtered(%.4f)\n", outValues[0], filterValues[0]);
-        CD_INFO_NO_HEADER("> Orientation: mouse(%.4f) filtered(%.4f)\n", outValues[1], filterValues[1]);
+        CD_INFO_NO_HEADER("> Inclination: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[0], filterValues[0], imu[0]);
+        CD_INFO_NO_HEADER("> Orientation: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[1], filterValues[1], imu[1]);
+
+        iCartesianControl->movj(filterValues);
 
         yarp::os::Time::delay(0.005);
     }
