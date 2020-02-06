@@ -25,6 +25,7 @@ git clone --recursive https://github.com/HUMASoft/yarp-devices.git  # Download y
 cd yarp-devices; mkdir build; cd build; cmake ..  # Configure the yarp-devices software
 make -j$(nproc) # Compile
 sudo make install  # Install :-)
+cp ../scripts/gnome/yarp-devices.desktop $HOME/Desktop/
 ```
 
 For additional options use `ccmake` instead of `cmake`.
