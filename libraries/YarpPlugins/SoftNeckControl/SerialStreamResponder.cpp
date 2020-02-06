@@ -77,12 +77,22 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 bool SerialStreamResponder::getLastData(std::vector<double> & x)
 {
     std::lock_guard<std::mutex> lock(mutex);
+
     std::vector<double> v = this->x;
     v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
     v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
-    if (!std::isnormal(this->x[1])) azimuthFilterSensor->Reset();
-    if(this->x[1] < 3 || this->x[1] > 357 ) v[1] = 0.0;
-    if(v[0]<5)   v[1] = 0.0;
+
+    // if NaN == this->x[1]
+    if (!std::isnormal(this->x[1])) azimuthFilterSensor->Reset(this->x[1]);
+    // orientation between 355º-5º (critical position)
+    if ((this->x[1]>355 && v[1]<250) || (this->x[1]<5 && v[1]>110) )
+    {
+       azimuthFilterSensor->Reset(this->x[1]);
+       v[1] = this->x[1];
+    }
+    // if (inclination < 5) orientation = crazy
+    if(v[0]<5) v[1] = 0.0;
+
     x = v;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
