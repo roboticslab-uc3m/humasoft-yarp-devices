@@ -25,8 +25,6 @@
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
 #include <KinematicRepresentation.hpp> // encodePose, decodePose
 
-#include <ColorDebug.h>
-
 #include "fcontrol.h"
 
 using namespace roboticslab::KinRepresentation;
@@ -132,6 +130,7 @@ int main(int argc, char *argv[])
     filterValues.resize(2);
     double initTime = yarp::os::Time::now();
 
+    // Valores a los que inicializamos el filtro
     mouseIncFilter->Reset(6.0);
     mouseOriFilter->Reset(10.0);
 
@@ -172,14 +171,6 @@ int main(int argc, char *argv[])
         iCartesianControl->stat(imu);
         if(imu[1]< 0.0) imu[1] += 360; // corregimos la orientación negativa a partir de 180º
 
-        /*
-        if(yarp::os::Time::now() - initTime > timeout)
-        {
-            CD_WARNING_NO_HEADER("> Sended inc(%.4f) or(%.4f)\n", outValues[0], outValues[1]);
-            iCartesianControl->movj(outValues);
-            initTime = yarp::os::Time::now();
-        }
-        */
 
         filterValues[0] = mouseIncFilter->OutputUpdate(outValues[0]);
         filterValues[1] = mouseOriFilter->OutputUpdate(outValues[1]);
@@ -192,8 +183,8 @@ int main(int argc, char *argv[])
         }
 
         printf("-----------------------------------------------------------\n");
-        CD_INFO_NO_HEADER("> Inclination: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[0], filterValues[0], imu[0]);
-        CD_INFO_NO_HEADER("> Orientation: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[1], filterValues[1], imu[1]);
+        printf("> Inclination: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[0], filterValues[0], imu[0]);
+        printf("> Orientation: mouse(%.4f) filtered(%.4f) sensor(%.4f)\n", outValues[1], filterValues[1], imu[1]);
 
         iCartesianControl->movj(filterValues);
 
