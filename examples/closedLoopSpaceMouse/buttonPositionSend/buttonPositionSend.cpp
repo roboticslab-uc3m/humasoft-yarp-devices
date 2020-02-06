@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         for(int i=0; i< mouseValues.size(); i++)
         {
             inValues[i] = mouseValues[i];
-                        if(mouseValues[5]!=0.0) inValues[5] = 0.0;
+            if(mouseValues[5]!=0.0) inValues[5] = 0.0;
         }
 
         printf("%f %f %f %f %f %f\n", inValues[0], inValues[1], inValues[2], inValues[3], inValues[4], inValues[5]);
@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
             CD_ERROR("decodePose failed.\n");
             return false;
         }
-
-        //printf("%f %f\n", outValues[0], outValues[1])
 
         if(outValues[0]>15.0) outValues[0]-= 15; // empezando a leer a partir de 15º para mayor precisión en orientación
         else
