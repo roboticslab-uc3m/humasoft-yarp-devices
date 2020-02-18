@@ -37,7 +37,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     controlAzimuthKd = config.check("controlAzimuthKd", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KD), "azimuth controller Kd param").asFloat64();
     controlAzimuthExp = config.check("controlAzimuthExp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_EXP), "azimuth controller exp param").asFloat64();
 
-    controlType = config.check("control type",yarp::os::Value(DEFAULT_CONTROL_TYPE),"the /type of control to be used").asString();
+    controlType = config.check("controlType",yarp::os::Value(DEFAULT_CONTROL_TYPE),"the /type of control to be used").asString();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");

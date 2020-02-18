@@ -17,10 +17,14 @@ void SoftNeckControl::run()
     switch (getCurrentState())
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
-        if(controlType=="docked")
+        if(controlType=="docked"){
+            CD_INFO_NO_HEADER("Arrancando control acoplado\n");
             !serialPort.isClosed() ? handleMovjClosedLoopDocked() : handleMovjOpenLoop();
-        else if(controlType=="undocked")
+        }
+        else if(controlType=="undocked"){
+            CD_INFO_NO_HEADER("Arrancando control desacoplado\n");
             !serialPort.isClosed() ? handleMovjClosedLoopUndocked() : handleMovjOpenLoop();
+        }
         else CD_ERROR("Control mode not defined\n");
         break;
     default:
@@ -135,9 +139,10 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
            = 0.0;
 
     double cs1; // motor izq
-    double cs2; // motor der
-    int motores[2] = {1,2};
-    double cs[2];
+    double cs2; // motor der    
+    std::vector<int> m = {2,0,1}; // motor izq, der, quieto
+    std::vector<double> cs;
+    cs.resize(3);
 
     if (!serialStreamResponder->getLastData(x_imu))
     {
@@ -145,9 +150,10 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
         iVelocityControl->stop();
     }
 
+
     std::vector<double> xd = targetPose;
     polarError   = (xd[0] - x_imu[0])*M_1_PI/180;
-    azimuthError = (xd[1] - x_imu[1])*M_1_PI/180;
+    azimuthError = (xd[1] - x_imu[1])*M_1_PI/180;   
 
     polarCs   = polarError   > *incon;
     azimuthCs = azimuthError > *orcon;
@@ -155,10 +161,11 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     if (!std::isnormal(polarCs)) polarCs = 0;
     if (!std::isnormal(azimuthCs) || x_imu[1] <5) azimuthCs = 0;
 
-    cs[0]=(polarCs-azimuthCs)/winchRadius;
-    cs[1]=(polarCs+azimuthCs)/winchRadius;
+    cs[0]=(polarCs-azimuthCs);///winchRadius;
+    cs[1]=(polarCs+azimuthCs);///winchRadius;
 
-    if (!iVelocityControl->velocityMove(2,motores,cs));
+    printf("> %f %f %f\n",cs[0], cs[1], cs[2]);
+    if (!iVelocityControl->velocityMove(3,m.data(),cs.data()));
     {
         CD_ERROR("velocityMove failed.\n");
     }
