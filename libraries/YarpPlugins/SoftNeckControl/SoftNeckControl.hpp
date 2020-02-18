@@ -15,6 +15,8 @@
 #include <yarp/dev/IEncoders.h>
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/IVelocityControl.h>
+#include <yarp/dev/ITorqueControl.h>
 #include <yarp/dev/IPositionDirect.h>
 #include <yarp/dev/PolyDriver.h>
 
@@ -31,6 +33,7 @@
 
 #define DEFAULT_PREFIX "/SoftNeckControl"
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
+#define DEFAULT_CONTROL_TYPE "docked" //docked (acoplado), undocked (desacoplado)
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
 #define DEFAULT_CMC_PERIOD 0.02 // seconds
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
@@ -39,6 +42,7 @@
 #define DEFAULT_GEOM_B 0.052 // meters
 #define DEFAULT_GEOM_L0 0.1085 // meters
 #define DEFAULT_GEOM_LG0 0.003 // meters
+#define DEFAULT_WINCH_RADIUS 0.0075 // meters
 
 #define DEFAULT_POLAR_CONTROLLER_KP 0.0
 #define DEFAULT_POLAR_CONTROLLER_KD 0.9636125
@@ -165,17 +169,21 @@ private:
     bool sendTargets(const std::vector<double> & xd);
 
     void handleMovjOpenLoop();
-    void handleMovjClosedLoop();
+    void handleMovjClosedLoopDocked();
+    void handleMovjClosedLoopUndocked();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
     yarp::dev::IEncoders * iEncoders;
     yarp::dev::IPositionControl * iPositionControl;
+    yarp::dev::IVelocityControl * iVelocityControl;
+    yarp::dev::ITorqueControl * iTorqueControl;
     yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
     SerialStreamResponder * serialStreamResponder;
 
+    string controlType;
     int currentState;
     bool cmcSuccess;
     int streamingCommand;
@@ -188,6 +196,7 @@ private:
     double geomB;
     double geomL0;
     double geomLg0;
+    double winchRadius;
 
     double controlPolarKp;
     double controlPolarKd;
@@ -199,6 +208,9 @@ private:
 
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
+
+    PIDBlock  *incon;
+    PIDBlock  *orcon;
 
     std::vector<double> targetPose;
 

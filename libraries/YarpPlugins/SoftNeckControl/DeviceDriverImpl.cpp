@@ -26,6 +26,8 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     geomB = config.check("geomB", yarp::os::Value(DEFAULT_GEOM_B), "distance between B and mobile platform (meters)").asFloat64();
     geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "neck length (meters)").asFloat64();
     geomLg0 = config.check("geomLg0", yarp::os::Value(DEFAULT_GEOM_LG0), "neck offset (meters)").asFloat64();
+    winchRadius = config.check("radiusWinch", yarp::os::Value(DEFAULT_WINCH_RADIUS), "winch radius (meters)").asFloat64();
+
 
     controlPolarKp = config.check("controlPolarKp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KP), "polar controller Kp param").asFloat64();
     controlPolarKd = config.check("controlPolarKd", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KD), "polar controller Kd param").asFloat64();
@@ -34,6 +36,8 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     controlAzimuthKp = config.check("controlAzimuthKp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KP), "azimuth controller Kp param").asFloat64();
     controlAzimuthKd = config.check("controlAzimuthKd", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KD), "azimuth controller Kd param").asFloat64();
     controlAzimuthExp = config.check("controlAzimuthExp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_EXP), "azimuth controller exp param").asFloat64();
+
+    controlType = config.check("control type",yarp::os::Value(DEFAULT_CONTROL_TYPE),"the /type of control to be used").asString();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
@@ -62,6 +66,18 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     if (!robotDevice.view(iPositionControl))
     {
         CD_ERROR("Unable to view IPositionControl in robot device.\n");
+        return false;
+    }
+
+    if (!robotDevice.view(iVelocityControl))
+    {
+        CD_ERROR("Unable to view IVelocityControl in robot device.\n");
+        return false;
+    }
+
+    if (!robotDevice.view(iTorqueControl))
+    {
+        CD_ERROR("Unable to view ITorqueControl in robot device.\n");
         return false;
     }
 

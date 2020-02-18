@@ -65,13 +65,26 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if (!setControlModes(VOCAB_CM_POSITION))
+    if(controlType=="docked")
     {
-        CD_ERROR("Unable to set position mode.\n");
-        return false;
+        if (!setControlModes(VOCAB_CM_POSITION))
+        {
+            CD_ERROR("Unable to set position mode.\n");
+            return false;
+        }
     }
+    else if(controlType=="undocked")
+    {
+        if (!setControlModes(VOCAB_CM_VELOCITY))
+        {
+            CD_ERROR("Unable to set velocity mode.\n");
+            return false;
+        }
+    }
+    else CD_ERROR("Control mode not defined\n");
 
-    if (serialPort.isClosed())
+
+    if (serialPort.isClosed()) //no IMU
     {
         if (!sendTargets(xd))
         {
@@ -80,7 +93,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else
     {
-        if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+        if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES)) // con IMU
         {
             CD_ERROR("decodePose failed.\n");
             return false;
