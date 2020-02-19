@@ -140,7 +140,7 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
 
     double cs1; // motor izq
     double cs2; // motor der    
-    std::vector<int> m = {2,0,1}; // motor izq, der, quieto
+    std::vector<int> m = {0,1,2}; // motor izq, der, quieto
     std::vector<double> cs;
     cs.resize(3);
 
@@ -161,12 +161,13 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     if (!std::isnormal(polarCs)) polarCs = 0;
     if (!std::isnormal(azimuthCs) || x_imu[1] <5) azimuthCs = 0;
 
-    cs[0]=(polarCs-azimuthCs);///winchRadius;
-    cs[1]=(polarCs+azimuthCs);///winchRadius;
+    cs[0]=(polarCs-azimuthCs)/0.1;//winchRadius;
+    cs[1]=(polarCs+azimuthCs)/0.1;///winchRadius;
 
-    printf("> %f %f %f\n",cs[0], cs[1], cs[2]);
+
+    printf("> sensor(i%f o%f) motors (%f %f %f)\n",x_imu[0], x_imu[1], cs[0], cs[1], cs[2]);
     if (!iVelocityControl->velocityMove(3,m.data(),cs.data()));
     {
-        CD_ERROR("velocityMove failed.\n");
+        //CD_ERROR("velocityMove failed.\n");
     }
 }
