@@ -38,10 +38,14 @@ launchCanBus --from softNeck.ini
     streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.1 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.01
     ```
     
-* **soft-neck-control in closed-loop**: It will reach the commanded position, using the IMU sensor to close the control loop    
-    * Terminal 1: closed loop control module
+* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the  control loop    
+    * Terminal 1: closed loop docked control module
     ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees
+    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlTyped docked
+    ```
+    * Terminal 1: closed loop undocked control module
+    ```bash
+    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlTyped undocked
     ```
     * Terminal 2: to send commands
     ```bash
