@@ -41,11 +41,11 @@ launchCanBus --from softNeck.ini
 * **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the  control loop    
     * Terminal 1: closed loop docked control module
     ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlTyped docked
+    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType docked
     ```
     * Terminal 1: closed loop undocked control module
     ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlTyped undocked
+    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType undocked
     ```
     * Terminal 2: to send commands
     ```bash
