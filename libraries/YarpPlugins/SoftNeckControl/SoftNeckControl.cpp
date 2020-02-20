@@ -14,8 +14,8 @@ void SoftNeckControl::setupControllers()
 {
     controllerPolar   = new FPDBlock(controlPolarKp, controlPolarKd, controlPolarExp, cmcPeriod);
     controllerAzimuth = new FPDBlock(controlAzimuthKp, controlAzimuthKd, controlAzimuthExp, cmcPeriod);
-    incon = new PIDBlock(0.1,0.0,0,cmcPeriod);
-    orcon = new PIDBlock(0.01,0.0,0,cmcPeriod);
+    incon = new PIDBlock(0.5,0.1,0,cmcPeriod);
+    orcon = new PIDBlock(0.05,0.0,0,cmcPeriod);
 }
 
 // -----------------------------------------------------------------------------

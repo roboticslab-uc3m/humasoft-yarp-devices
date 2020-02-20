@@ -139,8 +139,8 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
            = 0.0;
 
     double cs1; // motor izq
-    double cs2; // motor der    
-    std::vector<int> m = {0,1,2}; // motor izq, der, quieto
+    double cs2; // motor der
+    std::vector<int> m; // motor izq, der, quieto
     std::vector<double> cs;
     cs.resize(3);
 
@@ -150,19 +150,48 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
         iVelocityControl->stop();
     }
 
+    //iControlMode->setControlMode(2, VOCAB_CM_TORQUE);
+    //iTorqueControl->setRefTorque(2, 10);
+
+
+
 
     std::vector<double> xd = targetPose;
-    polarError   = (xd[0] - x_imu[0])*M_1_PI/180;
-    azimuthError = (xd[1] - x_imu[1])*M_1_PI/180;   
+    polarError   = (xd[0] - x_imu[0]);
+    azimuthError = (xd[1] - x_imu[1]);
 
-    polarCs   = polarError   > *incon;
-    azimuthCs = azimuthError > *orcon;
+    if (xd[1]<120)  // area=1
+    {
+        CD_INFO("Area 1\n");
+        m={1,2,0};
+        //if (azimuthError>300) azimuthError+=360;
+        //iVelocityControl->stop(1);
+
+    }
+    else if (xd[1]>240) //area=3
+    {
+        CD_INFO("Area 3\n");
+        m={0,1,2};
+        //if (azimuthError>300) azimuthError-=360;
+        //iVelocityControl->stop(2);
+    }
+    else //area=2;
+    {
+        CD_INFO("Area 2\n");
+        m={2,0,1};
+        //iVelocityControl->stop(0);
+    }
+
+    polarCs   = polarError*M_1_PI/180   > *incon;
+    azimuthCs = azimuthError*M_1_PI/180 > *orcon;
 
     if (!std::isnormal(polarCs)) polarCs = 0;
     if (!std::isnormal(azimuthCs) || x_imu[1] <5) azimuthCs = 0;
 
-    cs[0]=(polarCs-azimuthCs)/0.1;//winchRadius;
-    cs[1]=(polarCs+azimuthCs)/0.1;///winchRadius;
+    cs[0]=(polarCs-azimuthCs);//winchRadius;
+    cs[1]=(polarCs+azimuthCs);///winchRadius;
+    cs[2]= - (cs[0]+cs[1])/2;
+
 
 
     printf("> sensor(i%f o%f) motors (%f %f %f)\n",x_imu[0], x_imu[1], cs[0], cs[1], cs[2]);
