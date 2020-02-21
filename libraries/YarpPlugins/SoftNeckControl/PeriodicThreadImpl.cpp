@@ -25,7 +25,7 @@ void SoftNeckControl::run()
             CD_INFO_NO_HEADER("Arrancando control desacoplado\n");
             !serialPort.isClosed() ? handleMovjClosedLoopUndocked() : handleMovjOpenLoop();
         }
-        else CD_ERROR("Control mode not defined\n");
+        else CD_ERROR("Control mode not defined\n");                
         break;
     default:
         break;
@@ -140,8 +140,9 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
 
     double cs1; // motor izq
     double cs2; // motor der
-    std::vector<int> m; // motor izq, der, quieto
+    std::vector<int> m; // motor izq, der, tercero
     std::vector<double> cs;
+    int area_c, area_d = 0; // currect area, destination area (area_p = area actual)
     cs.resize(3);
 
     if (!serialStreamResponder->getLastData(x_imu))
@@ -150,36 +151,36 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
         iVelocityControl->stop();
     }
 
-    //iControlMode->setControlMode(2, VOCAB_CM_TORQUE);
-    //iTorqueControl->setRefTorque(2, 10);
-
-
-
-
     std::vector<double> xd = targetPose;
     polarError   = (xd[0] - x_imu[0]);
     azimuthError = (xd[1] - x_imu[1]);
 
-    if (xd[1]<120)  // area=1
-    {
-        CD_INFO("Area 1\n");
-        m={1,2,0};
-        //if (azimuthError>300) azimuthError+=360;
-        //iVelocityControl->stop(1);
+    if (x_imu[1]<120)  area_c=1;
+    else if (x_imu[1]>240) area_c=3;
+    else area_c=2;
 
-    }
-    else if (xd[1]>240) //area=3
+    printf("Area actual %d\n", area_c);
+
+    // Paso por cero
+    if (xd[1]<120) // xd -> destino
     {
-        CD_INFO("Area 3\n");
+        CD_INFO("Destino: Area 1\n");
+        area_d=1;
+        m={1,2,0};
+        if (area_c==3) azimuthError+=360;
+    }
+    else if (xd[1]>240)
+    {
+        CD_INFO("Destino: Area 3\n");
+        area_d=3;
         m={0,1,2};
-        //if (azimuthError>300) azimuthError-=360;
-        //iVelocityControl->stop(2);
+        if (area_c==1) azimuthError-=360;
     }
-    else //area=2;
+    else
     {
-        CD_INFO("Area 2\n");
-        m={2,0,1};
-        //iVelocityControl->stop(0);
+        CD_INFO("Destino: Area 2\n");
+        area_d=2;
+        m={2,0,1};        
     }
 
     polarCs   = polarError*M_1_PI/180   > *incon;
@@ -188,11 +189,30 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     if (!std::isnormal(polarCs)) polarCs = 0;
     if (!std::isnormal(azimuthCs) || x_imu[1] <5) azimuthCs = 0;
 
-    cs[0]=(polarCs-azimuthCs);//winchRadius;
-    cs[1]=(polarCs+azimuthCs);///winchRadius;
-    cs[2]= - (cs[0]+cs[1])/2;
+    //ajustar solo orientación, hasta llegar al área
+    if (area_d!=area_c && x_imu[0]>5) polarCs=0;
 
+    cs[0]=(polarCs-azimuthCs);//winchRadius; // motor izquierdo del area
+    cs[1]=(polarCs+azimuthCs);//winchRadius; //motor derecho del area
+    cs[2]= - (cs[0]+cs[1]); //2
 
+    //si no estoy en el área
+    if ((area_d!=area_c) && (x_imu[0]>5)){
+        //printf("areas: actual %d destino %d\n", area_c, area_d);
+        if (azimuthError>0) // aumentar de area bloqueo iz
+        {
+            CD_WARNING_NO_HEADER("azimuthError positivo\n");
+            cs[0]=0;
+            cs[2]=-cs[1];
+        }
+
+        else
+        {
+            CD_WARNING_NO_HEADER("azimuthError negativo\n");
+            cs[1]=0;
+            cs[2]=-cs[0];
+        }
+    }
 
     printf("> sensor(i%f o%f) motors (%f %f %f)\n",x_imu[0], x_imu[1], cs[0], cs[1], cs[2]);
     if (!iVelocityControl->velocityMove(3,m.data(),cs.data()));
