@@ -2,11 +2,11 @@
 
 /**
  * @ingroup yarp-devices-humasoft-examples
- * \defgroup closedLoopExample closedLoopExample
+ * \defgroup stepInputDemo stepInputDemo
  *
  * <b>Legal</b>
  *
- * Copyright: (C) 2019 Universidad Carlos III de Madrid;
+ * Copyright: (C) 2020 Universidad Carlos III de Madrid;
  *
  * Authors: Raul de Santos Rico
  *

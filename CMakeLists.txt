@@ -73,7 +73,7 @@ include(CMakeDependentOption)
 
 # Add main contents.
 add_subdirectory(libraries)
-#add_subdirectory(programs)
+add_subdirectory(programs)
 #add_subdirectory(tests)
 add_subdirectory(share)
 add_subdirectory(doc)

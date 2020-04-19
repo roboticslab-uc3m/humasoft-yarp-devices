@@ -24,6 +24,7 @@
 
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
 #include <KinematicRepresentation.hpp> // encodePose, decodePose
+#include <ColorDebug.h>
 
 #include "fcontrol.h"
 
