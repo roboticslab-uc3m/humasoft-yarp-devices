@@ -15,17 +15,14 @@
  */
 
 #include <vector>
-
+#include <ColorDebug.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Property.h>
-
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/IAnalogSensor.h>
-
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
 #include <KinematicRepresentation.hpp> // encodePose, decodePose
 
-#include <ColorDebug.h>
 
 using namespace roboticslab::KinRepresentation;
 

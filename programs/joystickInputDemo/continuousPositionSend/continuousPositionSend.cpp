@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         {
             CD_INFO_NO_HEADER("running demo with csv results..\n");
             file = fopen("../data.csv","w+");
-            fprintf(file, "Time, Inclination mouse, Inclination filtered, Inclination sensor, Orientation mouse, Orientation filtered, Orientation sensor\n");
+            fprintf(file, "time, mouse_inclination, filtered_inclination, sensor_inclination, mouse_orientation, filtered_orientation, sensor_orientation\n");
         }
         else
         {
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     CD_SUCCESS("Acquired interface.\n");
 
 
-    // Config SpaceMouse
+    // Config SpaceMouse (joystick)
     yarp::os::Property smoptions;
     smoptions.put("device","SpaceNavigator");
 
