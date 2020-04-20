@@ -43,7 +43,7 @@ To avoid strange behaviors in the sensor reading, the value to be commanded will
 
 ### Results:
 
-In this experiment you can see an example of the neck movement being commanded through the joystick, using coupled control.
+In this experiment you can see an example of the neck movement being commanded through the joystick, using the application `continuousPositionSend` in coupled control mode.
 
 <a href="https://vimeo.com/399669993" target="_blank"><img src="https://i.vimeocdn.com/video/867802707_640.jpg" 
 alt="joystick input using coupled control" width="640" border="10" /></a>
@@ -52,3 +52,6 @@ Next you can visualize in jupyter-notebook the dynamic graph generated from the 
 
 * [Joystick input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/joystick%20Input%20Coupled%20Control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/joystick-input-coupled-control.csv))
 
+
+## Data repository:
+All the data captured for these experiments are stored in the repository: https://github.com/HUMASoft/Data-and-Results
