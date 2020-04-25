@@ -4,7 +4,7 @@ Application designed to test the different types of control (coupled and uncoupl
 The application will move the neck in different poses, defined in this [lines](https://github.com/HUMASoft/yarp-devices/blob/18a6608dd6f5214b6bc5b02cac1e7ffd23541e01/programs/stepInputDemo/stepInputDemo.cpp#L79-L82) of the code:
 ```c++
     // Optional step inputs
-    pose[0] = {15.0, 90.0};
+    pose[0] = {10.0, 90.0};
     pose[1] = {20.0, 90.0};
     pose[2] = {20.0, 135.0};
 ```
