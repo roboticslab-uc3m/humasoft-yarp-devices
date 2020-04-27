@@ -1,14 +1,14 @@
 # Demostration Programs:
 ## 1. Step Input Demo:
 Application designed to test the different types of control (coupled and uncoupled control) and the behavior of the system.
-The application will move the neck in different poses, defined in this [lines](https://github.com/HUMASoft/yarp-devices/blob/18a6608dd6f5214b6bc5b02cac1e7ffd23541e01/programs/stepInputDemo/stepInputDemo.cpp#L79-L82) of the code:
+The application will move the neck in different poses, defined in this [lines](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/stepInputDemo/stepInputDemo.cpp#L79-L82) of the code:
 ```c++
     // Optional step inputs
     pose[0] = {10.0, 90.0};
     pose[1] = {20.0, 90.0};
     pose[2] = {20.0, 135.0};
 ```
-Each pose will be executed in a [period](https://github.com/HUMASoft/yarp-devices/blob/18a6608dd6f5214b6bc5b02cac1e7ffd23541e01/programs/stepInputDemo/stepInputDemo.cpp#L84-L85) of 20 seconds
+Each pose will be executed in a [period](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/stepInputDemo/stepInputDemo.cpp#L84-L85) of 20 seconds
 ```c++
     // time/step (sec)
     double timeout = 20.0;
@@ -27,9 +27,9 @@ In this experiment the behavior between the coupled and uncoupled control system
 alt="coupled vs uncoupled control" width="640" border="10" /></a>
 
 Next you can visualize in jupyter-notebooks the dynamic graphs generated from the resulting files:
-* [Step input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step-input-coupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step-input-coupled-control-01.csv))
-* [Step input using decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step-input-decoupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step-input-decoupled-control-01.csv))
-* [Coupled control VS Decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/coupled-vs-decoupled-control.ipynb)
+* [Step input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-coupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-coupled-control.csv))
+* [Step input using decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-decoupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-decoupled-control.csv))
+* [Coupled control VS Decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/coupled-vs-decoupled-control.ipynb)
 
 ## 2. Joystick Input Demo:
 
@@ -50,7 +50,7 @@ alt="joystick input using coupled control" width="640" border="10" /></a>
 
 Next you can visualize in jupyter-notebook the dynamic graph generated from the resulting file:
 
-* [Joystick input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/joystick%20Input%20Coupled%20Control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/joystick-input-coupled-control.csv))
+* [Joystick input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/joystick_input/joystick%20Input%20Coupled%20Control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/joystick_input/00-joystick-coupled-control.csv))
 
 
 ## Data repository:
