@@ -8,6 +8,6 @@ Installation instructions for installing from source can be found [here](doc/yar
 
 Usage instructions for running different YARP modules can be found [here](doc/yarp-device-usage.md).
 
-## Demostration programs
+## Demostration programs and results:
 
 Programs to test the control and obtain system results [here](https://github.com/HUMASoft/yarp-devices/tree/develop/programs).
