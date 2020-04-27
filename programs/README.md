@@ -1,4 +1,4 @@
-# Demostration Programs:
+# Demostration Programs and Results:
 ## 1. Step Input Demo:
 Application designed to test the different types of control (coupled and uncoupled control) and the behavior of the system.
 The application will move the neck in different poses, defined in this [lines](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/stepInputDemo/stepInputDemo.cpp#L79-L82) of the code:
@@ -51,6 +51,13 @@ alt="joystick input using coupled control" width="640" border="10" /></a>
 Next you can visualize in jupyter-notebook the dynamic graph generated from the resulting file:
 
 * [Joystick input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/joystick_input/joystick%20Input%20Coupled%20Control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/joystick_input/00-joystick-coupled-control.csv))
+
+## Old experiments and results
+### Test 3 necks:
+These experiments were performed with the previous neck models. In these dynamic graphs you can see the comparison of response with respect to different weights applied:
+* [Motor results](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/test_3necks/test_3necks_motors.ipynb)
+* [Inclination and orientation results](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/test_3necks/test_3necks_inclination_orientation.ipynb)
+
 
 
 ## Data repository:
