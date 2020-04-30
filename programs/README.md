@@ -1,5 +1,6 @@
 # Demostration Programs and Results:
 ## 1. Step Input Demo:
+### Information:
 Application designed to test the different types of control (coupled and uncoupled control) and the behavior of the system.
 The application will move the neck in different poses, defined in this [lines](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/stepInputDemo/stepInputDemo.cpp#L79-L82) of the code:
 ```c++
@@ -32,6 +33,8 @@ Next you can visualize in jupyter-notebooks the dynamic graphs generated from th
 * [Coupled control VS Decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/coupled-vs-decoupled-control.ipynb)
 
 ## 2. Joystick Input Demo:
+
+### Information: 
 
 Applications designed to test the different control systems, using the joystick position as the target position:
 * **buttonPositionSend:** allows us to visualize the current inclination and orientation of the joystick on the screen and send it to the neck at the desired time, by pressing the side button on the joystick.
