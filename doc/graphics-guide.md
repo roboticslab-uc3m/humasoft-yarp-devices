@@ -1,4 +1,5 @@
-# A short guide to creating dynamic charts
+# A Short Guide to Creating Dynamic Charts
+
 [Jupyter](https://jupyter.org/) has a beautiful notebook that lets you write and execute code, analyze data, embed content, and share reproducible work.
 Therefore, we will use Jupyter Notebook and python language, to process the test data previously stored in `cvs` files using the [pandas](https://pandas.pydata.org/) library, and later visualize them in dynamic graphics thanks to the [plotly](https://plotly.com/) library, being able to expand them, move through them, select the lines that we want to visualize, see the values that make up each point of the lines, export the graph in an image file, etc.
 In addition, it allows us to visualize the code blocks that generate these graphs and to be able to modify them as we want. <br>
@@ -60,3 +61,6 @@ layout = dict(title= dict(x=0.5,
 fig = go.Figure(data=data, layout=layout)
 iplot(fig)
 ```
+8. All the graphics are stored in [Data-and-results](https://github.com/HUMASoft/Data-and-Results) repository in the `jupyter-scripts` section of each experiment. Therefore, we can upload the resulting jupyter-notebook file with the extension `.ipynb`. Github is capable of opening this type of files directly from its web interface, displaying the structure of the python code, but it won't be able to execute the graphics created with plotly. In order to view them online, we'll need to use [nbviewer](https://nbviewer.jupyter.org). We can add the git URL and share it in any place ;)
+
+If you want to follow a more extensive guide on jupyter, I recommend [this one](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) to take a look. Bye!!
