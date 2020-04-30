@@ -1,4 +1,4 @@
-# A Short Guide to Creating Dynamic Charts
+## A Short Guide to Creating Dynamic Charts with Jupyter Notebook
 
 [Jupyter](https://jupyter.org/) has a beautiful notebook that lets you write and execute code, analyze data, embed content, and share reproducible work.
 Therefore, we will use Jupyter Notebook and python language, to process the test data previously stored in `cvs` files using the [pandas](https://pandas.pydata.org/) library, and later visualize them in dynamic graphics thanks to the [plotly](https://plotly.com/) library, being able to expand them, move through them, select the lines that we want to visualize, see the values that make up each point of the lines, export the graph in an image file, etc.
