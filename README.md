@@ -13,8 +13,8 @@ Programs to test the control and obtain system results:
 * [Step Input Demo](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#1-step-input-demo)
 * [Joystick Input Demo](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#2-joystick-input-demo)
 * [Old experiments](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#old-experiments-and-results)
-   - [test 3 necks](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#test-3-necks)
-
+   - [Test 3 necks](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#test-3-necks)
+   - [Frontiers Test Bench Evaluation Soft Robotic Link](https://github.com/HUMASoft/yarp-devices/blob/develop/programs/README.md#frontiers-test-bench-evaluation-soft-robotic-link)
 
 ## Other information:
 
