@@ -65,6 +65,17 @@ These experiments were performed with the previous neck models. In these dynamic
 * [Motor results](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/test_3necks/test_3necks_motors.ipynb)
 * [Inclination and orientation results](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/test_3necks/test_3necks_inclination_orientation.ipynb)
 
+### Frontiers Test Bench Evaluation Soft Robotic Link:
+
+<a href="https://vimeo.com/367895887" target="_blank"><img src="https://i.vimeocdn.com/video/824416869_640.jpg" 
+alt="Test bench for evaluation of a soft robotic link" width="640" border="10" /></a>
+
+Frontiers Published paper: https://doi.org/10.3389/frobt.2020.00027
+
+This paper has 2 different tests: 
+* **IMU Open Loop:** Dynamic Graphs of [Inclination and Orientation](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/paper-results/jupyter-scripts/Frontiers-Test-Bench-Evaluation-Soft-Robotic-Link/imu_openloop/inclination_orientation.ipynb)
+* **IMU Closed Loop:** Dynamic Graphs of [Control Signals](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/paper-results/jupyter-scripts/Frontiers-Test-Bench-Evaluation-Soft-Robotic-Link/imu_closeloop/control_signals.ipynb) and [Inclination and Orientation for Kinematics and Sensor](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/paper-results/jupyter-scripts/Frontiers-Test-Bench-Evaluation-Soft-Robotic-Link/imu_closeloop/inclination_orientation.ipynb)
+
 
 
 ## Data repository:
