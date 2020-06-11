@@ -159,28 +159,23 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     else if (x_imu[1]>240) area_c=3;
     else area_c=2;
 
-    printf("Area actual %d\n", area_c);
-
     // Paso por cero
-    if (xd[1]<120) // xd -> destino
+    if (xd[1]<120) // Area 1
     {
-        CD_INFO("Destino: Area 1\n");
         area_d=1;
-        m={1,2,0};
+        m={0,1,2}; //m={1,2,0}; config anterior
         if (area_c==3) azimuthError+=360;
     }
-    else if (xd[1]>240)
-    {
-        CD_INFO("Destino: Area 3\n");
+    else if (xd[1]>240) // Area 3
+    {        
         area_d=3;
-        m={0,1,2};
+        m={2,0,1}; //m={0,1,2};
         if (area_c==1) azimuthError-=360;
     }
-    else
+    else // Area 2
     {
-        CD_INFO("Destino: Area 2\n");
         area_d=2;
-        m={2,0,1};        
+        m={1,2,0}; //m={2,0,1};
     }
 
     polarCs   = polarError*M_1_PI/180   > *incon;
@@ -192,23 +187,20 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     //ajustar solo orientación, hasta llegar al área
     if (area_d!=area_c && x_imu[0]>5) polarCs=0;
 
-    cs[0]=(polarCs-azimuthCs);//winchRadius; // motor izquierdo del area
-    cs[1]=(polarCs+azimuthCs);//winchRadius; //motor derecho del area
-    cs[2]= - (cs[0]+cs[1]); //2
+    cs[0]=(polarCs-azimuthCs); // motor izquierdo del area
+    cs[1]=(polarCs+azimuthCs); //motor derecho del area
+    cs[2]= - (cs[0]+cs[1])/2; //2/3
 
     //si no estoy en el área
     if ((area_d!=area_c) && (x_imu[0]>5)){
-        //printf("areas: actual %d destino %d\n", area_c, area_d);
         if (azimuthError>0) // aumentar de area bloqueo iz
         {
-            CD_WARNING_NO_HEADER("azimuthError positivo\n");
             cs[0]=0;
             cs[2]=-cs[1];
         }
 
         else
         {
-            CD_WARNING_NO_HEADER("azimuthError negativo\n");
             cs[1]=0;
             cs[2]=-cs[0];
         }
