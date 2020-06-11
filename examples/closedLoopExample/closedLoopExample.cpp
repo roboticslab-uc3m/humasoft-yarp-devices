@@ -80,9 +80,9 @@ int main(int argc, char *argv[])
 
     std::vector<double> pose[3];
 
-    pose[0] = {15.0, 90.0};
-    pose[1] = {30.0, 90.0};
-    pose[2] = {30.0, 135.0};
+    pose[0] = {10.0, 90.0};
+    pose[1] = {20.0, 90.0};
+    pose[2] = {20.0, 135.0};
 
     double timeout = 20.0;
 
