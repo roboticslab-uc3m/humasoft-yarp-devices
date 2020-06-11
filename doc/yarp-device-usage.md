@@ -53,4 +53,4 @@ launchCanBus --from softNeck.ini
     > stat        # to know the current IMU position 
     > movj 20 10  # to move it in 20º inclination and 10º orientation 
     ```
-    * Terminal 3: you can try the differents [closed loop examples](https://github.com/HUMASoft/yarp-devices/tree/master/examples) and enjoy ;)
+    * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.

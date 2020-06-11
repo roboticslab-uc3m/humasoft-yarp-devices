@@ -2,11 +2,11 @@
 
 /**
  * @ingroup yarp-devices-humasoft-examples
- * \defgroup closedLoopExample closedLoopExample
+ * \defgroup stepInputDemo stepInputDemo
  *
  * <b>Legal</b>
  *
- * Copyright: (C) 2019 Universidad Carlos III de Madrid;
+ * Copyright: (C) 2020 Universidad Carlos III de Madrid;
  *
  * Authors: Raul de Santos Rico
  *
@@ -15,14 +15,10 @@
  */
 
 #include <vector>
-
 #include <yarp/os/Network.h>
 #include <yarp/os/Property.h>
-
 #include <yarp/dev/PolyDriver.h>
-
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
-
 #include <ColorDebug.h>
 
 int main(int argc, char *argv[])
@@ -45,7 +41,7 @@ int main(int argc, char *argv[])
     {
         CD_INFO_NO_HEADER("running demo with csv results..\n");
         file = fopen("../data.csv","w+");
-        fprintf(file, "time, inclination target, inclination sensor, orientation target, orientation sensor\n");
+        fprintf(file, "time, target_inclination, sensor_inclination, target_orientation, sensor_orientation\n");
     }
     else
     {
@@ -80,10 +76,12 @@ int main(int argc, char *argv[])
 
     std::vector<double> pose[3];
 
+    // Optional step inputs
     pose[0] = {10.0, 90.0};
     pose[1] = {20.0, 90.0};
     pose[2] = {20.0, 135.0};
 
+    // time/step (sec)
     double timeout = 20.0;
 
     while(true){
@@ -96,6 +94,9 @@ int main(int argc, char *argv[])
             {
                 std::vector<double> imu;
                 iCartesianControl->stat(imu);
+
+                // fix negative orientation
+                if(imu[1]<0.0) imu[1]+= 360;
                 CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", pose[i][0], imu[0]);
                 CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", pose[i][1], imu[1]);
                 if(file!=0)
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
                     fprintf(file,"%.4f, %.4f, ",pose[i][0], imu[0]);
                     fprintf(file,"%.4f, %.4f \n",pose[i][1], imu[1]);
                 }
-
+                // sensor reading period
                 yarp::os::Time::delay(0.020);
             }
 
