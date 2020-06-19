@@ -12,7 +12,22 @@ The SoftNeckControl YARP device requires the following additional packages:
 - [Install kinematics-dynamics](https://github.com/roboticslab-uc3m/kinematics-dynamics)
 - [Install fcontrol](https://github.com/munozyanez/fcontrol)
 
-For unit testing, you'll need the googletest source package. Refer to [Install googletest](https://github.com/roboticslab-uc3m/installation-guides/blob/master/install-googletest.md/).
+### Install Additional Libraires: ACE
+
+In order for YARP to recognize the serial port of the Arduino, we need to:
+
+Install ACE library
+```bash
+sudo apt-get install libace-dev
+````
+
+Activate serial-port and install the changes:
+```bash
+cd ~/repos/yarp/build
+cmake .. -DENABLE_yarpmod_serialport=ON
+make -j$(nproc) # Compile
+sudo make install && sudo ldconfig && cd # Install and go home
+```
 
 ### Install yarp-devices on Ubuntu (working on all tested versions)
 
