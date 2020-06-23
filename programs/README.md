@@ -28,9 +28,10 @@ In this experiment the behavior between the coupled and uncoupled control system
 alt="coupled vs uncoupled control" width="640" border="10" /></a>
 
 Next you can visualize in jupyter-notebooks the dynamic graphs generated from the resulting files:
-* [Step input using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-coupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-coupled-control.csv))
-* [Step input using decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-decoupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-decoupled-control.csv))
-* [Coupled control VS Decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/coupled-vs-decoupled-control.ipynb)
+* [Step Input Test using coupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-coupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-coupled-control.csv))
+* [Step Input Test using decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/step-input-decoupled-control.ipynb) ([csv](https://github.com/HUMASoft/Data-and-Results/blob/master/demo-results/csv-results/step_input/01-step-input-decoupled-control.csv))
+* [Step Input Test: coupled control VS decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/coupled-vs-decoupled-control.ipynb)
+* [SoftNeck integration on TEO: Step Input Test using decoupled control](https://nbviewer.jupyter.org/github/HUMASoft/Data-and-Results/blob/master/demo-results/jupyter-scripts/step_input/integration-without-mask-decoupled-control.ipynb)
 
 ## 2. Joystick Input Demo:
 
