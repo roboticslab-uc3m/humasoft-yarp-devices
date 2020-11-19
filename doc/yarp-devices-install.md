@@ -12,6 +12,16 @@ The SoftNeckControl YARP device requires the following additional packages:
 - [Install kinematics-dynamics](https://github.com/roboticslab-uc3m/kinematics-dynamics)
 - [Install fcontrol](https://github.com/munozyanez/fcontrol)
 
+Space Navegator:
+  Install dependencies:
+  ```bash
+  sudo apt install libmotif-dev 
+  sudo apt install libspnav-dev 
+  sudo apt install spacenavd
+  ```
+- [Drivers](https://www.3dconnexion.es/service/drivers.html)
+
+
 ### Install Additional Libraires: ACE
 
 In order for YARP to recognize the serial port of the Arduino, we need to:
