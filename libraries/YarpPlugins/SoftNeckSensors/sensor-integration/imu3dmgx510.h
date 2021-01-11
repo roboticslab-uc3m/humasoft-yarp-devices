@@ -22,7 +22,8 @@ class IMU3DMGX510
 {
 public:
 
-    IMU3DMGX510(string); //Constructor
+    IMU3DMGX510(string portName = "/dev/ttyUSB0"); //Constructor
+
 
     long set_IDLEmode();  //This function sets our device into IDLE mode
     long set_streamon(); //This function enable stream

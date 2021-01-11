@@ -1,41 +1,41 @@
-yarp_prepare_plugin(SoftNeckSensors
+#Creation of our new device from imudevice.h and IMUdevice class within it
+yarp_prepare_plugin(SoftNeckIMU
                     CATEGORY device
                     TYPE IMUdevice
                     INCLUDE imudevice.h
-#                    DEFAULT ON
+                    DEFAULT ON
                     #DEPENDS "EIGEN3_FOUND;ROBOTICSLAB_KINEMATICS_DYNAMICS_FOUND;fcontrol_FOUND"
-#                    EXTRA_CONFIG WRAPPER=CartesianControlServer)
+#                    EXTRA_CONFIG WRAPPER=CartesianControlSolver)
 )
-if(NOT SKIP_SoftNeckSensors)
+
+if(NOT SKIP_SoftNeckIMU)
 
 
-
-    yarp_add_plugin(SoftNeckSensors)
-
-    target_sources(SoftNeckSensors PRIVATE imudevice.h
-                                        DeviceDriverIMUImpl.cpp)
-
-#    target_link_libraries(sensor-integration          YARP::YARP_OS
-#                                                      YARP::YARP_dev
-#                                                      Eigen3::Eigen)
-list(APPEND YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS YARP_os
-                                                    YARP_sig
-                                                    YARP_dev)
+    set(CMAKE_INCLUDE_CURRENT_DIR TRUE) # yarp plugin builder needs this
 
 
-    yarp_install(TARGETS SoftNeckSensors
-        LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}
-        ARCHIVE DESTINATION ${YARP_STATIC_PLUGINS_INSTALL_DIR}
-        YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR})
+    yarp_add_plugin(SoftNeckIMU                       imudevice.h
+                                                      DeviceDriverIMUImpl.cpp
+                                                      SerialStreamResponder_IMU.cpp
+                                                      Readings.cpp
+                                                      PeriodicThreadIMU.cpp
+                                                      )
 
-    set(YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS ${YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS} PARENT_SCOPE)
+    target_link_libraries(SoftNeckIMU                 YARP::YARP_os
+                                                      YARP::YARP_dev
+                                                      YARP::YARP_sig
+                                                      YARP::YARP_init #key line to make network work
+                                                      Eigen3::Eigen
+                                                      SensorIntegration
+                                                      )
 
-    set_property(TARGET SoftNeckSensors PROPERTY FOLDER "Plugins/Device")
+    yarp_install(TARGETS SoftNeckIMU
+                                      LIBRARY DESTINATION ${HUMASOFT-YARP-DEVICES_DYNAMIC_PLUGINS_INSTALL_DIR}
+                                      ARCHIVE DESTINATION ${HUMASOFT-YARP-DEVICES_STATIC_PLUGINS_INSTALL_DIR}
+                                      YARP_INI DESTINATION ${HUMASOFT-YARP-DEVICES_PLUGIN_MANIFESTS_INSTALL_DIR})
+
+
 endif()
-
-
-
-
 
 
 

@@ -20,6 +20,7 @@
 #include <yarp/dev/IPositionDirect.h>
 #include <yarp/dev/PolyDriver.h>
 
+
 #include <yarp/conf/version.h>
 #if YARP_VERSION_MINOR >= 3
 # include <yarp/dev/ISerialDevice.h>
@@ -97,6 +98,7 @@ private:
 class SoftNeckControl : public yarp::dev::DeviceDriver,
                         public roboticslab::ICartesianControl,
                         public yarp::os::PeriodicThread
+
 {
 public:
 

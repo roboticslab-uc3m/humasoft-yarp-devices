@@ -9,6 +9,8 @@ IMU3DMGX510::IMU3DMGX510(string portName) : port(portName) {
     estimador.setPIGains(Kp, Ti, KpQuick, TiQuick); //Setting of device gains
 }
 
+
+
 long IMU3DMGX510::set_IDLEmode() {
 
     //We send data to set 3DMGX10 to IDLE mode
@@ -165,8 +167,16 @@ double* IMU3DMGX510::get_euleranglesPolling() {
     char c;
     int comp=0;
     int fin=0;
+    int firsttime;
+
+    //First time needs a mayor number of samples in order to get calibrated
+    //After it, there is no need of taking such number of samples
+
+    if (firsttime==0){
 
     for (int i =0; i<=100 ; i++){
+
+        firsttime=1;
 
 
         //We send data to set 3DMGX10 to polling mode
@@ -256,9 +266,101 @@ double* IMU3DMGX510::get_euleranglesPolling() {
             double f5 = gyroz.f;
 
             estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
-            roll=estimador.eulerRoll();
-            pitch=estimador.eulerPitch();
+
         }
+    }
+    }else{
+
+        //We send data to set 3DMGX10 to polling mode
+                port.WriteLine(polling);
+
+                //3DMGX10 will answer back a message with gyro and acc values
+                //We must read it
+                //reading = port.ReadNumberofChars(34);
+                //cout << "Lo que leemos es: " << hex(reading) << endl;
+
+                // 7565 80 1C 0E 04 3DA807A0 3EC36059 3F696C54 0E 05 BE6745FE 3E17130F BDCEB19C 00C2
+
+
+                comp=0;
+                fin=0;
+
+                do{
+                    c = port.ReadChar();
+                    switch (c) {
+                    case 'u':{
+                        comp=1;
+                        reading+=c;
+                        break;}
+                    case 'e':{
+                        if (comp==1){
+                            fin=1;
+                            reading+=c;
+                        }else{
+                            comp=0;
+                            reading+=c;
+                        }
+                        break;}
+
+                    default:{
+                        reading+=c;
+                        break;}
+
+                    }
+                }while(fin==0);
+
+                char descriptor = port.ReadChar();
+                reading+=descriptor;
+
+                char longitud = port.ReadChar();
+                reading+=longitud;
+
+                for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
+                    c = port.ReadChar();
+                    reading+=c;
+                }
+
+                if (int(longitud) == 28){
+                    ulf accx;
+                    std::string str =hex(reading.substr(6,4));
+                    std::stringstream ss(str);
+                    ss >> std::hex >> accx.ul;
+                    double f = accx.f;
+
+                    ulf accy;
+                    std::string str1 =hex(reading.substr(10,4));
+                    std::stringstream ss1(str1);
+                    ss1 >> std::hex >> accy.ul;
+                    double f1 = accy.f;
+
+                    ulf accz;
+                    std::string str2 =hex(reading.substr(14,4));
+                    std::stringstream ss2(str2);
+                    ss2 >> std::hex >> accz.ul;
+                    double f2 = accz.f;
+
+                    ulf gyrox;
+                    std::string str3 =hex(reading.substr(20,4));
+                    std::stringstream ss3(str3);
+                    ss3 >> std::hex >> gyrox.ul;
+                    double f3 = gyrox.f;
+
+                    ulf gyroy;
+                    std::string str4 =hex(reading.substr(24,4));
+                    std::stringstream ss4(str4);
+                    ss4 >> std::hex >> gyroy.ul;
+                    double f4 = gyroy.f;
+
+                    ulf gyroz;
+                    std::string str5 =hex(reading.substr(28,4));
+                    std::stringstream ss5(str5);
+                    ss5>> std::hex >> gyroz.ul;
+                    double f5 = gyroz.f;
+
+                    estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+
+                }
+
     }
     estimation[0]=estimador.eulerRoll();
     estimation[1]=estimador.eulerPitch();
@@ -488,7 +590,7 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesContinuou
                 estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
                 rollvector[h-100]=estimador.eulerRoll();
                 pitchvector[h-100]=estimador.eulerPitch();
-                //cout << "My attitude is (YX Euler): (" << estimador.eulerPitch() << "," << estimador.eulerRoll() << ")" << endl;
+                cout << "My attitude is (YX Euler): (" << estimador.eulerPitch() << "," << estimador.eulerRoll() << ")" << endl;
 
 
                 if(h>=225 && h<=350){
