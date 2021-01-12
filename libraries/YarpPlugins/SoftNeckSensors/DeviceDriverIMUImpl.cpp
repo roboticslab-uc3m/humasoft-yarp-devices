@@ -6,10 +6,11 @@
 
 bool IMUdevice::open(yarp::os::Searchable & config)
 {
+
+     CD_DEBUG("%s.\n", config.toString().c_str());
+
      nameyarpoutport = config.check("sendport", yarp::os::Value(DEFAULT_OUTPORT), "local outport yarp").asString();
      comport = config.check("comport",yarp::os::Value(DEFAULT_COMPORT),"name of the serial port where imu is connected to").asString().c_str();
-     period = config.check("period", yarp::os::Value(DEFAULT_PERIOD), "Period").asDouble();
-     frequency = config.check("freq",yarp::os::Value(DEFAULT_FREQUENCY), "Frequency").asInt();
      bx = config.check("bx", yarp::os::Value(DEFAULT_BX), "Gyro bias x").asFloat64();
      by = config.check("by", yarp::os::Value(DEFAULT_BY), "Gyro bias y").asFloat64();
      bz = config.check("bz", yarp::os::Value(DEFAULT_BZ), "Gyro bias z").asFloat64();
@@ -17,6 +18,11 @@ bool IMUdevice::open(yarp::os::Searchable & config)
      Ti = config.check("Ti", yarp::os::Value(DEFAULT_TI), "Ti gain").asFloat64();
      KpQuick = config.check("KpQuick", yarp::os::Value(DEFAULT_KP_QUICK), "KpQuick gain").asFloat64();
      TiQuick = config.check("TiQuick", yarp::os::Value(DEFAULT_TI_QUICK), "TiQuick gain").asFloat64();
+
+     period = config.check("period", yarp::os::Value(DEFAULT_PERIOD), "IMU Period").asDouble();
+     frequency = config.check("freq",yarp::os::Value(DEFAULT_FREQUENCY), "Frequency").asInt();
+     cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "Thread period (seconds)").asFloat64();
+
 
      //In case in which period or frequency are introduced by the user ...
      if( config.check("period")){
@@ -29,6 +35,11 @@ bool IMUdevice::open(yarp::os::Searchable & config)
          cout << "Using period = " << period << "s, and frequency = " << frequency << "Hz." << endl;
      } else  {
          cout << "Using default period of " << DEFAULT_PERIOD << " s, and default frequency of " << DEFAULT_FREQUENCY << " Hz" << endl;
+     }
+
+     if (cmcPeriod != DEFAULT_CMC_PERIOD)
+     {
+         yarp::os::PeriodicThread::setPeriod(cmcPeriod);
      }
 
      //In case in which user decides the name of the Yarp outport
@@ -46,16 +57,9 @@ bool IMUdevice::open(yarp::os::Searchable & config)
             CD_ERROR("Unable to open Yarp outport.\n");
             return false;
         }
-
-        //¿Lo usamos o no?
-        serialStreamResponderIMU = new SerialStreamResponder_IMU(period);
-        yarpPort.useCallback(*serialStreamResponderIMU);
     }
 
-    //This method from Yarp::os::PeriodicThread will be run in the background
-    run();
-
-    return true;
+    return yarp::os::PeriodicThread::start();
 }
 
 // -----------------------------------------------------------------------------
@@ -63,8 +67,8 @@ bool IMUdevice::open(yarp::os::Searchable & config)
 bool IMUdevice::close()
 {
     delete sensor;
-    delete serialStreamResponderIMU;
     yarpPort.close();
+    PeriodicThread::stop();
     return true;
 }
 

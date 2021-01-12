@@ -16,7 +16,6 @@ if(NOT SKIP_SoftNeckIMU)
 
     yarp_add_plugin(SoftNeckIMU                       imudevice.h
                                                       DeviceDriverIMUImpl.cpp
-                                                      SerialStreamResponder_IMU.cpp
                                                       Readings.cpp
                                                       PeriodicThreadIMU.cpp
                                                       )

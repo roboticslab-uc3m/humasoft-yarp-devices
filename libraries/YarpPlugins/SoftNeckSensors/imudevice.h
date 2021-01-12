@@ -50,35 +50,15 @@ using yarp::os::Network;
 #define DEFAULT_KP_QUICK  10
 #define DEFAULT_TI_QUICK  1.25
 
- //Default period&freq time
+//Default period&freq time
 #define DEFAULT_PERIOD 0.01 // seconds
 #define DEFAULT_FREQUENCY 100 // Hz
+#define DEFAULT_CMC_PERIOD 0.0002 // seconds
+
+
+
 
 // -------------------------------------------------------
-
-
-//Había intentado hacerlo igual que en el de SoftNeckControl, pero no sé si será necesario o no
-class SerialStreamResponder_IMU : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
-{
-public:
-
-    SerialStreamResponder_IMU(double timeout);
-    ~SerialStreamResponder_IMU  ();
-    void onRead(yarp::os::Bottle & b);
-    bool getLastData(std::vector<double> & x);
-    bool getDataIMU();
-private:
-
-    const double timeout;
-    double localArrivalTime;
-    IMU3DMGX510 *sensor;
-    double *estimator;
-    int frequency; //1,100,1000
-};
-
-
-
-
 
 class IMUdevice :    public yarp::dev::DeviceDriver,
                      public yarp::dev::ISerialDevice, //Seguramente descartable
@@ -94,8 +74,8 @@ public:
                     TiQuick(DEFAULT_TI_QUICK),
                     KpQuick(DEFAULT_KP_QUICK),
                     sensor(),
-                    serialStreamResponderIMU(0),
-                    yarp::os::PeriodicThread(DEFAULT_PERIOD)
+                    yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD),
+                    cmcPeriod(DEFAULT_CMC_PERIOD)
 
 
     {}
@@ -143,10 +123,12 @@ private:
 
     Network yarp;
     BufferedPort<Bottle> yarpPort; //Outport to publish imu data. This kind of port allow us to start a server in the background
-    SerialStreamResponder_IMU * serialStreamResponderIMU;
 
     IMU3DMGX510 *sensor;
     double *eulerdata;
+
+    double cmcPeriod;
+    double waitPeriod;
 
 
     //No usado, de la implementación en Readings.cpp

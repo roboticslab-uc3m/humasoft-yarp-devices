@@ -41,6 +41,8 @@ public:
     std::tuple <double*,double*,double*> get_gyroContinuousStream (int); //This funcion gives us gyro data
     std::tuple <double*,double*,double,double> get_euleranglesContinuousStream (int); //This funcion gives us pitch and roll, and both initial pitch offset and initial roll offset
 
+    double* Euler_Angles();
+
 
 
 private: //Attributes

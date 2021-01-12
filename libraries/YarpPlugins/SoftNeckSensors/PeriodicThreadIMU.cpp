@@ -9,32 +9,24 @@ void IMUdevice::run()
     sensor = new IMU3DMGX510(comport); //Main key changing constructor of IMU3DMGX510 atribute string --> string portname = "..."
     sensor->set_IDLEmode();
 
-    while (true) {
+    while (!PeriodicThread::isSuspended()) {
 
         sensor->set_devicetogetgyroacc(frequency);
         sensor->set_streamon();
 
-        double *roll;
-        double *pitch;
-        double absrollaverage=0.0;
-        double abspitchaverage=0.0;
+        //Ahora mismo el sensor está emitiendo velocidades y aceleraciones angulares a la frecuencia indicada por el user
+        eulerdata = sensor->Euler_Angles();
+//        cout << "My attitude is (YX Euler): (" << eulerdata[0] << "," << eulerdata[1] << ")" << endl;
 
-        //Tal como está la función ahora, obtengo el número de muestras que le paso por parámetro
-        std::tie( roll,  pitch,  absrollaverage,  abspitchaverage)= sensor->get_euleranglesContinuousStream(1000);
-        sensor->set_streamoff();
-
-        //Una vez las obtengo, las publico en Yarp, no puedo hacerlo uno a uno
-        for (int i = 0 ; i<=899 ; i++){
         Bottle& data = yarpPort.prepare();
         data.addString("[");
-        data.addDouble(*(roll+i));
+        data.addDouble(eulerdata[0]);
         data.addString(",");
-        data.addDouble(*(pitch+i));
+        data.addDouble(eulerdata[1]);
         data.addString("]");
         yarpPort.write();
         cout << "Writing bottle: \n" << data.toString() << endl;
         data.clear();
-        }
 
     }
     CD_INFO("Server Serial stopping... \n");
