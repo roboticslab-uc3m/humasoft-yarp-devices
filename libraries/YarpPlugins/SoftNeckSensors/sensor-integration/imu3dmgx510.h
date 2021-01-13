@@ -24,8 +24,9 @@ public:
 
     IMU3DMGX510(string portName = "/dev/ttyUSB0"); //Constructor
 
+    int start();
 
-    long set_IDLEmode();  //This function sets our device into IDLE mode
+    int set_IDLEmode();  //This function sets our device into IDLE mode
     long set_streamon(); //This function enable stream
     long set_streamoff(); //This function unenable stream
     long set_reset(); //This function resets the device

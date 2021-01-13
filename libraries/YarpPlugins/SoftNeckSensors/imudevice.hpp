@@ -53,17 +53,13 @@ using yarp::os::Network;
 //Default period&freq time
 #define DEFAULT_PERIOD 0.01 // seconds
 #define DEFAULT_FREQUENCY 100 // Hz
-#define DEFAULT_CMC_PERIOD 0.0002 // seconds
-
-
+#define DEFAULT_CMC_PERIOD 0.01 // seconds
 
 
 // -------------------------------------------------------
 
 class IMUdevice :    public yarp::dev::DeviceDriver,
-                     public yarp::dev::ISerialDevice, //Seguramente descartable
                      public yarp::os::PeriodicThread
-
  {
 public:
     IMUdevice() :   bx (DEFAULT_BX),
@@ -73,11 +69,9 @@ public:
                     Kp(DEFAULT_KP),
                     TiQuick(DEFAULT_TI_QUICK),
                     KpQuick(DEFAULT_KP_QUICK),
+                    cmcPeriod(DEFAULT_CMC_PERIOD),
                     sensor(),
-                    yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD),
-                    cmcPeriod(DEFAULT_CMC_PERIOD)
-
-
+                    yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD)
     {}
 
  // -------- DeviceDriver declarations. Implementation in DeviceDriverIMUImpl.cpp --------
@@ -89,19 +83,9 @@ public:
 
     virtual void run();
 
- // -------- Trying to read data. Implementation in Readings.cpp --------
-
-    //No se usa, es un device ya hecho de com serial
-    bool send(const yarp::os::Bottle& msg) override;
-    bool send(char *msg, size_t size) override;
-    bool receive(yarp::os::Bottle& msg) override;
-    int receiveChar(char& chr) override;
-    int receiveBytes(unsigned char* bytes, const int size) override;
-    int receiveLine(char* line, const int MaxLineLength) override;
-    bool setDTR(bool enable) override;
-    int flush() override;
-
 private:
+
+    void setupIMU();
 
     //Setting of GyroBias
     double bx;
@@ -114,29 +98,21 @@ private:
     double KpQuick;
     double TiQuick;
 
-    //Comm parameters
+    //IMU Comm parameters
+    IMU3DMGX510 *sensor;
     double period;
     double frequency;
-
     std::string comport;
-    std::string nameyarpoutport;
-
-    Network yarp;
-    BufferedPort<Bottle> yarpPort; //Outport to publish imu data. This kind of port allow us to start a server in the background
-
-    IMU3DMGX510 *sensor;
     double *eulerdata;
 
+    //PeriodicThread parameters
     double cmcPeriod;
     double waitPeriod;
 
-
-    //No usado, de la implementación en Readings.cpp
-    ACE_TTY_IO _serial_dev;
-    ACE_DEV_Connector _serialConnector;
-    bool verbose;
-
-
+    //Outport to publish imu data. This kind of port allow us to start a server in the background
+    yarp::os::Network Yarp;
+    BufferedPort<Bottle> yarpPort;
+    std::string nameyarpoutport;
 
 };
 

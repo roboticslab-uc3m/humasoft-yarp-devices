@@ -10,8 +10,13 @@ IMU3DMGX510::IMU3DMGX510(string portName) : port(portName) {
 }
 
 
+int IMU3DMGX510::start() {
+    port.WriteLine(idle);
+    int check = port.CheckLine(respuestacorrectaidle);
+    return check;
+}
 
-long IMU3DMGX510::set_IDLEmode() {
+int IMU3DMGX510::set_IDLEmode() {
 
     //We send data to set 3DMGX10 to IDLE mode
     port.WriteLine(idle);
@@ -19,12 +24,8 @@ long IMU3DMGX510::set_IDLEmode() {
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
     int comprobacion = port.CheckLine(respuestacorrectaidle);
-    if (comprobacion == 1){
-//        cout << "Envio y respuesta correctos" << endl;
-    }
-    return 0;
 
-
+    return comprobacion;
 }
 
 long IMU3DMGX510::set_streamon(){

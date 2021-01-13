@@ -2,7 +2,7 @@
 yarp_prepare_plugin(SoftNeckIMU
                     CATEGORY device
                     TYPE IMUdevice
-                    INCLUDE imudevice.h
+                    INCLUDE imudevice.hpp
                     DEFAULT ON
                     #DEPENDS "EIGEN3_FOUND;ROBOTICSLAB_KINEMATICS_DYNAMICS_FOUND;fcontrol_FOUND"
 #                    EXTRA_CONFIG WRAPPER=CartesianControlSolver)
@@ -14,10 +14,10 @@ if(NOT SKIP_SoftNeckIMU)
     set(CMAKE_INCLUDE_CURRENT_DIR TRUE) # yarp plugin builder needs this
 
 
-    yarp_add_plugin(SoftNeckIMU                       imudevice.h
+    yarp_add_plugin(SoftNeckIMU                       imudevice.hpp
                                                       DeviceDriverIMUImpl.cpp
-                                                      Readings.cpp
                                                       PeriodicThreadIMU.cpp
+                                                      SoftNeckIMU.cpp
                                                       )
 
     target_link_libraries(SoftNeckIMU                 YARP::YARP_os
