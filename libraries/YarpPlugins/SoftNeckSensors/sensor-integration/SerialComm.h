@@ -8,7 +8,6 @@
 
 using namespace std;
 using namespace boost::asio;
-//using namespace boost;
 
 /*
 // These are the values our port needs to connect
@@ -26,15 +25,26 @@ class SerialComm
 public:
     SerialComm(string portName = "/dev/ttyUSB0"); //Constructor
 
-    //Read functions
-    string ReadLine(); //Read a line till final carriage \n
-    char ReadChar(); //Read a single char
-    string ReadNumberofChars(int); //Read a set of charts specified by the user
-    string ReadUntill (char); //Read until an ending condition specified by the user
-    int CheckLine(string); //Read data and compare it with a given string by the user
+ // -------- Reading methods declarations. Implementation in SerialComm.cpp --------
 
-    //Write functions
-    long WriteLine(string); //Write a line via serial comm
+    bool ReadChar(); //Read a single char
+    char GetChar(); //Get the read char
+
+    bool ReadNumberofChars(int); //Read a specified number of charts specified by the user
+    string GetNumberofChars(int); //Read a specified number of charts specified by the user and get it
+
+    bool ReadLine(); //Read a line till final carriage \n
+    string GetLine(); //Read a line till final carriage \n and get it
+
+    bool ReadUntill (char); //Read until an ending condition specified by the user
+
+ // -------- Writing methods declarations. Implementation in SerialComm.cpp --------
+
+    bool WriteLine(string); //Write a line via serial comm
+
+ // -------- Checking method declaration. Implementation in SerialComm.cpp --------
+
+    bool CheckLine(string); //Read data and compare it with a given string by the user
 
 private: //Attributes
 
@@ -42,8 +52,6 @@ private: //Attributes
     serial_port *port; //Creation of the object
     boost::system::error_code error;
     boost::asio::streambuf buffer;
-
-
 
 };
 

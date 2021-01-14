@@ -8,7 +8,8 @@ void IMUdevice::setupIMU() {
         yarpPort.open(nameyarpoutport);
         cout << "Yarp port: " << nameyarpoutport << " has been correctly opened." << endl;
     }
+    sensor->set_freq(frequency);
     sensor->set_IDLEmode();
-    sensor->set_devicetogetgyroacc(frequency);
+    sensor->set_devicetogetgyroacc();
     sensor->set_streamon();
 }

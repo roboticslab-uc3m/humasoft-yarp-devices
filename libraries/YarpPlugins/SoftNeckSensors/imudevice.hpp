@@ -104,6 +104,7 @@ private:
     double frequency;
     std::string comport;
     double *eulerdata;
+    double *gyrodatos;
 
     //PeriodicThread parameters
     double cmcPeriod;
@@ -111,7 +112,7 @@ private:
 
     //Outport to publish imu data. This kind of port allow us to start a server in the background
     yarp::os::Network Yarp;
-    BufferedPort<Bottle> yarpPort;
+    yarp::os::Port yarpPort;
     std::string nameyarpoutport;
 
 };
