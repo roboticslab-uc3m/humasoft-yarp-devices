@@ -14,7 +14,7 @@ IMU3DMGX510::IMU3DMGX510(string portName) : port(portName) {
 
 // -------------------------  Initialization  ----------------------------
 
-bool IMU3DMGX510::start() {
+bool IMU3DMGX510::check() {
     port.WriteLine(idle);
     bool check = port.CheckLine(respuestacorrectaidle);
     return check;
@@ -26,9 +26,108 @@ bool IMU3DMGX510::set_freq(int frequency){
 }
 
 bool IMU3DMGX510::calibrate(){
-    //We will obtain initial offset to correct it the moment we make measures
-    //Not implemented yet
 
+    //We will obtain initial offset to correct it the moment we make measures
+    string answer;
+    char c;
+    char longitud;
+    char descriptor;
+    double roll=0.0;
+    double pitch=0.0;
+
+    for (int h=0; h<=500;h++){
+
+        //Reset of the variables to avoid infinite loops.
+        answer.clear();
+        int comp=0;
+        int fin=0;
+
+        do{
+            c = port.GetChar();
+            switch (c) {
+            case 'u':{
+                comp=1;
+                answer+=c;
+                break;}
+            case 'e':{
+                if (comp==1){
+                    fin=1;
+                    answer+=c;
+                }else{
+                    comp=0;
+                    answer+=c;
+                }
+                break;}
+
+            default:{
+                answer+=c;
+                break;}
+
+            }
+        }while(fin==0);
+
+        descriptor = port.GetChar();
+        answer+=descriptor;
+
+        longitud = port.GetChar();
+        answer+=longitud;
+
+        for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
+            c = port.GetChar();
+            answer+=c;
+        }
+
+        if (int(longitud) == 28){
+            ulf accx;
+            std::string str =hex(answer.substr(6,4));
+            std::stringstream ss(str);
+            ss >> std::hex >> accx.ul;
+            double f = accx.f;
+
+            ulf accy;
+            std::string str1 =hex(answer.substr(10,4));
+            std::stringstream ss1(str1);
+            ss1 >> std::hex >> accy.ul;
+            double f1 = accy.f;
+
+            ulf accz;
+            std::string str2 =hex(answer.substr(14,4));
+            std::stringstream ss2(str2);
+            ss2 >> std::hex >> accz.ul;
+            double f2 = accz.f;
+
+            ulf gyrox;
+            std::string str3 =hex(answer.substr(20,4));
+            std::stringstream ss3(str3);
+            ss3 >> std::hex >> gyrox.ul;
+            double f3 = gyrox.f;
+
+            ulf gyroy;
+            std::string str4 =hex(answer.substr(24,4));
+            std::stringstream ss4(str4);
+            ss4 >> std::hex >> gyroy.ul;
+            double f4 = gyroy.f;
+
+            ulf gyroz;
+            std::string str5 =hex(answer.substr(28,4));
+            std::stringstream ss5(str5);
+            ss5>> std::hex >> gyroz.ul;
+            double f5 = gyroz.f;
+
+            estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+            roll = estimador.eulerRoll();
+            pitch= estimador.eulerPitch();
+
+            //First 150 measures are ignored because they are not stable
+            if (h>=150 && h<=1000){
+                roll= roll + estimador.eulerRoll();
+                pitch = pitch + estimador.eulerPitch();
+            }
+        }
+    }
+    rolloffset = roll / 350;
+    pitchoffset = pitch / 350;
+//    cout << "Initial offsets: \n" << "Pitch = " << rolloffset << "\n" << "Roll = " << pitchoffset << endl;
     return true;
 }
 
@@ -657,8 +756,8 @@ double* IMU3DMGX510::EulerAngles() {
         double f5 = gyroz.f;
 
         estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
-        EulerAngles[0]=estimador.eulerRoll();
-        EulerAngles[1]=estimador.eulerPitch();
+        EulerAngles[0]=estimador.eulerRoll() - rolloffset;
+        EulerAngles[1]=estimador.eulerPitch() - pitchoffset;
         }
     return EulerAngles;
 }

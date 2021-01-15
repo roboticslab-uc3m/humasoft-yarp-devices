@@ -22,9 +22,9 @@ public:
 
      // -------- Initialization of the IMU. Implementation in imu3dmgx510.cpp --------
 
-    bool start(); //This funcion checks if our imu has been correctly initialized
+    bool check(); //This funcion checks if our imu is active
     bool set_freq(int); //This funcion will set the freq of our IMU
-    bool calibrate();
+    bool calibrate(); //This func will get initial offsets to correct future measures
 
      // -------- Configuration of the IMU. Implementation in imu3dmgx510.cpp --------
 
@@ -60,6 +60,10 @@ private: //Attributes
 
     SerialComm port; //DO NOT try to invoce the constructor here
     AttitudeEstimator estimador;
+
+    //Initial offset
+    double rolloffset;
+    double pitchoffset;
 
     //Setting of GyroBias
     double bx = -0.002786;
