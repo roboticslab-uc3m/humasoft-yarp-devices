@@ -126,6 +126,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
             return false;
         }
 
+        sensorType = '0';
         serialStreamResponder = new IMUSerialStreamResponder(sensorTimeout);
         serialPort.useCallback(*serialStreamResponder);
     }
@@ -145,6 +146,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
             CD_ERROR("Unable to connect to remote serial port.\n");
             return false;
         }
+        sensorType = '1';
         immu3dmgx510StreamResponder = new IMU3DMGX510StreamResponder(sensorTimeout);
         serialPort.useCallback(*immu3dmgx510StreamResponder);
     }

@@ -68,9 +68,17 @@ void SoftNeckControl::handleMovjClosedLoopDocked()
            azimuthCs
            = 0.0;
 
-    if (!serialStreamResponder->getLastData(x_imu))
-    {
-        CD_WARNING("Outdated serial stream data.\n");
+    switch (sensorType) {
+        case '0':
+            if (!serialStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated serial stream data.\n");
+            } break;
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+            } break;
     }
 
     std::vector<double> xd = targetPose;   
@@ -145,10 +153,19 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     int area_c, area_d = 0; // currect area, destination area (area_p = area actual)
     cs.resize(3);
 
-    if (!serialStreamResponder->getLastData(x_imu))
-    {
-        CD_WARNING("Outdated serial stream data.\n");
-        iVelocityControl->stop();
+    switch (sensorType) {
+        case '0':
+            if (!serialStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated serial stream data.\n");
+                iVelocityControl->stop();
+            } break;
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                iVelocityControl->stop();
+            } break;
     }
 
     std::vector<double> xd = targetPose;
