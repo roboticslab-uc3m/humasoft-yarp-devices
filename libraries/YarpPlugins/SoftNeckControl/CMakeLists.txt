@@ -15,7 +15,8 @@ if(NOT SKIP_SoftNeckControl)
                                     DeviceDriverImpl.cpp
                                     ICartesianControlImpl.cpp
                                     PeriodicThreadImpl.cpp
-                                    SerialStreamResponder.cpp
+                                    IMUSerialStreamResponder.cpp
+				    IMU3DMGX510StreamResponder.cpp
                                     Kinematics.cpp)
 
     target_link_libraries(SoftNeckControl YARP::YARP_OS

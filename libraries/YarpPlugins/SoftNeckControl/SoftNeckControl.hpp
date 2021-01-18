@@ -36,7 +36,7 @@
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
 #define DEFAULT_CONTROL_TYPE "docked" //docked (acoplado), undocked (desacoplado)
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
-#define DEFAULT_CMC_PERIOD 0.02 // seconds
+#define DEFAULT_CMC_PERIOD 0.02 // seconds  // tiempo de lectura del sensor (periodo hilo)
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
 
 #define DEFAULT_GEOM_A 0.052 // meters
@@ -69,14 +69,41 @@ namespace humasoft
  * @ingroup SoftNeckControl
  * @brief Responds to streaming serial bottles.
  */
-class SerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+class IMUSerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
 public:
 
-    SerialStreamResponder(double timeout);
-    ~SerialStreamResponder();
+    IMUSerialStreamResponder(double timeout);
+    ~IMUSerialStreamResponder();
     void onRead(yarp::os::Bottle & b);
     bool getLastData(std::vector<double> & x);
+
+private:
+
+    bool accumulateStuff(const std::string & s);
+
+    const double timeout;
+    double localArrivalTime;
+    std::vector<double> x;
+    std::string accumulator;
+    mutable std::mutex mutex;
+    SystemBlock * polarFilterSensor;
+    SystemBlock * azimuthFilterSensor;
+};
+
+
+/**
+ * @ingroup SoftNeckControl
+ * @brief Responds to streaming data bottles of 3DMGX510 sensor
+ */
+class IMU3DMGX510StreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+{
+public:
+
+    IMU3DMGX510StreamResponder(double timeout);
+    ~IMU3DMGX510StreamResponder();
+    void onRead(yarp::os::Bottle & b);
+    bool getLastData(std::vector<double> & v);
 
 private:
 
@@ -183,7 +210,8 @@ private:
     yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
-    SerialStreamResponder * serialStreamResponder;
+    IMUSerialStreamResponder * serialStreamResponder;
+    IMU3DMGX510StreamResponder* immu3dmgx510StreamResponder;
 
     string controlType;
     int currentState;

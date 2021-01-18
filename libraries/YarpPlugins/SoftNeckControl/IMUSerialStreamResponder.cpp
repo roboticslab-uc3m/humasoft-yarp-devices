@@ -10,7 +10,7 @@ using namespace humasoft;
 
 // -----------------------------------------------------------------------------
 
-SerialStreamResponder::SerialStreamResponder(double _timeout)
+IMUSerialStreamResponder::IMUSerialStreamResponder(double _timeout)
     : timeout(_timeout),
       localArrivalTime(0.0),
       x(2, 0.0)
@@ -20,7 +20,7 @@ SerialStreamResponder::SerialStreamResponder(double _timeout)
     azimuthFilterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
 }
 
-SerialStreamResponder::~SerialStreamResponder()
+IMUSerialStreamResponder::~IMUSerialStreamResponder()
     {
         delete polarFilterSensor;
         delete azimuthFilterSensor;
@@ -28,7 +28,7 @@ SerialStreamResponder::~SerialStreamResponder()
 
 // -----------------------------------------------------------------------------
 
-void SerialStreamResponder::onRead(yarp::os::Bottle & b)
+void IMUSerialStreamResponder::onRead(yarp::os::Bottle & b)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -45,7 +45,7 @@ void SerialStreamResponder::onRead(yarp::os::Bottle & b)
 
 // -----------------------------------------------------------------------------
 
-bool SerialStreamResponder::accumulateStuff(const std::string & s)
+bool IMUSerialStreamResponder::accumulateStuff(const std::string & s)
 {
     bool parsed = false;
     std::string::size_type newline = s.find('\n');
@@ -74,7 +74,7 @@ bool SerialStreamResponder::accumulateStuff(const std::string & s)
 
 // -----------------------------------------------------------------------------
 
-bool SerialStreamResponder::getLastData(std::vector<double> & x)
+bool IMUSerialStreamResponder::getLastData(std::vector<double> & x)
 {
     std::lock_guard<std::mutex> lock(mutex);
 

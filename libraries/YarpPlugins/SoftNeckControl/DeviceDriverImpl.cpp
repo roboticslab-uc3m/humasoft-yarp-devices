@@ -18,7 +18,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     std::string prefix = config.check("prefix", yarp::os::Value(DEFAULT_PREFIX), "local port prefix").asString();
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
 
-    double serialTimeout = config.check("serialTimeout", yarp::os::Value(DEFAULT_SERIAL_TIMEOUT), "serial timeout (seconds)").asFloat64();
+    double sensorTimeout = config.check("serialTimeout", yarp::os::Value(DEFAULT_SERIAL_TIMEOUT), "serial timeout (seconds)").asFloat64();
     cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "CMC period (seconds)").asFloat64();
     waitPeriod = config.check("waitPeriod", yarp::os::Value(DEFAULT_WAIT_PERIOD), "CMC wait check period (seconds)").asFloat64();
 
@@ -109,7 +109,8 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         return false;
     }
 
-    if (config.check("remoteSerial", "remote serial port"))
+    // Old Serial IMU
+    if (config.check("remoteOldImu", "remote serial port"))
     {
         std::string remoteSerial = config.find("remoteSerial").asString();
 
@@ -125,9 +126,29 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
             return false;
         }
 
-        serialStreamResponder = new SerialStreamResponder(serialTimeout);
+        serialStreamResponder = new IMUSerialStreamResponder(sensorTimeout);
         serialPort.useCallback(*serialStreamResponder);
     }
+
+    // New Yarp Sensor
+    if (config.check("remoteNewImu", "remote yarp port of IMU sensor")){
+        std::string remoteSerial = config.find("remoteYarpSensor").asString();
+
+        if (!serialPort.open(prefix + "/imu:i"))
+        {
+            CD_ERROR("Unable to open local serial port.\n");
+            return false;
+        }
+
+        if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
+        {
+            CD_ERROR("Unable to connect to remote serial port.\n");
+            return false;
+        }
+        immu3dmgx510StreamResponder = new IMU3DMGX510StreamResponder(sensorTimeout);
+        serialPort.useCallback(*immu3dmgx510StreamResponder);
+    }
+
 
     if (cmcPeriod != DEFAULT_CMC_PERIOD)
     {
