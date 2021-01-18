@@ -107,12 +107,9 @@ public:
 
 private:
 
-    bool accumulateStuff(const std::string & s);
-
     const double timeout;
     double localArrivalTime;
     std::vector<double> x;
-    std::string accumulator;
     mutable std::mutex mutex;
     SystemBlock * polarFilterSensor;
     SystemBlock * azimuthFilterSensor;
@@ -238,6 +235,7 @@ private:
 
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
+    char sensorType;
 
     PIDBlock  *incon;
     PIDBlock  *orcon;
