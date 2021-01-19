@@ -15,8 +15,11 @@ IMU3DMGX510::IMU3DMGX510(string portName) : port(portName) {
 // -------------------------  Initialization  ----------------------------
 
 bool IMU3DMGX510::check() {
+    bool check;
     port.WriteLine(idle);
-    bool check = port.CheckLine(respuestacorrectaidle);
+    do{
+    check = port.CheckLine(respuestacorrectaidle,idle);
+    }while (check==false);
     return check;
 }
 
@@ -136,11 +139,15 @@ bool IMU3DMGX510::calibrate(){
 // -------------------------  Configuration  -----------------------------
 
 bool IMU3DMGX510::set_IDLEmode() {
+    bool comprobacion;
     //We send data to set 3DMGX10 to IDLE mode
     port.WriteLine(idle);
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectaidle);
+    //Included loop to restart the process if it's frozen. It happens sometimes 1st time imu is active
+    do{
+    comprobacion = port.CheckLine(respuestacorrectaidle,idle);
+    }while (comprobacion==false);
     return comprobacion;
 }
 
@@ -149,7 +156,7 @@ bool IMU3DMGX510::set_streamon(){
         port.WriteLine(streamon);
         //3DMGX10 will answer back a message showing if any error appeared in the process
         //We must read it
-        bool comprobacion = port.CheckLine(respuestacorrectastreamonoff);
+        bool comprobacion = port.CheckLine(respuestacorrectastreamonoff,streamon);
         if (comprobacion == 1){
 //            cout << "Envio y respuesta correctos" << endl;
         }
@@ -161,7 +168,7 @@ bool IMU3DMGX510::set_streamoff(){
     port.WriteLine(streamoff);
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectastreamonoff);
+    bool comprobacion = port.CheckLine(respuestacorrectastreamonoff,streamoff);
     if (comprobacion == 1){
         //            cout << "Envio y respuesta correctos" << endl;
     }
@@ -173,7 +180,7 @@ bool IMU3DMGX510::set_reset(){
     port.WriteLine(reset);
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectareset);
+    bool comprobacion = port.CheckLine(respuestacorrectareset,reset);
     if (comprobacion == 1){
         //            cout << "Envio y respuesta correctos" << endl;
     }
@@ -183,14 +190,15 @@ bool IMU3DMGX510::set_reset(){
 bool IMU3DMGX510::set_devicetogetgyroacc(){
     //We will prepare our device to get gyros and accs values
     //Freq will be introduced by user (1Hz or 100Hz atm)
+    bool comprobacion;
     if (freq==1){
         port.WriteLine(gyracc);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc);
     }else if(freq==100){
         port.WriteLine(gyracc100);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc100);
     }
-    //3DMGX10 will answer back a message showing if any error appeared in the process
-    //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectaajustes);
+
     if (comprobacion == 1){
         //        cout << "Envio y respuesta correctos" << endl;
     }
@@ -200,16 +208,18 @@ bool IMU3DMGX510::set_devicetogetgyroacc(){
 bool IMU3DMGX510::set_devicetogetgyro(){
     //We will prepare our device to get gyros and accs values
     //Freq will be introduced by user (1Hz or 100Hz atm)
+    bool comprobacion;
     if (freq==1){
         port.WriteLine(imudata1);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata1);
     }else if (freq==100){
         port.WriteLine(imudata100);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata100);
     }else if (freq==1000){
         port.WriteLine(imudata1000);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata1000);
     }
-    //3DMGX10 will answer back a message showing if any error appeared in the process
-    //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectaajustes);
+
     if (comprobacion == 1){
 //        cout << "Envio y respuesta correctos" << endl;
     }

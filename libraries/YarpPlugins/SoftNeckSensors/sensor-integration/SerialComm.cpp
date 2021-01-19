@@ -144,7 +144,10 @@ bool SerialComm::WriteLine(string in_str){
 
 // -------------------------  Check functions  -------------------------
 
-bool SerialComm::CheckLine(string checkline){
+bool SerialComm::CheckLine(string checkline, string writenline){
+
+    //Implemented timer to avoid infinite loops. If sensor doesnt send back correct answer within a concrete time, the message is writen again
+    std::clock_t start;
 
     string deviceanswerr;
     int flag1=0;
@@ -160,6 +163,7 @@ bool SerialComm::CheckLine(string checkline){
     //If they match, func will return 1.
 
     do{
+             start = std::clock();
         do{
             //Reset of some variables to avoid infinite loops
             deviceanswerr.clear();
@@ -189,6 +193,7 @@ bool SerialComm::CheckLine(string checkline){
                 deviceanswerr.clear();
                 break;}
             }
+
         }while (flag2==0);
 
         boost::asio::read(*port,boost::asio::buffer(&deviceanswer_desc, 1));
@@ -198,9 +203,18 @@ bool SerialComm::CheckLine(string checkline){
 
         if (int(deviceanswer_length) != int(checkline.at(4))){
             flag3=0;
+
+            if (std::clock() - start >=50000){
+                //To avoid infinite loops
+                boost::asio::write(
+                            *port,
+                            boost::asio::buffer(writenline.c_str(), writenline.size()),
+                            boost::asio::transfer_at_least(writenline.size()),
+                            error
+                            );
+            }
         }else{
             flag3=1;
-
         }
 
         }while (flag3==0);

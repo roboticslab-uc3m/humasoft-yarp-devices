@@ -44,7 +44,7 @@ public:
 
  // -------- Checking method declaration. Implementation in SerialComm.cpp --------
 
-    bool CheckLine(string); //Read data and compare it with a given string by the user
+    bool CheckLine(string,string); //Read data and compare it with a given string by the user
 
 private: //Attributes
 
