@@ -18,17 +18,25 @@ bool IMUdevice::open(yarp::os::Searchable & config)
      frequency = config.check("freq",yarp::os::Value(DEFAULT_FREQUENCY), "Frequency").asInt();
      cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "Thread period (seconds)").asFloat64();
 
+     //IMU period and run method period must be equals
      //In case in which period or frequency are introduced by the user ...
-     if( config.check("period")){
+     if(config.check("period")){
          period = config.find("period").asDouble();
-         frequency = 1 / period ;
-         cout << "Using period = %d" << period << "s, and frequency = " << frequency << "Hz." << endl;
-     } else if ( config.check("freq")){
+         cmcPeriod = period;
+         frequency = 1 / period ;      
+         cout << "Using period = " << period << "s, and frequency = " << frequency << "Hz." << endl;
+     }else if(config.check("freq")){
          frequency = config.find("freq").asInt();
          period = 1 / frequency ;
+         cmcPeriod = period;
          cout << "Using period = " << period << "s, and frequency = " << frequency << "Hz." << endl;
-     } else  {
-         cout << "Using default period of " << DEFAULT_PERIOD << " s, and default frequency of " << DEFAULT_FREQUENCY << " Hz" << endl;
+     }else if(config.check("cmcPeriod")){
+         cmcPeriod = config.find("cmcPeriod").asDouble();
+         period = cmcPeriod;
+         frequency = 1 / period ;
+         cout << "Using period = " << period << "s, and frequency = " << frequency << "Hz." << endl;
+     }else {
+         cout << "Using default period of " << DEFAULT_PERIOD << " s, and default frequency of " << DEFAULT_FREQUENCY << " Hz." << endl;
      }
 
      if (cmcPeriod != DEFAULT_CMC_PERIOD)

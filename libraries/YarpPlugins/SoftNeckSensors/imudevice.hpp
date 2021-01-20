@@ -70,6 +70,8 @@ public:
                     TiQuick(DEFAULT_TI_QUICK),
                     KpQuick(DEFAULT_KP_QUICK),
                     cmcPeriod(DEFAULT_CMC_PERIOD),
+                    period(DEFAULT_PERIOD),
+                    frequency(DEFAULT_FREQUENCY),
                     sensor(),
                     yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD)
     {}

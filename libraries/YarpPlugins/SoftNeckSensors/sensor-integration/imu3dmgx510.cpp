@@ -25,6 +25,7 @@ bool IMU3DMGX510::check() {
 
 bool IMU3DMGX510::set_freq(int frequency){
     freq=frequency;
+    period = 1 / freq;
     return true;
 }
 
@@ -117,7 +118,7 @@ bool IMU3DMGX510::calibrate(){
             ss5>> std::hex >> gyroz.ul;
             double f5 = gyroz.f;
 
-            estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+            estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
             roll = estimador.eulerRoll();
             pitch= estimador.eulerPitch();
 
@@ -191,10 +192,22 @@ bool IMU3DMGX510::set_devicetogetgyroacc(){
     //We will prepare our device to get gyros and accs values
     //Freq will be introduced by user (1Hz or 100Hz atm)
     bool comprobacion;
-    if (freq==1){
-        port.WriteLine(gyracc);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc);
-    }else if(freq==100){
+    if(freq==1){
+        port.WriteLine(gyracc1);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc1);
+    }else if (freq == 50){
+        port.WriteLine(gyracc50);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc50);
+    }else if (freq == 100){
+        port.WriteLine(gyracc100);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc100);
+    }else if (freq == 500){
+        port.WriteLine(gyracc500);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc500);
+    }else if (freq == 1000){
+        port.WriteLine(gyracc1000);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc1000);
+    }else{
         port.WriteLine(gyracc100);
         comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc100);
     }
@@ -218,10 +231,14 @@ bool IMU3DMGX510::set_devicetogetgyro(){
     }else if (freq==1000){
         port.WriteLine(imudata1000);
         comprobacion = port.CheckLine(respuestacorrectaajustes,imudata1000);
+                    printf(">>>1000 \n");
+    }else{
+        port.WriteLine(imudata100);
+        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata100);
     }
 
     if (comprobacion == 1){
-//        cout << "Envio y respuesta correctos" << endl;
+        cout << "Envio y respuesta correctos" << endl;
     }
     return comprobacion;
 }
@@ -369,7 +386,7 @@ double* IMU3DMGX510::get_euleranglesPolling() {
             ss5>> std::hex >> gyroz.ul;
             double f5 = gyroz.f;
 
-            estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+            estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
         }
     }
     }else{
@@ -452,7 +469,7 @@ double* IMU3DMGX510::get_euleranglesPolling() {
             ss5>> std::hex >> gyroz.ul;
             double f5 = gyroz.f;
 
-            estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+            estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
         }
      }
 
@@ -657,7 +674,7 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
             //If sensor is placed face down, we can skip the if loop.
             if (h>=100 && h<=samples){
 
-                estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+                estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
                 rollvector[h-100]=estimador.eulerRoll();
                 pitchvector[h-100]=estimador.eulerPitch();
                 cout << "My attitude is (YX Euler): (" << estimador.eulerPitch() << "," << estimador.eulerRoll() << ")" << endl;
@@ -683,9 +700,9 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
 double* IMU3DMGX510::EulerAngles() {
 
     string answer;
-    char c;
-    char longitud;
-    char descriptor;
+    char c = '0';
+    char longitud = '0';
+    char descriptor = '0';
     static double EulerAngles[2];
 
     //Reset of the variables to avoid infinite loops.
@@ -728,7 +745,7 @@ double* IMU3DMGX510::EulerAngles() {
         answer+=c;
     }
 
-    if (int(longitud) == 28){
+    if (int(longitud) == 28 ){
         ulf accx;
         std::string str =hex(answer.substr(6,4));
         std::stringstream ss(str);
@@ -765,12 +782,14 @@ double* IMU3DMGX510::EulerAngles() {
         ss5>> std::hex >> gyroz.ul;
         double f5 = gyroz.f;
 
-        estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
-        EulerAngles[0]=estimador.eulerRoll() - rolloffset;
-        EulerAngles[1]=estimador.eulerPitch() - pitchoffset;
+        estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+        EulerAngles[0]=estimador.eulerRoll() - rolloffset; //rads
+        EulerAngles[1]=estimador.eulerPitch() - pitchoffset; //rads
+
         EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
         EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
         }
+    answer.clear();
     return EulerAngles;
 }
 double* IMU3DMGX510::GyroData(){
