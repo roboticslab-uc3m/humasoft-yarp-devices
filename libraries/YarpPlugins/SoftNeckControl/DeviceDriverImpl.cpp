@@ -112,7 +112,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     // Old Serial IMU
     if (config.check("remoteOldImu", "remote serial port"))
     {
-        std::string remoteSerial = config.find("remoteSerial").asString();
+        std::string remoteSerial = config.find("remoteOldImu").asString();
 
         if (!serialPort.open(prefix + "/imu:i"))
         {
@@ -120,7 +120,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
             return false;
         }
 
-        if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
+        if (!yarp::os::Network::connect(remoteSerial, serialPort.getName(), "udp"))
         {
             CD_ERROR("Unable to connect to remote serial port.\n");
             return false;
@@ -133,7 +133,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     // New Yarp Sensor
     if (config.check("remoteNewImu", "remote yarp port of IMU sensor")){
-        std::string remoteSerial = config.find("remoteYarpSensor").asString();
+        std::string remoteSerial = config.find("remoteNewImu").asString();
 
         if (!serialPort.open(prefix + "/imu:i"))
         {
@@ -141,7 +141,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
             return false;
         }
 
-        if (!yarp::os::Network::connect(remoteSerial + "/out", serialPort.getName(), "udp"))
+        if (!yarp::os::Network::connect(remoteSerial, serialPort.getName(), "udp")) // remoteSerial + "/out"
         {
             CD_ERROR("Unable to connect to remote serial port.\n");
             return false;
@@ -172,7 +172,7 @@ bool SoftNeckControl::close()
 
     serialPort.close();
     delete serialStreamResponder;
-
+    delete immu3dmgx510StreamResponder;
     robotDevice.close();
 
     return true;

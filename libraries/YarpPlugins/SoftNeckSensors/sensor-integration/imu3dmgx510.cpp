@@ -768,6 +768,8 @@ double* IMU3DMGX510::EulerAngles() {
         estimador.update(0.01,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
         EulerAngles[0]=estimador.eulerRoll() - rolloffset;
         EulerAngles[1]=estimador.eulerPitch() - pitchoffset;
+        EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
+        EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
         }
     return EulerAngles;
 }

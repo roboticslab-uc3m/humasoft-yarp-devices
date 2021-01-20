@@ -52,9 +52,9 @@ bool IMU3DMGX510StreamResponder::getLastData(std::vector<double> & v)
     std::lock_guard<std::mutex> lock(mutex);
 
     // si fuera necesario filtrar
-    v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
-    v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
-
+    //v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
+    //v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
+    v=x ;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }
 

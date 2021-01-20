@@ -19,6 +19,7 @@
 #include <yarp/dev/ITorqueControl.h>
 #include <yarp/dev/IPositionDirect.h>
 #include <yarp/dev/PolyDriver.h>
+#include <math.h>
 
 
 #include <yarp/conf/version.h>
@@ -132,6 +133,7 @@ public:
                         iPositionControl(0),
                         iPositionDirect(0),
                         serialStreamResponder(0),
+                        immu3dmgx510StreamResponder(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),
@@ -197,6 +199,7 @@ private:
     void handleMovjOpenLoop();
     void handleMovjClosedLoopDocked();
     void handleMovjClosedLoopUndocked();
+    void handleMovjClosedLoopNewUndocked();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;

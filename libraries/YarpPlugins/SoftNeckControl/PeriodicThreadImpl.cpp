@@ -25,6 +25,10 @@ void SoftNeckControl::run()
             CD_INFO_NO_HEADER("Arrancando control desacoplado\n");
             !serialPort.isClosed() ? handleMovjClosedLoopUndocked() : handleMovjOpenLoop();
         }
+        else if(controlType=="newUndocked"){
+            CD_INFO_NO_HEADER("Arrancando control nuevo desacoplado\n");
+            !serialPort.isClosed() ? handleMovjClosedLoopNewUndocked() : handleMovjOpenLoop();
+        }
         else CD_ERROR("Control mode not defined\n");                
         break;
     default:
@@ -228,4 +232,17 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     {
         //CD_ERROR("velocityMove failed.\n");
     }
+}
+
+void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
+  std::vector<double> x_imu;
+  if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+  {
+      CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+      iVelocityControl->stop();
+  }
+
+
+
+  printf("> sensor(roll%f pitch%f)\n",x_imu[0], x_imu[1]);
 }

@@ -23,11 +23,19 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
     if (!serialPort.isClosed())
     {
         std::vector<double> x_imu;
-
-        if (!serialStreamResponder->getLastData(x_imu))
-        {
-            CD_ERROR("Serial stream timed out.\n");
-            return false;
+        switch (sensorType) {
+            case '0':
+                if (!serialStreamResponder->getLastData(x_imu))
+                {
+                    CD_WARNING("Outdated serial stream data.\n");
+                }
+            break;
+            case '1':
+                if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+                {
+                    CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                }
+            break;
         }
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
@@ -35,7 +43,7 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             CD_ERROR("encodePose failed.\n");
             return false;
         }
-
+        printf("%f %f\n",x[0],x[1]);
         *state = getCurrentState();
         *timestamp = yarp::os::Time::now();
         return true;
@@ -74,6 +82,14 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
         }
     }
     else if(controlType=="undocked")
+    {
+        if (!setControlModes(VOCAB_CM_VELOCITY))
+        {
+            CD_ERROR("Unable to set velocity mode.\n");
+            return false;
+        }
+    }
+    else if(controlType=="newUndocked")
     {
         if (!setControlModes(VOCAB_CM_VELOCITY))
         {
