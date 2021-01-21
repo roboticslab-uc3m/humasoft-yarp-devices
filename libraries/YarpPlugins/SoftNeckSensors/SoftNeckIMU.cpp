@@ -18,7 +18,7 @@ void IMUdevice::setupIMU() {
     sensor->calibrate();
     cout << "Calibration done" << endl;
 
-    //Once it has been done, it's prepared to streaming euler angles
+    //Once it has been done, it's prepared to stream euler angles
     sensor->set_freq(frequency);
     sensor->set_IDLEmode();
     sensor->set_devicetogetgyroacc();

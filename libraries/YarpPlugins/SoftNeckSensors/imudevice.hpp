@@ -30,7 +30,6 @@
 #endif
 
 using yarp::os::Bottle;
-using yarp::os::BufferedPort;
 using yarp::os::Network;
 
 

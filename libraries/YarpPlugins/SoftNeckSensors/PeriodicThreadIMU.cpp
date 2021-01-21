@@ -8,9 +8,9 @@ void IMUdevice::run()
     eulerdata = sensor->EulerAngles();
 
     //Publication of euler angles in Yarp
-    data.clear();
     data.addDouble(eulerdata[0]);
     data.addDouble(eulerdata[1]);
     yarpPort.write(data);
     cout << "Writing bottle: " << data.toString() << endl;
+    data.clear();
 }
