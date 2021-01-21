@@ -8,7 +8,6 @@ void IMUdevice::run()
     eulerdata = sensor->EulerAngles();
 
     //Publication of euler angles in Yarp
-    Bottle data;
     data.clear();
     data.addDouble(eulerdata[0]);
     data.addDouble(eulerdata[1]);

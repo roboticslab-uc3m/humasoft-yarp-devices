@@ -116,6 +116,7 @@ private:
     yarp::os::Network Yarp;
     yarp::os::Port yarpPort;
     std::string nameyarpoutport;
+    Bottle data;
 
 };
 

@@ -699,18 +699,33 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
 
 double* IMU3DMGX510::EulerAngles() {
 
-    string answer;
-    char c = '0';
-    char longitud = '0';
-    char descriptor = '0';
+    string answer, str, str1, str2, str3, str4, str5;
+    char c, longitud, descriptor;
     static double EulerAngles[2];
 
     //Reset of the variables to avoid infinite loops.
     answer.clear();
-    int comp=0;
-    int fin=0;
+    str.clear();
+    str1.clear();
+    str2.clear();
+    str3.clear();
+    str4.clear();
+    str5.clear();
+    int comp = 0;
+    int fin = 0;
+    ulf accx,accy,accz,gyrox,gyroy,gyroz;
+    double f=0;
+    double f1=0;
+    double f2=0;
+    double f3=0;
+    double f4=0;
+    double f5=0;
+    c = '0';
+    longitud = '0';
+    descriptor = '0';
 
     do{
+        c = '0';
         c = port.GetChar();
         switch (c) {
         case 'u':{
@@ -723,16 +738,16 @@ double* IMU3DMGX510::EulerAngles() {
                 answer+=c;
             }else{
                 comp=0;
-                answer+=c;
+                answer.clear();
             }
             break;}
 
         default:{
-            answer+=c;
+            answer.clear();
             break;}
-
         }
     }while(fin==0);
+//    cout << answer << endl;
 
     descriptor = port.GetChar();
     answer+=descriptor;
@@ -740,47 +755,49 @@ double* IMU3DMGX510::EulerAngles() {
     longitud = port.GetChar();
     answer+=longitud;
 
-    for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
-        c = port.GetChar();
-        answer+=c;
-    }
+//    cout << int(descriptor) << endl;
+//    cout << int(longitud) << endl;
 
-    if (int(longitud) == 28 ){
-        ulf accx;
-        std::string str =hex(answer.substr(6,4));
+
+
+    if (int(longitud) == 28 && int(descriptor) == -128){
+
+        for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
+            c = port.GetChar();
+            answer+=c;
+        }
+
+//        cout << hex(answer) << endl;
+
+        str =hex(answer.substr(6,4));
         std::stringstream ss(str);
         ss >> std::hex >> accx.ul;
-        double f = accx.f;
+        f = accx.f;
 
-        ulf accy;
-        std::string str1 =hex(answer.substr(10,4));
+        str1 =hex(answer.substr(10,4));
         std::stringstream ss1(str1);
         ss1 >> std::hex >> accy.ul;
-        double f1 = accy.f;
+        f1 = accy.f;
 
-        ulf accz;
-        std::string str2 =hex(answer.substr(14,4));
+        str2 =hex(answer.substr(14,4));
         std::stringstream ss2(str2);
         ss2 >> std::hex >> accz.ul;
-        double f2 = accz.f;
+        f2 = accz.f;
 
-        ulf gyrox;
-        std::string str3 =hex(answer.substr(20,4));
+        str3 =hex(answer.substr(20,4));
         std::stringstream ss3(str3);
         ss3 >> std::hex >> gyrox.ul;
-        double f3 = gyrox.f;
+        f3 = gyrox.f;
 
-        ulf gyroy;
-        std::string str4 =hex(answer.substr(24,4));
+        str4 =hex(answer.substr(24,4));
         std::stringstream ss4(str4);
         ss4 >> std::hex >> gyroy.ul;
-        double f4 = gyroy.f;
+        f4 = gyroy.f;
 
-        ulf gyroz;
-        std::string str5 =hex(answer.substr(28,4));
+        str5 =hex(answer.substr(28,4));
         std::stringstream ss5(str5);
         ss5>> std::hex >> gyroz.ul;
-        double f5 = gyroz.f;
+        f5 = gyroz.f;
 
         estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
         EulerAngles[0]=estimador.eulerRoll() - rolloffset; //rads
@@ -788,7 +805,38 @@ double* IMU3DMGX510::EulerAngles() {
 
         EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
         EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
+
+    }else {
+
+        //Data will be overwriten in case it's been corrupted
+        port.WriteLine(idle);
+        port.CheckLine(respuestacorrectaidle,idle);
+
+        if(freq==1){
+            port.WriteLine(gyracc1);
+            port.CheckLine(respuestacorrectaajustes,gyracc1);
+        }else if (freq == 50){
+            port.WriteLine(gyracc50);
+            port.CheckLine(respuestacorrectaajustes,gyracc50);
+        }else if (freq == 100){
+            port.WriteLine(gyracc100);
+            port.CheckLine(respuestacorrectaajustes,gyracc100);
+        }else if (freq == 500){
+            port.WriteLine(gyracc500);
+            port.CheckLine(respuestacorrectaajustes,gyracc500);
+        }else if (freq == 1000){
+            port.WriteLine(gyracc1000);
+            port.CheckLine(respuestacorrectaajustes,gyracc1000);
+        }else{
+            port.WriteLine(gyracc100);
+            port.CheckLine(respuestacorrectaajustes,gyracc100);
         }
+
+        port.WriteLine(streamon);
+        port.CheckLine(respuestacorrectastreamonoff,streamon);
+//        cout << "Recalibrating.... " << endl;
+    }
+
     answer.clear();
     return EulerAngles;
 }
