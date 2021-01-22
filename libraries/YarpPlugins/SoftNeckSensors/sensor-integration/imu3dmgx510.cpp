@@ -775,9 +775,13 @@ double* IMU3DMGX510::EulerAngles() {
         answer+=c;
     }
 
-//    75 65 80 1C 0E 04 BB 16 DF 76 3C 2F B0 49 3F 80 1A 85 0E 05 BB 5E 50 00 B9 B3 AE D4 BA FB B0 C6 05 FF
+    //We'll get NaN values when IMU sends data packets corrupted, where two of its three descriptors are wrongly located.
+    //To correct this failure, a second if condition has been implemented.
+    //It will check if 2nd and 3nd descriptors are both correct
 
-//    75 65 80 1C 0E 04 F7 E4 BB 13 A5 1A BB 0A FF A6 BA 94 75 65 80 1C 0E 04 3B 1A 8C 74 3C 1E 34 89 3F 7F
+    // Correct ---> 75 65 80 1C 0E 04 BB 16 DF 76 3C 2F B0 49 3F 80 1A 85 0E 05 BB 5E 50 00 B9 B3 AE D4 BA FB B0 C6 05 FF
+
+    // Incorrect ---> 75 65 80 1C 0E 04 F7 E4 BB 13 A5 1A BB 0A FF A6 BA 94 75 65 80 1C 0E 04 3B 1A 8C 74 3C 1E 34 89 3F 7F
 
 
     if (int(longitud) == 28 && int(descriptorgeneral) == -128 ){
@@ -831,6 +835,7 @@ double* IMU3DMGX510::EulerAngles() {
     }else {
         cout << "Bad" << endl;
     }
+
     answer.clear();
     return EulerAngles;
 }

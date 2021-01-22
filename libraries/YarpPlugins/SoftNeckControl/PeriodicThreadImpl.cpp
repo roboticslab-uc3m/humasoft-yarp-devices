@@ -243,6 +243,33 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
   }
 
 
+  //Testing
+  double targetroll = 0.0;
+  double targetpitch = 0.0;
+  double errorroll = targetroll - x_imu[0];
+  double errorpitch = targetpitch - x_imu[1];
 
-  printf("> sensor(roll%f pitch%f)\n",x_imu[0], x_imu[1]);
+
+
+  double cs1; // motor izq
+  double cs2; // motor der
+  std::vector<int> m; // motor izq, der, tercero
+  std::vector<double> cs;
+  int area_c, area_d = 0; // currect area, destination area (area_p = area actual)
+  cs.resize(3);
+
+  std::vector<double> xd = targetPose;
+  rollError   = xd[0] - x_imu[0];
+  pitchError = xd[1] - x_imu[1];
+
+
+
+
+
+
+
+
+  printf(">>>> sensor(roll%f pitch%f)\n",x_imu[0], x_imu[1]);
+  printf(">>>> error(errorroll%f errorpitch%f)\n",errorroll, errorpitch);
+
 }

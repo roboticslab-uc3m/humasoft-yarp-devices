@@ -91,9 +91,9 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else if(controlType=="newUndocked")
     {
-        if (!setControlModes(VOCAB_CM_VELOCITY))
+        if (!setControlModes(VOCAB_CM_POSITION))
         {
-            CD_ERROR("Unable to set velocity mode.\n");
+            CD_ERROR("Unable to set position mode.\n");
             return false;
         }
     }
