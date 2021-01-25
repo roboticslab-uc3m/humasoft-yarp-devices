@@ -265,11 +265,19 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
 
 
   //Los mando a los motores
+
+  if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+  {
+      CD_ERROR("encodePose failed.\n");
+      cmcSuccess = false;
+      stopControl();
+      return;
+  }
+
   if (!sendTargets(xd))
   {
       CD_WARNING("Command error, not updating control this iteration.\n");
   }
-
 
 
 
