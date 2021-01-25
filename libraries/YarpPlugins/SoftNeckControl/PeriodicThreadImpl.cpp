@@ -235,41 +235,47 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
 }
 
 void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
+
   std::vector<double> x_imu;
+  //targetPose is a double vector in which its values has been converted to ref coordinate system and ref orientation system from introduced parameters with movj command
+  std::vector<double> xd = targetPose;
+
   if (!immu3dmgx510StreamResponder->getLastData(x_imu))
   {
       CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
-      iVelocityControl->stop();
+      iPositionControl->stop();
+  }
+
+  double rollError = xd[0] - x_imu[0];
+  double pitchError = xd[1] - x_imu[1];
+
+  double p1 = x_imu[0] / 1.5;
+  double p2 = (x_imu[1] / 1.6) - (x_imu[0] / 3);
+  double p3 = (x_imu[0] / -3) - (x_imu[1] / 1.6);
+
+
+  cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
+  cout << "Error with RollTarget: " << xd[0] << " PitchTarget:  " << xd[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+  cout << "Motor positions >>>>> P1(Single): " << p1 << " P2(Left): " << p2 << " P3(Right): " << p3 << endl;
+
+  //¿Como los muevo?
+  //Ver void SoftNeckControl::handleMovjClosedLoopDocked()
+
+  // -------> Aplicar Control actualizando valores de xd
+
+
+  //Los mando a los motores
+  if (!sendTargets(xd))
+  {
+      CD_WARNING("Command error, not updating control this iteration.\n");
   }
 
 
-  //Testing
-  double targetroll = 0.0;
-  double targetpitch = 0.0;
-  double errorroll = targetroll - x_imu[0];
-  double errorpitch = targetpitch - x_imu[1];
-
-
-
-  double cs1; // motor izq
-  double cs2; // motor der
-  std::vector<int> m; // motor izq, der, tercero
-  std::vector<double> cs;
-  int area_c, area_d = 0; // currect area, destination area (area_p = area actual)
-  cs.resize(3);
-
-  std::vector<double> xd = targetPose;
-  rollError   = xd[0] - x_imu[0];
-  pitchError = xd[1] - x_imu[1];
 
 
 
 
 
 
-
-
-  printf(">>>> sensor(roll%f pitch%f)\n",x_imu[0], x_imu[1]);
-  printf(">>>> error(errorroll%f errorpitch%f)\n",errorroll, errorpitch);
 
 }
