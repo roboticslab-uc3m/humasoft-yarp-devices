@@ -27,6 +27,7 @@ void SoftNeckControl::run()
         }
         else if(controlType=="newUndocked"){
             CD_INFO_NO_HEADER("Arrancando control nuevo desacoplado\n");
+
             !serialPort.isClosed() ? handleMovjClosedLoopNewUndocked() : handleMovjOpenLoop();
         }
         else CD_ERROR("Control mode not defined\n");                
@@ -41,6 +42,7 @@ void SoftNeckControl::run()
 void SoftNeckControl::handleMovjOpenLoop()
 {
     bool done;
+    cout << "Bucle abierto" << endl;
 
     if (!iPositionControl->checkMotionDone(&done))
     {
@@ -236,9 +238,14 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
 
 void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
 
+double rollError,
+       pitchError,
+       rollCs,
+       pitchCs
+       = 0.0;
+
   std::vector<double> x_imu;
-  //targetPose is a double vector in which its values has been converted to ref coordinate system and ref orientation system from introduced parameters with movj command
-  std::vector<double> xd = targetPose;
+  std::vector<double> xd(2);
 
   if (!immu3dmgx510StreamResponder->getLastData(x_imu))
   {
@@ -246,44 +253,52 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
       iPositionControl->stop();
   }
 
-  double rollError = xd[0] - x_imu[0];
-  double pitchError = xd[1] - x_imu[1];
+  //...
+  //x_imu[1] es roll
+//  x_imu[0] = - x_imu[0];
+  x_imu[1] = - x_imu[1];
 
-  double p1 = x_imu[0] / 1.5;
-  double p2 = (x_imu[1] / 1.6) - (x_imu[0] / 3);
-  double p3 = (x_imu[0] / -3) - (x_imu[1] / 1.6);
+  pitchError = targetPose[0] - x_imu[0];
+  rollError = targetPose[1] - x_imu[1];
+
+//  // Controladores
+  rollCs = controllerRoll->OutputUpdate(rollError);
+//  rollCs   = rollError   > *controllerRoll;
+  if (!std::isnormal(rollCs))
+  {
+      rollCs = 0.0;
+  }
+
+  xd[0] = rollCs;
+
+  pitchCs = controllerPitch->OutputUpdate(pitchError);
+//  pitchCs   = pitchError   > *controllerPitch;
+
+  if (!std::isnormal(pitchCs))
+  {
+      pitchCs = 0.0;
+  }
+
+  xd[1] = pitchCs;
 
 
-  cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
-  cout << "Error with RollTarget: " << xd[0] << " PitchTarget:  " << xd[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+  double p1 = 0.001*(xd[0] / 1.5);
+  double p2 = 0.001*( (xd[1] / 1.732) - (xd[0] / 3) );
+  double p3 = 0.001*( (xd[0] / -3) - (xd[1] / 1.732) );
+
+
+
+  cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[1] << "  Pitch: " << x_imu[0] << endl;
+  cout << "RollTarget: " << targetPose[1] << " PitchTarget:  " << targetPose[0] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+  cout << "Rollxd" << xd[0] << "Pitchxd" << xd[1] << endl;
   cout << "Motor positions >>>>> P1(Single): " << p1 << " P2(Left): " << p2 << " P3(Right): " << p3 << endl;
 
-  //¿Como los muevo?
-  //Ver void SoftNeckControl::handleMovjClosedLoopDocked()
+  std::vector<double> qd={p1,p2,p3};
 
-  // -------> Aplicar Control actualizando valores de xd
-
-
-  //Los mando a los motores
-
-  if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+  if (!iPositionControl->positionMove(qd.data()))
   {
-      CD_ERROR("encodePose failed.\n");
-      cmcSuccess = false;
-      stopControl();
-      return;
+      CD_ERROR("positionMove failed.\n");
   }
-
-  if (!sendTargets(xd))
-  {
-      CD_WARNING("Command error, not updating control this iteration.\n");
-  }
-
-
-
-
-
-
 
 
 }

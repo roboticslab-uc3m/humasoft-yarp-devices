@@ -169,6 +169,8 @@ bool SoftNeckControl::close()
     yarp::os::PeriodicThread::stop();
     delete controllerPolar;
     delete controllerAzimuth;
+    delete controllerRoll;
+    delete controllerPitch;
 
     serialPort.close();
     delete serialStreamResponder;

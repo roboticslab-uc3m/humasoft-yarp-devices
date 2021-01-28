@@ -238,6 +238,8 @@ private:
 
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
+    PIDBlock * controllerRoll;
+    PIDBlock * controllerPitch;
     char sensorType;
 
     PIDBlock  *incon;

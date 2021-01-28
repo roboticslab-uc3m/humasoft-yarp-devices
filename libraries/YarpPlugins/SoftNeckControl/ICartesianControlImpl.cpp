@@ -1,4 +1,4 @@
-// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
+﻿// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 #include "SoftNeckControl.hpp"
 
@@ -43,7 +43,6 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             CD_ERROR("encodePose failed.\n");
             return false;
         }
-        printf("%f %f\n",x[0],x[1]);
         *state = getCurrentState();
         *timestamp = yarp::os::Time::now();
         return true;
@@ -109,15 +108,26 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else
     {
+        printf("--> %f %f %f %f %f %f\n", xd[0],xd[1],xd[2],xd[3],xd[4],xd[5]);
         if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES)) // con IMU
         {
             CD_ERROR("decodePose failed.\n");
             return false;
         }
 
-        if(targetPose[1]<0.0) targetPose[1]+= 360;
-    }
+        if(controlType!="newUndocked"){
+            if(targetPose[1]<0.0) targetPose[1]+= 360;
+        }
+        else
+        {
+            if(xd[4] < 0){ // caso a resolver (roll negativo)
+                targetPose[0] = 0;
+                targetPose[1] = 0;
+            }
 
+        }
+
+    }
     cmcSuccess = true;
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
     return true;
