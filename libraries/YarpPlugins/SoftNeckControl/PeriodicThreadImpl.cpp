@@ -7,6 +7,9 @@
 #include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
+//In order to clasify the system, we are using fstream library
+#include <fstream>
+
 using namespace humasoft;
 using namespace roboticslab::KinRepresentation;
 
@@ -238,67 +241,70 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
 
 void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
 
-double rollError,
-       pitchError,
-       rollCs,
-       pitchCs
-       = 0.0;
+    double rollError,
+            pitchError,
+            rollCs,
+            pitchCs
+            = 0.0;
 
-  std::vector<double> x_imu;
-  std::vector<double> xd(2);
+    std::vector<double> x_imu;
+    std::vector<double> xd(2);
 
-  if (!immu3dmgx510StreamResponder->getLastData(x_imu))
-  {
-      CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
-      iPositionControl->stop();
-  }
+    if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+    {
+        CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+        iPositionControl->stop();
+    }
 
-  //...
-  //x_imu[1] es roll
-//  x_imu[0] = - x_imu[0];
-  x_imu[1] = - x_imu[1];
+    //...
+    //x_imu[1] es roll
+    //  x_imu[0] = - x_imu[0];
+    x_imu[1] = - x_imu[1];
 
-  pitchError = targetPose[0] - x_imu[0];
-  rollError = targetPose[1] - x_imu[1];
+    pitchError = targetPose[0] - x_imu[0];
+    rollError = targetPose[1] - x_imu[1];
 
-//  // Controladores
-  rollCs = controllerRoll->OutputUpdate(rollError);
-//  rollCs   = rollError   > *controllerRoll;
-  if (!std::isnormal(rollCs))
-  {
-      rollCs = 0.0;
-  }
+    //  // Controladores
+    rollCs = controllerRoll->OutputUpdate(rollError);
+    //  rollCs   = rollError   > *controllerRoll;
+    if (!std::isnormal(rollCs))
+    {
+        rollCs = 0.0;
+    }
 
-  xd[0] = rollCs;
+    xd[0] = rollCs;
 
-  pitchCs = controllerPitch->OutputUpdate(pitchError);
-//  pitchCs   = pitchError   > *controllerPitch;
+    pitchCs = controllerPitch->OutputUpdate(pitchError);
+    //  pitchCs   = pitchError   > *controllerPitch;
 
-  if (!std::isnormal(pitchCs))
-  {
-      pitchCs = 0.0;
-  }
+    if (!std::isnormal(pitchCs))
+    {
+        pitchCs = 0.0;
+    }
 
-  xd[1] = pitchCs;
-
-
-  double p1 = 0.001*(xd[0] / 1.5);
-  double p2 = 0.001*( (xd[1] / 1.732) - (xd[0] / 3) );
-  double p3 = 0.001*( (xd[0] / -3) - (xd[1] / 1.732) );
+    xd[1] = pitchCs;
 
 
-
-  cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[1] << "  Pitch: " << x_imu[0] << endl;
-  cout << "RollTarget: " << targetPose[1] << " PitchTarget:  " << targetPose[0] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
-  cout << "Rollxd" << xd[0] << "Pitchxd" << xd[1] << endl;
-  cout << "Motor positions >>>>> P1(Single): " << p1 << " P2(Left): " << p2 << " P3(Right): " << p3 << endl;
-
-  std::vector<double> qd={p1,p2,p3};
-
-  if (!iPositionControl->positionMove(qd.data()))
-  {
-      CD_ERROR("positionMove failed.\n");
-  }
+    double p1 = 0.001*(xd[0] / 1.5);
+    double p2 = 0.001*( (xd[1] / 1.732) - (xd[0] / 3) );
+    double p3 = 0.001*( (xd[0] / -3) - (xd[1] / 1.732) );
 
 
+
+    cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[1] << "  Pitch: " << x_imu[0] << endl;
+    cout << "RollTarget: " << targetPose[1] << " PitchTarget:  " << targetPose[0] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+    cout << "Rollxd" << xd[0] << "Pitchxd" << xd[1] << endl;
+    cout << "Motor positions >>>>> P1(Single): " << p1 << " P2(Left): " << p2 << " P3(Right): " << p3 << endl;
+
+
+
+    std::vector<double> qd={p1,p2,p3};
+
+    if (!iPositionControl->positionMove(qd.data()))
+    {
+        CD_ERROR("positionMove failed.\n");
+    }
+
+    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << x_imu[0] << endl;
+    numtime = numtime+1;
 }
