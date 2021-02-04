@@ -248,8 +248,8 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
             = 0.0;
 
     std::vector<double> x_imu;
-//    std::vector<double> xd(2);
-     std::vector<double> xd = targetPose;
+    std::vector<double> xd(2);
+//     std::vector<double> xd = targetPose;
 
     if (!immu3dmgx510StreamResponder->getLastData(x_imu))
     {
@@ -265,25 +265,25 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     rollError = targetPose[0] - x_imu[0];
     pitchError = targetPose[1] - x_imu[1];
 
-//    //  // Controladores
-//    rollCs = controllerRoll->OutputUpdate(rollError);
-//    //  rollCs   = rollError   > *controllerRoll;
-//    if (!std::isnormal(rollCs))
-//    {
-//        rollCs = 0.0;
-//    }
+    // Controladores
+    rollCs = controllerRoll->OutputUpdate(rollError);
+    //  rollCs   = rollError   > *controllerRoll;
+    if (!std::isnormal(rollCs))
+    {
+        rollCs = 0.0;
+    }
 
-//    xd[0] = rollCs;
+    xd[0] = rollCs;
 
-//    pitchCs = controllerPitch->OutputUpdate(pitchError);
-//    //  pitchCs   = pitchError   > *controllerPitch;
+    pitchCs = controllerPitch->OutputUpdate(pitchError);
+    //  pitchCs   = pitchError   > *controllerPitch;
 
-//    if (!std::isnormal(pitchCs))
-//    {
-//        pitchCs = 0.0;
-//    }
+    if (!std::isnormal(pitchCs))
+    {
+        pitchCs = 0.0;
+    }
 
-//    xd[1] = pitchCs;
+    xd[1] = pitchCs;
 
 
     double p1 = 0.001*(xd[1] / 1.5);
@@ -307,6 +307,6 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     }
 
 //    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
-    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
-    numtime = numtime+1;
+//    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
+//    numtime = numtime+1;
 }

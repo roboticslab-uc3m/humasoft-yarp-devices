@@ -248,8 +248,8 @@ private:
     std::vector<double> targetPose;
 
     //Creation of a txt.file to write data
-    ofstream ensayos; //r
-    int numtime;
+//    ofstream ensayos; //r
+//    int numtime;
 
     mutable std::mutex stateMutex;
 };
