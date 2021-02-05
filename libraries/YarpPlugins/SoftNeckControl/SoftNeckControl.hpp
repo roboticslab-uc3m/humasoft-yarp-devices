@@ -240,6 +240,8 @@ private:
     FPDBlock * controllerAzimuth;
     PIDBlock * controllerRoll;
     PIDBlock * controllerPitch;
+//    FPDBlock * controllerRoll;
+//    FPDBlock * controllerPitch;
     char sensorType;
 
     PIDBlock  *incon;

@@ -18,6 +18,8 @@ void SoftNeckControl::setupControllers()
     // inicializar controladores
     controllerRoll = new PIDBlock(0.52,0.82,0.082,cmcPeriod); //New controller
     controllerPitch = new PIDBlock(0.52,0.82,0.082,cmcPeriod); //New controller
+//    controllerRoll = new FPDBlock(0.6743,0.9523,-1.09,cmcPeriod); //New controller
+//    controllerPitch = new FPDBlock(0.6743,0.9523,-1.09,cmcPeriod); //New controller
     incon = new PIDBlock(0.5,0.1,0,cmcPeriod);
     orcon = new PIDBlock(0.05,0.0,0,cmcPeriod);
 }
