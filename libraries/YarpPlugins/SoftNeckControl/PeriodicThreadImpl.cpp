@@ -290,29 +290,47 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     double p2 = 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
     double p3 = 0.001*( (xd[1] / -3) - (xd[0] / 1.732) );
 
-
-    //Tensión cables
-    //Correción cuando vuelvo a 0,0 después de girar solo en roll en p2
-    if (p2<0 && p1>0 && p3>0){
-        p2=p2+0.004;
+    if (p3<0){
+        p3=p3*0.5;
     }
-    //Corección cuando giro solo en roll para no soltar de más en p3
+    if (p2<0){
+        p2=p2*0.5;
+    }
+    if (p1<0){
+        p1=p1*0.5;
+    }
+
+
+    /*//Tensión cables
+    //Correción cuando vuelvo a 0,0 después de girar solo en roll en p2 (CHECK)
+//    if (p2<0 && p1>0 && p3>0){
+    if (p2<0 && p3>0){
+//        p2=p2+0.004;
+          p2=p2*0.001;
+    }
+    //Corección cuando giro solo en roll para no soltar de más en p3 (CHECK)
     if (p3<0 && p2>0 && p1>0){
         p3 = 0.5*p3;
+//        p3=p3+0.005;
     }
-    //Corección cuando giro en pitch para que no destensen de más p2 y p3
+    //Corección cuando giro en pitch para que no destensen de más p2 y p3 (CHECK)
     if (p1>0 && p2<0 && p3<0){
-        p2=p2*0.5;
-        p3=p3*0.7;
+        p2=p2*0.4;
+        p3=p3*0.4;
     }
-    //Corección cuando vuelvo a 0,0 después de girar en pitch para que p1 no se pase
-    if (p1<0 && p2>0 && p3<0){
-        p1=p1+0.002;
-    }
-    //Corrección cuando giramos en pìtch negativo sobre p1
+    //Corección cuando vuelvo a 0,0 después de girar en pitch para p1 (CHECK)
+    //También entramos aquí cuando el target en pitch es negativo
     if (p1<0 && p2>0 && p3>0){
-//        p1=p1*0.9;
-    }
+        //Si volvemos a 0 desde pitch positivo
+        if(targetPose[1]>0){
+         p1=p1*-0.1;
+        }
+        //Si vamos a un pitch negativo
+        if(targetPose[1]<0){
+            p1=p1*0.25;
+        }
+    }*/
+
 
     cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
