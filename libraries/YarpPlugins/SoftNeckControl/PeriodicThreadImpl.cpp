@@ -249,7 +249,7 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
 
     std::vector<double> x_imu;
     std::vector<double> xd(2);
-//     std::vector<double> xd = targetPose;
+    //std::vector<double> xd = targetPose;
 
     if (!immu3dmgx510StreamResponder->getLastData(x_imu))
     {
@@ -257,34 +257,27 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
         iPositionControl->stop();
     }
 
-    //...
-    //x_imu[1] es pitch
-    //  x_imu[0] = - x_imu[0];
+    //IMU gives us roll in x_imu[0] and pitch in x_imu[1]
+    //In order to match sign criterion of IMU and SoftNeck, sign of pitch needs to be changed
     x_imu[1] = - x_imu[1];
 
     rollError = targetPose[0] - x_imu[0];
     pitchError = targetPose[1] - x_imu[1];
 
-    // Controladores
+    //Control process
     rollCs = controllerRoll->OutputUpdate(rollError);
-    //  rollCs   = rollError   > *controllerRoll;
     if (!std::isnormal(rollCs))
     {
         rollCs = 0.0;
     }
-
     xd[0] = rollCs;
 
     pitchCs = controllerPitch->OutputUpdate(pitchError);
-    //  pitchCs   = pitchError   > *controllerPitch;
-
     if (!std::isnormal(pitchCs))
     {
         pitchCs = 0.0;
     }
-
     xd[1] = pitchCs;
-
 
     double p1 = 0.001*(xd[1] / 1.5);
     double p2 = 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
@@ -300,43 +293,9 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
         p1=p1*0.5;
     }
 
-
-    /*//Tensión cables
-    //Correción cuando vuelvo a 0,0 después de girar solo en roll en p2 (CHECK)
-//    if (p2<0 && p1>0 && p3>0){
-    if (p2<0 && p3>0){
-//        p2=p2+0.004;
-          p2=p2*0.001;
-    }
-    //Corección cuando giro solo en roll para no soltar de más en p3 (CHECK)
-    if (p3<0 && p2>0 && p1>0){
-        p3 = 0.5*p3;
-//        p3=p3+0.005;
-    }
-    //Corección cuando giro en pitch para que no destensen de más p2 y p3 (CHECK)
-    if (p1>0 && p2<0 && p3<0){
-        p2=p2*0.4;
-        p3=p3*0.4;
-    }
-    //Corección cuando vuelvo a 0,0 después de girar en pitch para p1 (CHECK)
-    //También entramos aquí cuando el target en pitch es negativo
-    if (p1<0 && p2>0 && p3>0){
-        //Si volvemos a 0 desde pitch positivo
-        if(targetPose[1]>0){
-         p1=p1*-0.1;
-        }
-        //Si vamos a un pitch negativo
-        if(targetPose[1]<0){
-            p1=p1*0.25;
-        }
-    }*/
-
-
     cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
-    cout << "Rollxd" << xd[0] << "Pitchxd" << xd[1] << endl;
-    cout << "Motor positions >>>>> P1(Single): " << p1 << " P2(Left): " << p2 << " P3(Right): " << p3 << endl;
-
+    cout << "Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
 
     std::vector<double> qd={p1,p2,p3};
 
@@ -345,7 +304,9 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
         CD_ERROR("positionMove failed.\n");
     }
 
-//    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
-//    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
-//    numtime = numtime+1;
+    //Uncomment it to receive data from testing
+    /*ensayos << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
+    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << x_imu[0] << endl;
+    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
+    numtime = numtime+1;*/
 }

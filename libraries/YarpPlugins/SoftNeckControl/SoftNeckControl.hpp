@@ -240,8 +240,7 @@ private:
     FPDBlock * controllerAzimuth;
     PIDBlock * controllerRoll;
     PIDBlock * controllerPitch;
-//    FPDBlock * controllerRoll;
-//    FPDBlock * controllerPitch;
+
     char sensorType;
 
     PIDBlock  *incon;
@@ -249,9 +248,9 @@ private:
 
     std::vector<double> targetPose;
 
-    //Creation of a txt.file to write data
-//    ofstream ensayos; //r
-//    int numtime;
+    /*//In order to analyze obtained data
+    ofstream testingFile;
+    int numtime;*/
 
     mutable std::mutex stateMutex;
 };

@@ -157,7 +157,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
         yarp::os::PeriodicThread::setPeriod(cmcPeriod);
     }
 
-//    ensayos.open("ensayos.txt", ofstream::out); //r
+    //testingFile.open("ensayos.txt", ofstream::out);
 
     setupControllers();
     return yarp::os::PeriodicThread::start();
@@ -179,7 +179,7 @@ bool SoftNeckControl::close()
     delete immu3dmgx510StreamResponder;
     robotDevice.close();
 
-//    ensayos.close(); //r
+    //testingFile.close();
 
     return true;
 }
