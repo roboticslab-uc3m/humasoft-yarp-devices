@@ -8,11 +8,16 @@ In the next steps, you'll see the different modules that would have to be opened
 yarp server
 ```
 
-* **Arduino (IMU):** Its function is to collect the input data received by the Arduino and publish them on the yarp network.
+* **Arduino IMU:** Its function is to collect the input data received by the Arduino and publish them on the yarp network.
 ```bash
 yarpdev --device serialport --name /softimu --comport /dev/ttyACM0 --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1
 ```
 *Note*: For Arduino Nano, change `--comport / dev / ttyACM0` to `--comport / dev / ttyUSB0`
+
+* **3DMGX510 IMU:** 
+```bash
+sudo yarpdev --device SoftNeckIMU
+```
 
 * **launchCanBus:** Start the iPOS, activating the motor control in position mode and open the necessary ports to control each of the 3 engines through the yarp network. `softNeck.ini` refers to the configuration of each iPOS
 ```bash
@@ -47,6 +52,10 @@ launchCanBus --from softNeck.ini
     * Terminal 1: closed loop undocked control module
     ```bash
     yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType undocked
+    ```
+    * Terminal 1: closed loop new-undocked control module using 3DMGX510 IMU
+    ```bash
+    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /teo/softNeck --remoteNewImu /teo/softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType newUndocked
     ```
     * Terminal 2: to send commands
     ```bash
