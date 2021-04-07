@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <vector>
+#include <chrono>
 
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
@@ -241,6 +242,9 @@ private:
     PIDBlock * controllerRoll;
     PIDBlock * controllerPitch;
 
+    FPDBlock * controllerRollFracc;
+    FPDBlock * controllerPitchFracc;
+
     char sensorType;
 
     PIDBlock  *incon;
@@ -248,9 +252,13 @@ private:
 
     std::vector<double> targetPose;
 
-    /*//In order to analyze obtained data
+    //In order to analyze obtained data
     ofstream testingFile;
-    int numtime;*/
+    int numtime;
+    time_t timer;
+
+    chrono::system_clock::time_point tprev;
+    chrono::system_clock::time_point tnow;
 
     mutable std::mutex stateMutex;
 };

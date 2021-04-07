@@ -265,14 +265,14 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     pitchError = targetPose[1] - x_imu[1];
 
     //Control process
-    rollCs = controllerRoll->OutputUpdate(rollError);
+    rollCs = controllerRollFracc->OutputUpdate(rollError);
     if (!std::isnormal(rollCs))
     {
         rollCs = 0.0;
     }
     xd[0] = rollCs;
 
-    pitchCs = controllerPitch->OutputUpdate(pitchError);
+    pitchCs = controllerPitchFracc->OutputUpdate(pitchError);
     if (!std::isnormal(pitchCs))
     {
         pitchCs = 0.0;
@@ -293,6 +293,26 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
         p1=p1*0.5;
     }
 
+
+    tprev = tnow;
+    tnow = std::chrono::system_clock::now();
+
+
+    chrono::nanoseconds elapsedNanoseconds = tprev.time_since_epoch()-tnow.time_since_epoch();
+
+//    double tiempo1bucle = elapsedNanoseconds.count()/1000;
+    double tiempototal = elapsedNanoseconds.count();
+
+//    cout << "Tiempo 1 bucle ms: " << (tiempo1bucle/1000000) << endl;
+    cout << "Tiempo total: ms " << (tiempototal/1000000) << endl;
+
+//    cout <<  << endl;
+
+
+
+
+
+
     cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
     cout << "Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
@@ -305,8 +325,8 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     }
 
     //Uncomment it to receive data from testing
-    /*ensayos << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
-    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << x_imu[0] << endl;
-    ensayos << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
-    numtime = numtime+1;*/
-}
+//    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
+//    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << x_imu[0] << endl;
+    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
+    numtime = numtime+1;
+     }
