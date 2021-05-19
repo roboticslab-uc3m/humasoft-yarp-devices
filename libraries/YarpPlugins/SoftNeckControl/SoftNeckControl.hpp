@@ -253,7 +253,7 @@ private:
     std::vector<double> targetPose;
 
     //In order to analyze obtained data
-    ofstream testingFile;
+    //ofstream testingFile;
     int numtime;
     time_t timer;
 

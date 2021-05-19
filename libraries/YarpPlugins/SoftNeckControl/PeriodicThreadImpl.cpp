@@ -325,8 +325,7 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
     }
 
     //Uncomment it to receive data from testing
-//    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[1] << "," << x_imu[1] << endl;
-//    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << x_imu[0] << endl;
-    testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
+    //testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
     numtime = numtime+1;
-     }
+
+}
