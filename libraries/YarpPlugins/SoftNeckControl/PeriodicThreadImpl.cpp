@@ -20,18 +20,18 @@ void SoftNeckControl::run()
     switch (getCurrentState())
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
-        if(controlType=="docked"){
-            CD_INFO_NO_HEADER("Arrancando control acoplado\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopDocked() : handleMovjOpenLoop();
+        if(controlType=="ioCoupled"){
+            CD_INFO_NO_HEADER("Starting Inclination Orientation Coupled Contro\n");
+            !serialPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
         }
-        else if(controlType=="undocked"){
-            CD_INFO_NO_HEADER("Arrancando control desacoplado\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopUndocked() : handleMovjOpenLoop();
+        else if(controlType=="ioUncoupled"){
+            CD_INFO_NO_HEADER("Starting Inclination Orientation Uncoupled Control\n");
+            !serialPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
         }
-        else if(controlType=="newUndocked"){
-            CD_INFO_NO_HEADER("Arrancando control nuevo desacoplado\n");
+        else if(controlType=="rpUncoupled"){
+            CD_INFO_NO_HEADER("Starting Roll Pitch Uncoupled Control\n");
 
-            !serialPort.isClosed() ? handleMovjClosedLoopNewUndocked() : handleMovjOpenLoop();
+            !serialPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
         else CD_ERROR("Control mode not defined\n");                
         break;
@@ -68,7 +68,7 @@ void SoftNeckControl::handleMovjOpenLoop()
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::handleMovjClosedLoopDocked()
+void SoftNeckControl::handleMovjClosedLoopIOCoupled()
 {
     std::vector<double> x_imu;
     double polarError,
@@ -81,12 +81,12 @@ void SoftNeckControl::handleMovjClosedLoopDocked()
         case '0':
             if (!serialStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated serial stream data.\n");
+                CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
             } break;
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
             } break;
     }
 
@@ -146,7 +146,7 @@ void SoftNeckControl::handleMovjClosedLoopDocked()
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::handleMovjClosedLoopUndocked()
+void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
 {
     std::vector<double> x_imu;
     double polarError,
@@ -239,7 +239,7 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     }
 }
 
-void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
+void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
     double rollError,
             pitchError,
@@ -296,23 +296,11 @@ void SoftNeckControl::handleMovjClosedLoopNewUndocked(){
 
     tprev = tnow;
     tnow = std::chrono::system_clock::now();
-
-
     chrono::nanoseconds elapsedNanoseconds = tprev.time_since_epoch()-tnow.time_since_epoch();
 
-//    double tiempo1bucle = elapsedNanoseconds.count()/1000;
-    double tiempototal = elapsedNanoseconds.count();
+    double totaltime = elapsedNanoseconds.count();
 
-//    cout << "Tiempo 1 bucle ms: " << (tiempo1bucle/1000000) << endl;
-    cout << "Tiempo total: ms " << (tiempototal/1000000) << endl;
-
-//    cout <<  << endl;
-
-
-
-
-
-
+    cout << "Total time: ms " << (totaltime/1000000) << endl;
     cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
     cout << "Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;

@@ -198,9 +198,9 @@ private:
     bool sendTargets(const std::vector<double> & xd);
 
     void handleMovjOpenLoop();
-    void handleMovjClosedLoopDocked();
-    void handleMovjClosedLoopUndocked();
-    void handleMovjClosedLoopNewUndocked();
+    void handleMovjClosedLoopIOCoupled();
+    void handleMovjClosedLoopIOUncoupled();
+    void handleMovjClosedLoopRPUncoupled();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -239,9 +239,6 @@ private:
 
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
-    PIDBlock * controllerRoll;
-    PIDBlock * controllerPitch;
-
     FPDBlock * controllerRollFracc;
     FPDBlock * controllerPitchFracc;
 

@@ -15,15 +15,10 @@ IMU3DMGX510StreamResponder::IMU3DMGX510StreamResponder(double _timeout)
       localArrivalTime(0.0),
       x(2, 0.0)
 {
-    // Configuración de los filtros: para una frecuencua de corte de 8 rad/s y tiempo de muestreo 0,02s.
-    polarFilterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
-    azimuthFilterSensor = new SystemBlock(0.1479, 0, -0.8521, 1);
 }
 
 IMU3DMGX510StreamResponder::~IMU3DMGX510StreamResponder()
     {
-        delete polarFilterSensor;
-        delete azimuthFilterSensor;
     }
 
 // -----------------------------------------------------------------------------
@@ -50,10 +45,6 @@ void IMU3DMGX510StreamResponder::onRead(yarp::os::Bottle & b)
 bool IMU3DMGX510StreamResponder::getLastData(std::vector<double> & v)
 {
     std::lock_guard<std::mutex> lock(mutex);
-
-    // si fuera necesario filtrar
-    //v[0] = polarFilterSensor->OutputUpdate(this->x[0]);
-    //v[1] = azimuthFilterSensor->OutputUpdate(this->x[1]);
     v=x ;
     return yarp::os::Time::now() - localArrivalTime <= timeout;
 }

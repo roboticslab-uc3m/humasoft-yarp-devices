@@ -15,8 +15,9 @@ void SoftNeckControl::setupControllers()
 {
     controllerPolar   = new FPDBlock(controlPolarKp, controlPolarKd, controlPolarExp, cmcPeriod);
     controllerAzimuth = new FPDBlock(controlAzimuthKp, controlAzimuthKd, controlAzimuthExp, cmcPeriod);
-    controllerRoll = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
-    controllerPitch = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
+
+    //controllerRoll = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
+    //controllerPitch = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
 
     controllerRollFracc   = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);
     controllerPitchFracc = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);

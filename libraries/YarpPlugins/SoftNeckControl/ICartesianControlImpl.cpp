@@ -27,13 +27,13 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             case '0':
                 if (!serialStreamResponder->getLastData(x_imu))
                 {
-                    CD_WARNING("Outdated serial stream data.\n");
+                    CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
                 }
             break;
             case '1':
                 if (!immu3dmgx510StreamResponder->getLastData(x_imu))
                 {
-                    CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                    CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
                 }
             break;
         }
@@ -72,7 +72,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if(controlType=="docked")
+    if(controlType=="ioCoupled")
     {
         if (!setControlModes(VOCAB_CM_POSITION))
         {
@@ -80,7 +80,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
     }
-    else if(controlType=="undocked")
+    else if(controlType=="ioUncoupled")
     {
         if (!setControlModes(VOCAB_CM_VELOCITY))
         {
@@ -88,7 +88,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
     }
-    else if(controlType=="newUndocked")
+    else if(controlType=="rpUncoupled")
     {
         if (!setControlModes(VOCAB_CM_POSITION))
         {
@@ -115,16 +115,8 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
 
-        if(controlType!="newUndocked"){
+        if(controlType!="prUncoupled"){
             if(targetPose[1]<0.0) targetPose[1]+= 360;
-        }
-        else
-        {
-            if(xd[4] < 0){ // caso a resolver (roll negativo)
-                targetPose[0] = 0;
-                targetPose[1] = 0;
-            }
-
         }
 
     }

@@ -110,9 +110,9 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     }
 
     // Old Serial IMU
-    if (config.check("remoteOldImu", "remote serial port"))
+    if (config.check("SparkfunIMU", "remote serial port"))
     {
-        std::string remoteSerial = config.find("remoteOldImu").asString();
+        std::string remoteSerial = config.find("SparkfunIMU").asString();
 
         if (!serialPort.open(prefix + "/imu:i"))
         {
@@ -132,8 +132,8 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     }
 
     // New Yarp Sensor
-    if (config.check("remoteNewImu", "remote yarp port of IMU sensor")){
-        std::string remoteSerial = config.find("remoteNewImu").asString();
+    if (config.check("3DMGX510IMU", "remote yarp port of IMU sensor")){
+        std::string remoteSerial = config.find("3DMGX510IMU").asString();
 
         if (!serialPort.open(prefix + "/imu:i"))
         {
@@ -158,7 +158,6 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     }
 
     //testingFile.open("data.txt", ofstream::out);
-
     setupControllers();
     return yarp::os::PeriodicThread::start();
 }
@@ -171,19 +170,13 @@ bool SoftNeckControl::close()
     yarp::os::PeriodicThread::stop();
     delete controllerPolar;
     delete controllerAzimuth;
-    delete controllerRoll;
-    delete controllerPitch;
-
     delete controllerRollFracc;
     delete controllerPitchFracc;
-
-    serialPort.close();
     delete serialStreamResponder;
     delete immu3dmgx510StreamResponder;
     robotDevice.close();
-
+    serialPort.close();
     //testingFile.close();
-
     return true;
 }
 
