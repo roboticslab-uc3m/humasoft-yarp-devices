@@ -8,11 +8,16 @@ In the next steps, you'll see the different modules that would have to be opened
 yarp server
 ```
 
-* **Arduino (IMU):** Its function is to collect the input data received by the Arduino and publish them on the yarp network.
+* **Arduino IMU:** Its function is to collect the input data received by the Arduino and publish them on the yarp network.
 ```bash
 yarpdev --device serialport --name /softimu --comport /dev/ttyACM0 --baudrate 9600 --paritymode NONE --databits 8 --stopbits 1
 ```
 *Note*: For Arduino Nano, change `--comport / dev / ttyACM0` to `--comport / dev / ttyUSB0`
+
+* **3DMGX510 IMU:** 
+```bash
+sudo yarpdev --device SoftNeckIMU
+```
 
 * **launchCanBus:** Start the iPOS, activating the motor control in position mode and open the necessary ports to control each of the 3 engines through the yarp network. `softNeck.ini` refers to the configuration of each iPOS
 ```bash
@@ -39,19 +44,31 @@ launchCanBus --from softNeck.ini
     streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.1 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.01
     ```
     
-* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the  control loop    
-    * Terminal 1: closed loop docked control module
-    ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType docked
-    ```
-    * Terminal 1: closed loop undocked control module
-    ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType undocked
-    ```
-    * Terminal 2: to send commands
-    ```bash
-    yarp rpc /SoftNeckControl/rpc_transform:s
-    > stat        # to know the current IMU position 
-    > movj 20 10  # to move it in 20º inclination and 10º orientation 
-    ```
-    * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
+* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop  
+  - With **Sparkfun IMU** sensor:
+      * Terminal 1: closed loop Coupled Control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --SparkfunIMU /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled
+      ```
+      * Terminal 1: closed loop Uncoupled Control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioUncoupled
+      ```
+      * Terminal 2: to send commands to coupled or uncoupled control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarp rpc /SoftNeckControl/rpc_transform:s
+      > stat        # to know the current IMU position 
+      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      ```   
+  - With **3DMGX510 IMU** sensor:    
+      * Terminal 1: closed loop Uncoupled Control module using 3DMGX510 IMU (roll-pitch)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Imu3DMGX510 /softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled
+      ```    
+      * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (roll-pitch)
+      ```bash
+      yarp rpc /SoftNeckControl/rpc_transform:s
+      > stat        # to know the current IMU position (roll pitch)
+      > movj 20 10  # to move it in 20º roll and 10º pitch 
+      ```
+      * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
