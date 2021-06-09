@@ -4,6 +4,10 @@ project(SensorIntegration)
 aux_source_directory(. SensorIntegration_SRCS)
 FILE(GLOB_RECURSE SensorIntegration_INCLUDE_LIST *.h *.hpp)
 
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(Qt5SerialPort REQUIRED)
 find_package(Boost COMPONENTS system thread REQUIRED)
 

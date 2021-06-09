@@ -4,6 +4,7 @@
 
 // Includes
 #include "attitude_estimator.h"
+#include <iostream>
 #include <cmath>
 
 // Defines
@@ -245,6 +246,8 @@ void AttitudeEstimator::update(double dt, double gyroX, double gyroY, double gyr
 		if(m_lambda <= 0.0) m_lambda = 0.0;
 		if(m_lambda >= 1.0) m_lambda = 1.0;
 	}
+
+//    cout << dt << "," << gyroX << "," <<  gyroY<< "," << gyroZ<< "," << accX<< "," << accY<< "," << accZ<< "," << magX<< "," << magY<< "," << magZ << endl;
 
 	// Calculate the required filter gains for this update (Note: Ki = Kp / Ti)
 	double Kp = m_lambda*m_Kp + (1-m_lambda)*m_KpQuick;
@@ -904,14 +907,16 @@ void AttitudeEstimator::updateEuler()
 	double stheta = 2.0*(m_Qhat[0]*m_Qhat[2] - m_Qhat[3]*m_Qhat[1]);
 	stheta = (stheta >= 1.0 ? 1.0 : (stheta <= -1.0 ? -1.0 : stheta)); // Coerce stheta to [-1,1]
 	m_Ehat[1] = asin(stheta);
-
+    if (!isnormal(m_Ehat[1])) cout << "ERROR m_Ehat[1]" << endl;
 	// Calculate yaw and roll
 	double ysq = m_Qhat[2]*m_Qhat[2];
 	m_Ehat[0] = atan2(m_Qhat[0]*m_Qhat[3]+m_Qhat[1]*m_Qhat[2], 0.5-(ysq+m_Qhat[3]*m_Qhat[3]));
 	m_Ehat[2] = atan2(m_Qhat[0]*m_Qhat[1]+m_Qhat[2]*m_Qhat[3], 0.5-(ysq+m_Qhat[1]*m_Qhat[1]));
 
+    if (!isnormal(m_Ehat[2])) cout << "ERROR m_Ehat[2]" << endl;
+
 	// Set the Euler angles valid flag
-	m_eulerValid = true;
+    m_eulerValid = true;
 }
 void AttitudeEstimator::updateFused()
 {

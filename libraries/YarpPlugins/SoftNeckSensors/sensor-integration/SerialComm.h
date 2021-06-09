@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+#define MAX_READ_CHARS 1024*1000
+
 using namespace std;
 using namespace boost::asio;
 
@@ -24,27 +26,29 @@ class SerialComm
 {
 public:
     SerialComm(string portName = "/dev/ttyUSB0"); //Constructor
+    long SetBaudRate(ulong new_baudrate);
 
  // -------- Reading methods declarations. Implementation in SerialComm.cpp --------
 
     bool ReadChar(); //Read a single char
     char GetChar(); //Get the read char
 
-    bool ReadNumberofChars(int); //Read a specified number of charts specified by the user
+    string GetChars(int size); //Read a specified number of charts specified by the user
     string GetNumberofChars(int); //Read a specified number of charts specified by the user and get it
 
     bool ReadLine(); //Read a line till final carriage \n
     string GetLine(); //Read a line till final carriage \n and get it
 
-    bool ReadUntill (char); //Read until an ending condition specified by the user
+    long ReadAndFind(string delim, string &read_available); //Read until an ending condition specified by the user
 
  // -------- Writing methods declarations. Implementation in SerialComm.cpp --------
 
-    bool WriteLine(string); //Write a line via serial comm
+    long WriteLine(string); //Write a line via serial comm
 
  // -------- Checking method declaration. Implementation in SerialComm.cpp --------
 
-    bool CheckLine(string,string); //Read data and compare it with a given string by the user
+    long CheckLine(string,string); //Read data and compare it with a given string by the user
+
 
 private: //Attributes
 
@@ -53,6 +57,16 @@ private: //Attributes
     boost::system::error_code error;
     boost::asio::streambuf buffer;
 
+    string lineRead;
+    long charsWritten;
+    long charsRead;
+    long charsUntil;
+
+
+    char charbuff[MAX_READ_CHARS];
+    string reading;
+
 };
 
 #endif // SERIALCOMM_H
+

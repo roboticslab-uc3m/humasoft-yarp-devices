@@ -1,13 +1,44 @@
 #include "imu3dmgx510.h"
 
+#include <iostream>
+#include <ios>
 
 // -------------------------  Constructor  -------------------------------
 
-IMU3DMGX510::IMU3DMGX510(string portName) : port(portName) {
+IMU3DMGX510::IMU3DMGX510(string portName, int new_freq) : port(portName)
+{
+
+    port.SetBaudRate(115200);
+
     //3DMGX10 device will be calibrated once port where it has been connected to has been correctly opened thanks to SerialComm constructor.
     estimador.setMagCalib(0.0, 0.0, 0.0); //Device 3DMGX10 has no magnetometer
     estimador.setGyroBias(bx,by,bz); //Setting of gyro bias
-    estimador.setPIGains(Kp, Ti, KpQuick, TiQuick); //Setting of device gains
+//    estimador.setPIGains(Kp, Ti, KpQuick, TiQuick); //Setting of device gains
+//    estimador.setAccMethod(estimador.ME_FUSED_YAW);        // Optional: Use if you wish to experiment with varying acc-only resolution methods
+//    set_reset();
+
+
+//    //Calibration
+    set_IDLEmode();
+
+    Ping();
+
+    set_freq(new_freq);
+    set_devicetogetgyroacc();
+    set_streamon();
+    cout << "Calibrating IMU..." << endl;
+    calibrate();
+
+    //Once the device is correctly connected, it's set to IDLE mode to stop transmitting data till user requests it
+    set_IDLEmode();
+
+    double initPitch,initiRoll;
+    for (int i = 0; i < 200; ++i) {
+        GetPitchRoll(initPitch,initiRoll);
+    }
+
+    cout << "Calibration done" << endl;
+
 }
 
 // -----------------------------------------------------------------------
@@ -18,7 +49,7 @@ bool IMU3DMGX510::check() {
     bool check;
     port.WriteLine(idle);
     do{
-    check = port.CheckLine(respuestacorrectaidle,idle);
+    check = port.CheckLine(ok_idle,idle);
     }while (check==false);
     return check;
 }
@@ -29,10 +60,11 @@ bool IMU3DMGX510::set_freq(int frequency){
     return true;
 }
 
-bool IMU3DMGX510::calibrate(){
+long IMU3DMGX510::calibrate(){
 
     //We will obtain initial offset to correct it the moment we make measures
     string answer, str, str1, str2, str3, str4, str5;
+    string line;
     char c;
     char longitud;
     char descriptor;
@@ -40,7 +72,8 @@ bool IMU3DMGX510::calibrate(){
     double pitch=0.0;
     ulf accx,accy,accz,gyrox,gyroy,gyroz;
 
-    for (int h=0; h<=500;h++){
+    for (int h=0; h<=CAL_LOOPS;h++)
+    {
 
         //Reset of the variables to avoid infinite loops.
         answer.clear();
@@ -61,6 +94,11 @@ bool IMU3DMGX510::calibrate(){
         c = '0';
         longitud = '0';
         descriptor = '0';
+
+        line = port.GetLine();
+
+//        cout << line << endl;
+
 
         do{
             c = port.GetChar();
@@ -139,119 +177,178 @@ bool IMU3DMGX510::calibrate(){
             }
         }
     }
-    rolloffset = rolloffset / 350;
-    pitchoffset = pitchoffset / 350;
+//    rolloffset = rolloffset / 350;
+//    pitchoffset = pitchoffset / 350;
 
-//    rolloffset=rolloffset*180/M_PI;
-//    pitchoffset=pitchoffset*180/M_PI;
-    cout << "Initial offsets: \n" << "Roll = " << rolloffset << "\n" << "Pitch = " << pitchoffset << endl;
-    return true;
+////    rolloffset=rolloffset*180/M_PI;
+////    pitchoffset=pitchoffset*180/M_PI;
+//    cout << "Initial offsets: \n" << "Roll = " << rolloffset << "\n" << "Pitch = " << pitchoffset << endl;
+    return 0;
 }
 
 // -----------------------------------------------------------------------
 
 // -------------------------  Configuration  -----------------------------
 
-bool IMU3DMGX510::set_IDLEmode() {
-    bool comprobacion;
+long IMU3DMGX510::Ping()
+{
+
+    port.WriteLine(ping);
+    usleep(T_WAIT);
+//    ShowCode(port.GetChars(10));
+    return ReadACK(ok_ping);
+
+}
+
+long IMU3DMGX510::set_IDLEmode()
+{
+
     //We send data to set 3DMGX10 to IDLE mode
-    port.WriteLine(idle);
+
+
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    //Included loop to restart the process if it's frozen. It happens sometimes 1st time imu is active
-    do{
-    comprobacion = port.CheckLine(respuestacorrectaidle,idle);
-    }while (comprobacion==false);
-    return comprobacion;
+//    for (int t=0; t<T_OUT; t+=T_WAIT)
+//    {
+        port.WriteLine(idle);
+        usleep(T_WAIT);
+        return FindPortLine(ok_idle,portResponse);
+//        ShowCode(portResponse);
+//        return ReadACK(ok_idle);
+//        GetPortLine(portResponse);
+
+//        usleep(T_WAIT);
+//        cout << port.GetLine();
+
+//        if (ReadACK(ok_idle)==0) break;
+//    }
+
+
+//    do{
+//    comprobacion = port.CheckLine(respuestacorrectaidle,idle);
+//    }while (comprobacion==false);
+
+//    return 0;
 }
 
-bool IMU3DMGX510::set_streamon(){
+long IMU3DMGX510::set_streamon()
+{
     //We activate data stream
-        port.WriteLine(streamon);
-        //3DMGX10 will answer back a message showing if any error appeared in the process
-        //We must read it
-        bool comprobacion = port.CheckLine(respuestacorrectastreamonoff,streamon);
-        if (comprobacion == 1){
-//            cout << "Envio y respuesta correctos" << endl;
-        }
-    return comprobacion;
+    port.WriteLine(streamon);
+    //3DMGX10 will answer back a message showing if any error appeared in the process
+    //We must read it
+    usleep(T_WAIT);
+    return FindPortLine(ok_streamon,portResponse);
+
+//    return ReadACK(ok_streamon);
+//        comprobacion = port.CheckLine(ok_streamon,streamon);
+//        if (comprobacion != 0){
+//            cout << "set_streamon. Envio o respuesta incorrectos" << endl;
+//        }
+//    return comprobacion;
 }
 
-bool IMU3DMGX510::set_streamoff(){
-    //We activate data stream
+long IMU3DMGX510::set_streamoff(){
+    //We deactivate data stream
     port.WriteLine(streamoff);
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectastreamonoff,streamoff);
-    if (comprobacion == 1){
-        //            cout << "Envio y respuesta correctos" << endl;
-    }
-    return comprobacion;
+    usleep(T_WAIT);
+    return FindPortLine(ok_streamon,portResponse);
+
+//    return ReadACK(ok_streamon);
+
+//    bool comprobacion = port.CheckLine(ok_streamon,streamoff);
+//    if (comprobacion != 0){
+//                    cout << "set_streamoff. Envio o respuesta incorrectos" << endl;
+//    }
+//    return comprobacion;
 }
 
-bool IMU3DMGX510::set_reset(){
-    //We activate data stream
-    port.WriteLine(reset);
+long IMU3DMGX510::set_reset(){
+    //We reset IMU
+//    port.WriteLine(reset);
     //3DMGX10 will answer back a message showing if any error appeared in the process
     //We must read it
-    bool comprobacion = port.CheckLine(respuestacorrectareset,reset);
-    if (comprobacion == 1){
-        //            cout << "Envio y respuesta correctos" << endl;
+    if (port.WriteLine(reset) == 0)
+    {
+        cout << "Not responding. No data" << endl;
+        return -1;
     }
-    return comprobacion;
+
+    for (int t=0; t<T_OUT; t+=T_WAIT)
+    {
+
+        usleep(T_WAIT);
+
+        cout << "loop" << t << endl;
+        if (ReadACK(ok_reset)==0) break;
+    }
+//    usleep(T_WAIT);
+//    GetPortLine(portResponse);
+//    ReadACK(ok_reset);
+//    bool comprobacion = port.CheckLine(respuestacorrectareset,reset);
+//    if (comprobacion != 0){
+//                    cout << "set_reset. Envio o respuesta incorrectos" << endl;
+//    }
+    return 0;
 }
 
-bool IMU3DMGX510::set_devicetogetgyroacc(){
+long IMU3DMGX510::set_devicetogetgyroacc(){
     //We will prepare our device to get gyros and accs values
     //Freq will be introduced by user (1Hz or 100Hz atm)
-    bool comprobacion;
     if(freq==1){
         port.WriteLine(gyracc1);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc1);
+        comprobacion = port.CheckLine(setok,gyracc1);
     }else if (freq == 50){
         port.WriteLine(gyracc50);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc50);
+        comprobacion = port.CheckLine(setok,gyracc50);
     }else if (freq == 100){
         port.WriteLine(gyracc100);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc100);
+        comprobacion = port.CheckLine(setok,gyracc100);
     }else if (freq == 500){
         port.WriteLine(gyracc500);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc500);
+        comprobacion = port.CheckLine(setok,gyracc500);
     }else if (freq == 1000){
         port.WriteLine(gyracc1000);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc1000);
+        comprobacion = port.CheckLine(setok,gyracc1000);
     }else{
         port.WriteLine(gyracc100);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,gyracc100);
+        comprobacion = port.CheckLine(setok,gyracc100);
     }
+    usleep(T_WAIT);
 
-    if (comprobacion == 1){
-        //        cout << "Envio y respuesta correctos" << endl;
-    }
-    return comprobacion;
+    return ReadACK(setok);
+
+//    if (comprobacion != 0){
+
+//        cout << "set_devicetogetgyroacc. Envio o respuesta incorrectos" << endl;
+//        ShowCode(gyracc100);
+//        ShowCode(setok);
+//    }
+//    return comprobacion;
 }
 
-bool IMU3DMGX510::set_devicetogetgyro(){
+long IMU3DMGX510::set_devicetogetgyro(){
     //We will prepare our device to get gyros and accs values
     //Freq will be introduced by user (1Hz or 100Hz atm)
-    bool comprobacion;
     if (freq==1){
         port.WriteLine(imudata1);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata1);
+        comprobacion = port.CheckLine(setok,imudata1);
     }else if (freq==100){
         port.WriteLine(imudata100);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata100);
+        comprobacion = port.CheckLine(setok,imudata100);
     }else if (freq==1000){
         port.WriteLine(imudata1000);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata1000);
+        comprobacion = port.CheckLine(setok,imudata1000);
                     printf(">>>1000 \n");
     }else{
         port.WriteLine(imudata100);
-        comprobacion = port.CheckLine(respuestacorrectaajustes,imudata100);
+        comprobacion = port.CheckLine(setok,imudata100);
     }
 
-    if (comprobacion == 1){
-        cout << "Envio y respuesta correctos" << endl;
+    if (comprobacion != 0){
+        cout << "set_devicetogetgyro. Envio o respuesta incorrectos" << endl;
     }
     return comprobacion;
 }
@@ -300,6 +397,8 @@ std::tuple <float, float, float> IMU3DMGX510::get_gyroPolling() {
 
     return std::make_tuple(gyroxvalue, gyroyvalue, gyrozvalue);
 }
+
+
 double* IMU3DMGX510::get_euleranglesPolling() {
 
     string reading;
@@ -308,7 +407,6 @@ double* IMU3DMGX510::get_euleranglesPolling() {
     char c;
     int comp=0;
     int fin=0;
-    int firsttime;
 
     //First time needs a mayor number of samples in order to get calibrated
     //After it, there is no need of taking such number of samples
@@ -489,6 +587,82 @@ double* IMU3DMGX510::get_euleranglesPolling() {
     estimation[0]=estimador.eulerRoll();
     estimation[1]=estimador.eulerPitch();
     return estimation;
+}
+
+long IMU3DMGX510::GetPitchRoll(double &pitch, double &roll)
+{
+    port.WriteLine(polling);
+    portResponse.clear();
+
+    //Really bad hardcoded time wait!!
+    //TODO: Compute the wait time correctly!!
+    usleep(10*1000); //10 milliseconds
+
+    FindPortLine(poll_data,portResponse);
+//    ShowCode(portResponse);
+
+    string reading = portResponse;
+    if (reading.size() < 32) return -1;
+
+    ulf accx;
+    std::string str =hex(reading.substr(6,4));
+    std::stringstream ss(str);
+    ss >> std::hex >> accx.ul;
+    double ax = accx.f;
+
+    ulf accy;
+    std::string str1 =hex(reading.substr(10,4));
+    std::stringstream ss1(str1);
+    ss1 >> std::hex >> accy.ul;
+    double ay = accy.f;
+
+    ulf accz;
+    std::string str2 =hex(reading.substr(14,4));
+    std::stringstream ss2(str2);
+    ss2 >> std::hex >> accz.ul;
+    double az = accz.f;
+
+    ulf gyrox;
+    std::string str3 =hex(reading.substr(20,4));
+    std::stringstream ss3(str3);
+    ss3 >> std::hex >> gyrox.ul;
+    double gx = gyrox.f;
+
+    ulf gyroy;
+    std::string str4 =hex(reading.substr(24,4));
+    std::stringstream ss4(str4);
+    ss4 >> std::hex >> gyroy.ul;
+    double gy = gyroy.f;
+
+    ulf gyroz;
+    std::string str5 =hex(reading.substr(28,4));
+    std::stringstream ss5(str5);
+    ss5>> std::hex >> gyroz.ul;
+    double gz = gyroz.f;
+
+    if (isnan(ax*ay*az*gx*gy*gz))
+    {
+        cout << ax*ay*az*gx*gy*gz << endl;
+        return -1;
+    }
+
+    {
+        //accelerations x and y need -9.81???!!!!
+    estimador.update(period,0.01*(gx-0.5*gy),0.01*(gy-0.5*gx),0.01*gz,ax,ay,az,0,0,0);
+//    pitch = estimador.eulerPitch();
+//    roll = estimador.eulerRoll();
+    pitch = estimador.fusedPitch();
+    roll = estimador.fusedRoll();
+//    pitch = gx;
+//    roll = gy;
+    }
+
+//    cout << "Values: "  << period << "," << gx << "," <<  gy<< "," << gz<< "," << ax<< "," << ay<< "," << az<< "," << endl;
+
+
+
+
+    return 0;
 }
 
 std::tuple <double*,double*,double*> IMU3DMGX510::get_gyroStreaming(int samples){
@@ -821,9 +995,11 @@ double* IMU3DMGX510::EulerAngles() {
         ss5>> std::hex >> gyroz.ul;
         f5 = gyroz.f;
 
-        estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
-        EulerAngles[0]=estimador.eulerRoll() - rolloffset; //rads
-        EulerAngles[1]=estimador.eulerPitch() - pitchoffset; //rads
+        estimador.update(period,f3,f4,f5,f*-9.81,f1*-9.81,f2*-9.81,0,0,0);
+//        EulerAngles[0]=estimador.eulerRoll() - rolloffset; //rads
+//        EulerAngles[1]=estimador.eulerPitch() - pitchoffset; //rads
+        EulerAngles[0]=estimador.fusedRoll() - rolloffset; //rads
+        EulerAngles[1]=estimador.fusedPitch() - pitchoffset; //rads
 
         EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
         EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
@@ -912,7 +1088,127 @@ double* IMU3DMGX510::GyroData(){
         GyrosData[2] = f;
     }
 
-return GyrosData;
+    return GyrosData;
 }
+
+long IMU3DMGX510::ReadACK(string expected)
+{
+
+    portResponse.clear();
+
+    //        portResponse = port.ReadUntil('u');
+
+    GetPortLine(portResponse);
+    //Checksums TODO: error handlng using checksums
+    //Checksums are allways the last two bytes
+    //        portResponse.pop_back();
+    //        portResponse.pop_back();
+
+    if (portResponse.compare(expected)!=0)
+    {
+        cout << "Retry, Waiting for: ";
+        ShowCode(expected);
+//        cout << "Not found, instead: ";
+//        ShowCode(portResponse);
+
+        cout << endl;
+
+        return -1;
+
+    }
+
+    //        cout << "Found: " << endl;
+    //        ShowCode(portResponse);
+
+    return 0;
+}
+
+
+
+long IMU3DMGX510::GetPortLine(string & portLine)
+{
+//    cout << "GetPortLine Start " << endl;
+
+
+    ulong readLineSize=0, delimiterPos = 0;
+//    char check;
+
+    delimiterPos = port.ReadAndFind("ue", portLine);
+
+//    ShowCode(portLine);
+
+//    The size of a comm line is formed by 4 header, payload, and 2 checksum bytes
+    readLineSize = 4 + (uint)portLine[delimiterPos+2] + 2;
+    portLine = portLine.substr(delimiterPos-2,readLineSize);
+
+//    portLine = "ue";
+//    portLine += port.GetChars(2);
+
+//    descriptor = (uint)portLine[2];
+//    payload = (uint)portLine[3];
+
+//    cout << "Payload: " << (uint)payload << endl;
+
+//    portLine = string("ue");
+//    portLine += descriptor;
+//    portLine += payload;
+//    ShowCode(portLine);
+
+//    portLine += port.GetChars(payload);
+
+//    ShowCode(portLine);
+//    cout << "GetPortLine End " << endl;
+
+    return readLineSize;
+}
+
+///
+/// \brief IMU3DMGX510::FindPortLine: Find a specific string in a port.
+/// This function bloks until the string is read!!!
+/// \param findText: The string to find.
+/// \param wholeLine: The whole port line read.
+/// \return
+///
+long IMU3DMGX510::FindPortLine(string findText, string &wholeLine)
+{
+
+    ulong readLineSize=0, delimiterPos = 0, initPos = 0;
+    ulong delimSize=findText.size();
+
+    delimiterPos = port.ReadAndFind(findText, wholeLine);
+//    cout << "delimiterPos  " << delimiterPos << endl;
+
+    initPos = delimiterPos - delimSize;
+
+    readLineSize = delimiterPos + (uint)wholeLine[initPos +3] + 2;
+//    cout << "initPos  " << initPos << endl;
+//    printf("wholeLine[initPos +3] :%02hhx\n",wholeLine[initPos +3]);
+//    cout << "readLineSize  " << readLineSize << endl;
+
+//    ShowCode(wholeLine);
+
+//    The size of a comm line is formed by delimiter, payload, and 2 checksum bytes
+//    readLineSize = 4 + (uint)wholeLine[delimiterPos+2] + 2;
+    wholeLine = wholeLine.substr(initPos,readLineSize);
+
+    //TODO: Do timeout and return error when no string found!!
+//    if (delimiterPos == wholeLine.size()) return -1;
+    return 0;
+}
+
+long IMU3DMGX510::ShowCode(string showString)
+{
+    cout << "chars(" << showString.size() <<  ") :";
+    for(uint i=0;i<showString.size();i++)
+    {
+        printf("%02hhx,",showString[i]);
+//            cout << int(showString[i]) << ",";
+    }
+    cout << endl;
+
+    return 0;
+
+}
+
 
 // -----------------------------------------------------------------------
