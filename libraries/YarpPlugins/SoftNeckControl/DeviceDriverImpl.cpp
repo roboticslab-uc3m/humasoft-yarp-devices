@@ -110,7 +110,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     }
 
     // Old Serial IMU
-    if (config.check("SparkfunIMU", "remote serial port"))
+    if (config.check("ImuSparkfun", "remote serial port"))
     {
         std::string remoteSerial = config.find("ImuSparkfun").asString();
 
@@ -132,7 +132,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     }
 
     // New Yarp Sensor
-    if (config.check("3DMGX510IMU", "remote yarp port of IMU sensor")){
+    if (config.check("Imu3DMGX510", "remote yarp port of IMU sensor")){
         std::string remoteSerial = config.find("Imu3DMGX510").asString();
 
         if (!serialPort.open(prefix + "/imu:i"))
