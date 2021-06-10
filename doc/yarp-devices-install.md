@@ -43,7 +43,7 @@ sudo apt-get install libqt5serialport5-dev
 sudo apt remove 'libboost.*-dev' # to remove old versions
 sudo add-apt-repository ppa:mhier/libboost-latest # to install last version (1.68)
 sudo apt update
-sudo sudo apt install libboost1.68-dev
+sudo sudo apt install libboost1.73-dev
 ```
 
 
