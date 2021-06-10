@@ -48,7 +48,7 @@ launchCanBus --from softNeck.ini
   - With **Sparkfun IMU** sensor:
       * Terminal 1: closed loop Coupled Control module using Sparkfun IMU (inclination-orientation)
       ```bash
-      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --SparkfunIMU /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled
       ```
       * Terminal 1: closed loop Uncoupled Control module using Sparkfun IMU (inclination-orientation)
       ```bash
