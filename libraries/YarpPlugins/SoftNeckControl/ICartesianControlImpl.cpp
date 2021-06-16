@@ -4,7 +4,7 @@
 
 #include <yarp/os/Time.h>
 #include <yarp/os/Vocab.h>
-
+#include <math.h>
 #include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
@@ -108,14 +108,22 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     }
     else
     {
-        printf("--> %f %f %f %f %f %f\n", xd[0],xd[1],xd[2],xd[3],xd[4],xd[5]);
         if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES)) // con IMU
         {
             CD_ERROR("decodePose failed.\n");
             return false;
         }
 
-        if(controlType!="prUncoupled"){
+        // equations to solve the transformation: inclnation-orientation -> roll-pitch
+        if(controlType == "rpUncoupled"){
+            double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
+            double roll = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
+            targetPose[0] = roll;
+            targetPose[1] = pitch;
+        }
+
+        else
+        {
             if(targetPose[1]<0.0) targetPose[1]+= 360;
         }
 
