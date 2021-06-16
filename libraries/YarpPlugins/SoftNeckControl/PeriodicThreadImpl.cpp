@@ -257,10 +257,6 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
         iPositionControl->stop();
     }
 
-    //IMU gives us roll in x_imu[0] and pitch in x_imu[1]
-    //In order to match sign criterion of IMU and SoftNeck, sign of pitch needs to be changed
-    x_imu[1] = - x_imu[1];
-
     rollError = targetPose[0] - x_imu[0];
     pitchError = targetPose[1] - x_imu[1];
 
