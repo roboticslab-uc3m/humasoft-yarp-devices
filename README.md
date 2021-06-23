@@ -18,5 +18,6 @@ Programs to test the control and obtain system results:
 
 ## Other information:
 
+* See a graphical simulation using [Humasoft Blender Models](https://github.com/HUMASoft/humasoft-blender-models).
 * How to create [Dynamic Charts with Jupyter Notebook](https://github.com/HUMASoft/yarp-devices/blob/develop/doc/graphics-guide.md) and publish them.
 * Repository to store [data and results](https://github.com/HUMASoft/Data-and-Results).
