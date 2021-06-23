@@ -48,11 +48,11 @@ launchCanBus --from softNeck.ini
   - With **Sparkfun IMU** sensor:
       * Terminal 1: closed loop Coupled Control module using Sparkfun IMU (inclination-orientation)
       ```bash
-      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled --cmcPeriod 0.02
       ```
       * Terminal 1: closed loop Uncoupled Control module using Sparkfun IMU (inclination-orientation)
       ```bash
-      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioUncoupled
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioUncoupled --cmcPeriod 0.02
       ```
       * Terminal 2: to send commands to coupled or uncoupled control module using Sparkfun IMU (inclination-orientation)
       ```bash
@@ -63,12 +63,12 @@ launchCanBus --from softNeck.ini
   - With **3DMGX510 IMU** sensor:    
       * Terminal 1: closed loop Uncoupled Control module using 3DMGX510 IMU (roll-pitch)
       ```bash
-      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Imu3DMGX510 /softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Imu3DMGX510 /softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled --cmcPeriod 0.02
       ```    
       * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (roll-pitch)
       ```bash
       yarp rpc /SoftNeckControl/rpc_transform:s
       > stat        # to know the current IMU position (roll pitch)
-      > movj 20 10  # to move it in 20º roll and 10º pitch 
+      > movj 20 10  # to move it in 20º inclination and 10º orientation 
       ```
       * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
