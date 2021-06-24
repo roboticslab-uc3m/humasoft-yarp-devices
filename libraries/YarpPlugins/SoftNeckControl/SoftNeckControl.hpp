@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <vector>
+#include <chrono>
 
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
@@ -19,6 +20,8 @@
 #include <yarp/dev/ITorqueControl.h>
 #include <yarp/dev/IPositionDirect.h>
 #include <yarp/dev/PolyDriver.h>
+#include <math.h>
+
 
 #include <yarp/conf/version.h>
 #if YARP_VERSION_MINOR >= 3
@@ -35,7 +38,7 @@
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
 #define DEFAULT_CONTROL_TYPE "docked" //docked (acoplado), undocked (desacoplado)
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
-#define DEFAULT_CMC_PERIOD 0.02 // seconds
+#define DEFAULT_CMC_PERIOD 0.02 // seconds  // tiempo de lectura del sensor (periodo hilo)
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
 
 #define DEFAULT_GEOM_A 0.052 // meters
@@ -68,12 +71,12 @@ namespace humasoft
  * @ingroup SoftNeckControl
  * @brief Responds to streaming serial bottles.
  */
-class SerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+class IMUSerialStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
 public:
 
-    SerialStreamResponder(double timeout);
-    ~SerialStreamResponder();
+    IMUSerialStreamResponder(double timeout);
+    ~IMUSerialStreamResponder();
     void onRead(yarp::os::Bottle & b);
     bool getLastData(std::vector<double> & x);
 
@@ -90,6 +93,30 @@ private:
     SystemBlock * azimuthFilterSensor;
 };
 
+
+/**
+ * @ingroup SoftNeckControl
+ * @brief Responds to streaming data bottles of 3DMGX510 sensor
+ */
+class IMU3DMGX510StreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+{
+public:
+
+    IMU3DMGX510StreamResponder(double timeout);
+    ~IMU3DMGX510StreamResponder();
+    void onRead(yarp::os::Bottle & b);
+    bool getLastData(std::vector<double> & v);
+
+private:
+
+    const double timeout;
+    double localArrivalTime;
+    std::vector<double> x;
+    mutable std::mutex mutex;
+    SystemBlock * polarFilterSensor;
+    SystemBlock * azimuthFilterSensor;
+};
+
 /**
  * @ingroup SoftNeckControl
  * @brief The SoftNeckControl class implements ICartesianControl.
@@ -97,6 +124,7 @@ private:
 class SoftNeckControl : public yarp::dev::DeviceDriver,
                         public roboticslab::ICartesianControl,
                         public yarp::os::PeriodicThread
+
 {
 public:
 
@@ -106,6 +134,7 @@ public:
                         iPositionControl(0),
                         iPositionDirect(0),
                         serialStreamResponder(0),
+                        immu3dmgx510StreamResponder(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),
@@ -169,8 +198,9 @@ private:
     bool sendTargets(const std::vector<double> & xd);
 
     void handleMovjOpenLoop();
-    void handleMovjClosedLoopDocked();
-    void handleMovjClosedLoopUndocked();
+    void handleMovjClosedLoopIOCoupled();
+    void handleMovjClosedLoopIOUncoupled();
+    void handleMovjClosedLoopRPUncoupled();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -181,7 +211,8 @@ private:
     yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
-    SerialStreamResponder * serialStreamResponder;
+    IMUSerialStreamResponder * serialStreamResponder;
+    IMU3DMGX510StreamResponder* immu3dmgx510StreamResponder;
 
     string controlType;
     int currentState;
@@ -208,11 +239,23 @@ private:
 
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
+    FPDBlock * controllerRollFracc;
+    FPDBlock * controllerPitchFracc;
+
+    char sensorType;
 
     PIDBlock  *incon;
     PIDBlock  *orcon;
 
     std::vector<double> targetPose;
+
+    //In order to analyze obtained data
+    //ofstream testingFile;
+    int numtime;
+    time_t timer;
+
+    chrono::system_clock::time_point tprev;
+    chrono::system_clock::time_point tnow;
 
     mutable std::mutex stateMutex;
 };

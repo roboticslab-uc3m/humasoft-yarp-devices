@@ -1,10 +1,10 @@
-// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
+﻿// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 #include "SoftNeckControl.hpp"
 
 #include <yarp/os/Time.h>
 #include <yarp/os/Vocab.h>
-
+#include <math.h>
 #include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
@@ -23,11 +23,19 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
     if (!serialPort.isClosed())
     {
         std::vector<double> x_imu;
-
-        if (!serialStreamResponder->getLastData(x_imu))
-        {
-            CD_ERROR("Serial stream timed out.\n");
-            return false;
+        switch (sensorType) {
+            case '0':
+                if (!serialStreamResponder->getLastData(x_imu))
+                {
+                    CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
+                }
+            break;
+            case '1':
+                if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+                {
+                    CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
+                }
+            break;
         }
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
@@ -35,7 +43,6 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             CD_ERROR("encodePose failed.\n");
             return false;
         }
-
         *state = getCurrentState();
         *timestamp = yarp::os::Time::now();
         return true;
@@ -65,7 +72,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
 bool SoftNeckControl::movj(const std::vector<double> & xd)
 {
-    if(controlType=="docked")
+    if(controlType=="ioCoupled")
     {
         if (!setControlModes(VOCAB_CM_POSITION))
         {
@@ -73,11 +80,19 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
     }
-    else if(controlType=="undocked")
+    else if(controlType=="ioUncoupled")
     {
         if (!setControlModes(VOCAB_CM_VELOCITY))
         {
             CD_ERROR("Unable to set velocity mode.\n");
+            return false;
+        }
+    }
+    else if(controlType=="rpUncoupled")
+    {
+        if (!setControlModes(VOCAB_CM_POSITION))
+        {
+            CD_ERROR("Unable to set position mode.\n");
             return false;
         }
     }
@@ -99,9 +114,20 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
 
-        if(targetPose[1]<0.0) targetPose[1]+= 360;
-    }
+        // equations to solve the transformation: inclnation-orientation -> roll-pitch
+        if(controlType == "rpUncoupled"){
+            double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
+            double roll = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
+            targetPose[0] = roll;
+            targetPose[1] = pitch;
+        }
 
+        else
+        {
+            if(targetPose[1]<0.0) targetPose[1]+= 360;
+        }
+
+    }
     cmcSuccess = true;
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
     return true;

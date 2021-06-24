@@ -1,0 +1,3 @@
+[submodule "libraries/YarpPlugins/sensor-integration"]
+	path = libraries/YarpPlugins/sensor-integration
+	url = https://github.com/HUMASoft/sensor-integration.git

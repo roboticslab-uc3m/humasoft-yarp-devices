@@ -22,8 +22,7 @@ Space Navegator:
 - [Drivers](https://www.3dconnexion.es/service/drivers.html)
 
 
-### Install Additional Libraires: ACE
-
+## Install Additional Libraries for MPU9250 sensor:
 In order for YARP to recognize the serial port of the Arduino, we need to:
 
 Install ACE library
@@ -38,6 +37,15 @@ cmake .. -DENABLE_yarpmod_serialport=ON
 make -j$(nproc) # Compile
 sudo make install && sudo ldconfig && cd # Install and go home
 ```
+## Install Additional Libraries for 3DMGX510 sensor:
+```bash
+sudo apt-get install libqt5serialport5-dev
+sudo apt remove 'libboost.*-dev' # to remove old versions
+sudo add-apt-repository ppa:mhier/libboost-latest # to install last version (1.68)
+sudo apt update
+sudo sudo apt install libboost1.73-dev
+```
+
 
 ### Install yarp-devices on Ubuntu (working on all tested versions)
 
@@ -52,5 +60,7 @@ make -j$(nproc) # Compile
 sudo make install  # Install :-)
 cp ../scripts/gnome/yarp-devices.desktop $HOME/Desktop/
 ```
+In order to get resourcefinder to locate those robot-specific directories, the environment variable `YARP_ROBOT_NAME` should be set accordingly.
+Add the line `YARP_ROBOT_NAME=teoSoftNeck` to `/etc/environment` or `.bashrc`
 
 For additional options use `ccmake` instead of `cmake`.

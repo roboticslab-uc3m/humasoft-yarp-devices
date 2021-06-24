@@ -7,6 +7,9 @@
 #include <KinematicRepresentation.hpp>
 #include <ColorDebug.h>
 
+//In order to clasify the system, we are using fstream library
+#include <fstream>
+
 using namespace humasoft;
 using namespace roboticslab::KinRepresentation;
 
@@ -17,13 +20,18 @@ void SoftNeckControl::run()
     switch (getCurrentState())
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
-        if(controlType=="docked"){
-            CD_INFO_NO_HEADER("Arrancando control acoplado\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopDocked() : handleMovjOpenLoop();
+        if(controlType=="ioCoupled"){
+            CD_INFO_NO_HEADER("Starting Inclination Orientation Coupled Contro\n");
+            !serialPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
         }
-        else if(controlType=="undocked"){
-            CD_INFO_NO_HEADER("Arrancando control desacoplado\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopUndocked() : handleMovjOpenLoop();
+        else if(controlType=="ioUncoupled"){
+            CD_INFO_NO_HEADER("Starting Inclination Orientation Uncoupled Control\n");
+            !serialPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
+        }
+        else if(controlType=="rpUncoupled"){
+            CD_INFO_NO_HEADER("Starting Roll Pitch Uncoupled Control\n");
+
+            !serialPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
         else CD_ERROR("Control mode not defined\n");                
         break;
@@ -37,6 +45,7 @@ void SoftNeckControl::run()
 void SoftNeckControl::handleMovjOpenLoop()
 {
     bool done;
+    cout << "Bucle abierto" << endl;
 
     if (!iPositionControl->checkMotionDone(&done))
     {
@@ -59,7 +68,7 @@ void SoftNeckControl::handleMovjOpenLoop()
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::handleMovjClosedLoopDocked()
+void SoftNeckControl::handleMovjClosedLoopIOCoupled()
 {
     std::vector<double> x_imu;
     double polarError,
@@ -68,9 +77,17 @@ void SoftNeckControl::handleMovjClosedLoopDocked()
            azimuthCs
            = 0.0;
 
-    if (!serialStreamResponder->getLastData(x_imu))
-    {
-        CD_WARNING("Outdated serial stream data.\n");
+    switch (sensorType) {
+        case '0':
+            if (!serialStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
+            } break;
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
+            } break;
     }
 
     std::vector<double> xd = targetPose;   
@@ -129,7 +146,7 @@ void SoftNeckControl::handleMovjClosedLoopDocked()
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::handleMovjClosedLoopUndocked()
+void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
 {
     std::vector<double> x_imu;
     double polarError,
@@ -145,10 +162,19 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     int area_c, area_d = 0; // currect area, destination area (area_p = area actual)
     cs.resize(3);
 
-    if (!serialStreamResponder->getLastData(x_imu))
-    {
-        CD_WARNING("Outdated serial stream data.\n");
-        iVelocityControl->stop();
+    switch (sensorType) {
+        case '0':
+            if (!serialStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated serial stream data.\n");
+                iVelocityControl->stop();
+            } break;
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                iVelocityControl->stop();
+            } break;
     }
 
     std::vector<double> xd = targetPose;
@@ -211,4 +237,79 @@ void SoftNeckControl::handleMovjClosedLoopUndocked()
     {
         //CD_ERROR("velocityMove failed.\n");
     }
+}
+
+void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
+
+    double rollError,
+            pitchError,
+            rollCs,
+            pitchCs
+            = 0.0;
+
+    std::vector<double> x_imu;
+    std::vector<double> xd(2);
+    //std::vector<double> xd = targetPose;
+
+    if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+    {
+        CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+        iPositionControl->stop();
+    }
+
+    rollError = targetPose[0] - x_imu[0];
+    pitchError = targetPose[1] - x_imu[1];
+
+    //Control process
+    rollCs = controllerRollFracc->OutputUpdate(rollError);
+    if (!std::isnormal(rollCs))
+    {
+        rollCs = 0.0;
+    }
+    xd[0] = rollCs;
+
+    pitchCs = controllerPitchFracc->OutputUpdate(pitchError);
+    if (!std::isnormal(pitchCs))
+    {
+        pitchCs = 0.0;
+    }
+    xd[1] = pitchCs;
+
+    double p1 = 0.001*(xd[1] / 1.5);
+    double p2 = 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
+    double p3 = 0.001*( (xd[1] / -3) - (xd[0] / 1.732) );
+
+    if (p3<0){
+        p3=p3*0.5;
+    }
+    if (p2<0){
+        p2=p2*0.5;
+    }
+    if (p1<0){
+        p1=p1*0.5;
+    }
+
+
+    tprev = tnow;
+    tnow = std::chrono::system_clock::now();
+    chrono::nanoseconds elapsedNanoseconds = tprev.time_since_epoch()-tnow.time_since_epoch();
+
+    double totaltime = elapsedNanoseconds.count();
+
+    cout << "Total time: ms " << (totaltime/1000000) << endl;
+    cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
+    cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+    cout << "Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
+
+    std::vector<double> qd={p1,p2,p3};
+
+    if (!iPositionControl->positionMove(qd.data()))
+    {
+        CD_ERROR("positionMove failed.\n");
+    }
+
+    //Uncomment it to receive data from testing
+    //testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
+    numtime = numtime+1;
+
 }

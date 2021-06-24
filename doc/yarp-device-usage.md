@@ -44,23 +44,32 @@ launchCanBus --from softNeck.ini
     streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.1 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.01
     ```
     
-* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the  control loop    
-    * Terminal 1: closed loop docked control module
-    ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType docked
-    ```
-    * Terminal 1: closed loop undocked control module
-    ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --remoteSerial /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType undocked
-    ```
-    * Terminal 1: closed loop new-undocked control module using 3DMGX510 IMU
-    ```bash
-    yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /teo/softNeck --remoteNewImu /teo/softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType newUndocked
-    ```
-    * Terminal 2: to send commands
-    ```bash
-    yarp rpc /SoftNeckControl/rpc_transform:s
-    > stat        # to know the current IMU position 
-    > movj 20 10  # to move it in 20º inclination and 10º orientation 
-    ```
-    * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
+* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop  
+  - With **Sparkfun IMU** sensor:
+      * Terminal 1: closed loop Coupled Control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioCoupled --cmcPeriod 0.02
+      ```
+      * Terminal 1: closed loop Uncoupled Control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --ImuSparkfun /softimu --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType ioUncoupled --cmcPeriod 0.02
+      ```
+      * Terminal 2: to send commands to coupled or uncoupled control module using Sparkfun IMU (inclination-orientation)
+      ```bash
+      yarp rpc /SoftNeckControl/rpc_transform:s
+      > stat        # to know the current IMU position 
+      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      ```   
+  - With **3DMGX510 IMU** sensor:    
+      * Terminal 1: closed loop Uncoupled Control module using 3DMGX510 IMU (roll-pitch)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Imu3DMGX510 /softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled --cmcPeriod 0.02
+      ```    
+      * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (roll-pitch)
+      ```bash
+      yarp rpc /SoftNeckControl/rpc_transform:s
+      > stat        # to know the current IMU position (roll pitch)
+      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      ```
+      * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
+

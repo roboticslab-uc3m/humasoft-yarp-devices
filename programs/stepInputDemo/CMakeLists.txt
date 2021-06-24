@@ -10,11 +10,15 @@ find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
 # Set up our main executable.
 add_executable(stepInputDemo stepInputDemo.cpp)
 
+#INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES}) #Sensor-integration lib included
+
 target_link_libraries(stepInputDemo YARP::YARP_OS
                                         YARP::YARP_init
                                         YARP::YARP_dev
                                         ROBOTICSLAB::KinematicsDynamicsInterfaces
                                         ROBOTICSLAB::ColorDebug)
+
+#target_link_libraries(stepInputDemo SensorIntegration) #Sensor-integration lib included
 
 include(GNUInstallDirs)
 
