@@ -49,7 +49,7 @@ find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
 find_package(fcontrol REQUIRED)
 
 # SoftNeckIMU dependencies.
-add_subdirectory(libraries/YarpPlugins/SoftNeckSensors/sensor-integration) #KEY LINE
+add_subdirectory(libraries/YarpPlugins/SoftNeckImu/sensor-integration) #KEY LINE
 set(SUBDIR_INCLUDE_DIRECTORIES ${SUBDIR_INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(SUBDIR_LINK_NAMES ${SUBDIR_LINK_NAMES} ${PROJECT_NAME} PARENT_SCOPE)
 INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES})
@@ -89,7 +89,6 @@ include(CMakeDependentOption)
 # Add main contents.
 add_subdirectory(libraries)
 add_subdirectory(programs)
-#add_subdirectory(tests)
 add_subdirectory(share)
 add_subdirectory(doc)
 
