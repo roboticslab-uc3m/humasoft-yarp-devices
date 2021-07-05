@@ -158,6 +158,7 @@ public:
                         iPositionDirect(0),
                         serialStreamResponder(0),
                         immu3dmgx510StreamResponder(0),
+                        mocapStreamResponder(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),

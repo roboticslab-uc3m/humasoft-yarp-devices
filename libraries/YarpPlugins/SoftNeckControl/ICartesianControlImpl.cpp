@@ -36,6 +36,12 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
                     CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
                 }
             break;
+            case '2':
+                if (!mocapStreamResponder->getLastData(x_imu))
+                {
+                    CD_WARNING("Outdated Mocap stream data.\n");
+                }
+            break;
         }
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
