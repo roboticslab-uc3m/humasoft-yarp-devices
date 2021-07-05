@@ -1,9 +1,10 @@
 #include "mocapdevice.hpp"
 
 sFrameOfMocapData* MOCAPdevice::frame = NULL;	//static attribute frame is declared as Null
+std::vector< sNatNetDiscoveredServer > MOCAPdevice::g_discoveredServers;
 
 bool MOCAPdevice::setupMOCAP() {
-	
+
     // print version info
     unsigned char ver[4];
     NatNet_GetVersion(ver);
@@ -14,15 +15,20 @@ bool MOCAPdevice::setupMOCAP() {
 
     // create NatNet client
     g_pClient = new NatNetClient();
-	
-    yarpPort.open(nameyarpoutport+"/out");
-    printf("Yarp port: %s/out has been correctly opened", nameyarpoutport.c_str());
 
-    g_connectParams.connectionType = kDefaultConnectionType;
-	g_connectParams.serverAddress = serverIP.c_str();
-	
-	// set the frame callback handler
+    // set the frame callback handler
     g_pClient->SetFrameReceivedCallback(dataHandler, g_pClient);	// this function will receive data
+
+    yarpPort.open(nameyarpoutport+"/out");
+    printf("Yarp port: %s/out has been correctly opened\n", nameyarpoutport.c_str());
+
+    if (!serverIP.empty()) {
+        g_connectParams.connectionType = kDefaultConnectionType;
+        g_connectParams.serverAddress = serverIP.c_str();
+    }
+
+    else
+        scanForServers();
 
     int iResult;
 
@@ -31,18 +37,18 @@ bool MOCAPdevice::setupMOCAP() {
     if (iResult != ErrorCode_OK)
     {
         printf("Error initializing client.  See log for details.  Exiting");
-        return 1;
+        return iResult;
     }
     else
     {
         printf("Client initialized and ready.\n");
     }
-	
-	return 0;
+
+    return ErrorCode_OK;
 }
 
 void MOCAPdevice::testRequest(){
-	// Send/receive test request
+    // Send/receive test request
     void* response;
     int nBytes;
     int iResult;
@@ -58,7 +64,7 @@ void MOCAPdevice::getDataDescriptions() {
     // Retrieve Data Descriptions from Motive
     printf("\n\nRequesting Data Descriptions...");
     sDataDescriptions* pDataDefs = NULL;
-	int iResult;
+    int iResult;
     iResult = g_pClient->GetDataDescriptionList(&pDataDefs);
     if (iResult != ErrorCode_OK || pDataDefs == NULL)
     {
@@ -88,6 +94,9 @@ void MOCAPdevice::getDataDescriptions() {
                 printf("RigidBody Parent ID : %d\n", pRB->parentID);
                 printf("Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
 
+                if (sensoredRigidBodyID == -1)
+                    sensoredRigidBodyID = pRB->ID;
+
                 if (pRB->MarkerPositions != NULL && pRB->MarkerRequiredLabels != NULL)
                 {
                     for (int markerIdx = 0; markerIdx < pRB->nMarkers; ++markerIdx)
@@ -115,7 +124,7 @@ void MOCAPdevice::getDataDescriptions() {
 }
 
 int MOCAPdevice::connectClient() {
-	
+
     // Release previous server
     g_pClient->Disconnect();
     // Init Client and connect to NatNet server
@@ -145,7 +154,6 @@ int MOCAPdevice::connectClient() {
             g_serverDescription.HostAppVersion[1], g_serverDescription.HostAppVersion[2], g_serverDescription.HostAppVersion[3]);
         printf("NatNet Version: %d.%d.%d.%d\n", g_serverDescription.NatNetVersion[0], g_serverDescription.NatNetVersion[1],
             g_serverDescription.NatNetVersion[2], g_serverDescription.NatNetVersion[3]);
-        printf("Client IP:%s\n", g_connectParams.localAddress);
         printf("Server IP:%s\n", g_connectParams.serverAddress);
     }
 
@@ -167,71 +175,71 @@ void MOCAPdevice::resetClient() {
 }
 
 void MOCAPdevice::calibrate() {
-	
+
     unsigned int iSample = 0;
-	
+
     struct Quaternions quaternAngles = {};
     int32_t iFrame = 0;
 
     //Samples are taken
     do
-	{
-		if (MOCAPdevice::frame!= nullptr)
-		{
-			
+    {
+        if (MOCAPdevice::frame!= nullptr)
+        {
+
             sFrameOfMocapData* nowFrame = MOCAPdevice::frame;
             if (iFrame != nowFrame->iFrame)  //If a new frame is handled, then data sample is taken
-			{
+            {
                 for (int iBody = 0; iBody < nowFrame->nRigidBodies; iBody++)
-				{
+                {
                     if (nowFrame->RigidBodies[iBody].ID == sensoredRigidBodyID)
-					{
-						float progress = (iSample*100)/calibrNumSamples;
-						printf("\rSampling.....%.0f%%", progress);
+                    {
+                        float progress = (iSample*100)/calibrNumSamples;
+                        printf("\rSampling.....%.0f%%", progress);
                         quaternAngles.qw += nowFrame->RigidBodies[iBody].qw;
                         quaternAngles.qx += nowFrame->RigidBodies[iBody].qx;
                         quaternAngles.qy += nowFrame->RigidBodies[iBody].qy;
                         quaternAngles.qz += nowFrame->RigidBodies[iBody].qz;
-						iSample++;
+                        iSample++;
                         break;
-					}
-				}
-			}
+                    }
+                }
+            }
             iFrame = nowFrame->iFrame;
-		}
+        }
         else
             continue;
-	}
+    }
     while(iSample < calibrNumSamples);
-	
-	//Average of the samples taken is made
+
+    //Average of the samples taken is made
     quaternAngles.qw = quaternAngles.qw / calibrNumSamples;
     quaternAngles.qx = quaternAngles.qx / calibrNumSamples;
     quaternAngles.qy = quaternAngles.qy / calibrNumSamples;
     quaternAngles.qz = quaternAngles.qz / calibrNumSamples;
 
-	//Print quaternions taken for calibration
+    //Print quaternions taken for calibration
     printf("\n\tqx   \tqy   \tqz   \tqw\n");
     printf("\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
         quaternAngles.qx,
         quaternAngles.qy,
         quaternAngles.qz,
         quaternAngles.qw);
-	
-	//Building rotation matrix
+
+    //Building rotation matrix
     createRotMatrixQuaternion(quaternAngles);
-	
-	//Print rotation matrix
+
+    //Print rotation matrix
     for(int x=0;x<4;x++)
     {
         for(int y=0;y<4;y++)
         {
             printf("\t %3.2f", calibrRotMatrix[x][y]);
         }
-		printf("\n");
+        printf("\n");
     }
-	
-	printf("Calibration Done\n");
+
+    printf("Calibration Done\n");
 }
 
 void MOCAPdevice::createRotMatrixQuaternion(struct Quaternions qAngles) {
@@ -250,21 +258,21 @@ void MOCAPdevice::createRotMatrixQuaternion(struct Quaternions qAngles) {
 }
 
 float MOCAPdevice::get_frameRate(NatNetClient *g_pClient) {
-	void* pResult;
-	int nBytes = 0;
-	ErrorCode ret = ErrorCode_OK;
-	// get mocap frame rate
-	ret = g_pClient->SendMessageAndWait("FrameRate", &pResult, &nBytes);
-	if (ret == ErrorCode_OK)
-	{
-		float fRate = *((float*)pResult);
+    void* pResult;
+    int nBytes = 0;
+    ErrorCode ret = ErrorCode_OK;
+    // get mocap frame rate
+    ret = g_pClient->SendMessageAndWait("FrameRate", &pResult, &nBytes);
+    if (ret == ErrorCode_OK)
+    {
+        float fRate = *((float*)pResult);
         return fRate;
-	}
-	else
-	{
-		printf("Error getting frame rate.\n");
-		return -1;
-	}
+    }
+    else
+    {
+        printf("Error getting frame rate.\n");
+        return -1;
+    }
 }
 
 // MessageHandler receives NatNet error/debug messages
@@ -305,6 +313,93 @@ void NATNET_CALLCONV MOCAPdevice::dataHandler(sFrameOfMocapData* data, void* pUs
     MOCAPdevice::frame = data;
 }
 
+void NATNET_CALLCONV MOCAPdevice::serverDiscoveredCallback(const sNatNetDiscoveredServer* pDiscoveredServer, void* pUserContext) {
+    char serverHotkey = '.';
+    if (MOCAPdevice::g_discoveredServers.size() < 9)
+    {
+        serverHotkey = static_cast<char>('1' + MOCAPdevice::g_discoveredServers.size());
+    }
+
+    const char* warning = "";
+
+    if (pDiscoveredServer->serverDescription.bConnectionInfoValid == false)
+    {
+        warning = " (WARNING: Legacy server, could not autodetect settings. Auto-connect may not work reliably.)";
+    }
+
+    printf("[%c] %s %d.%d at %s%s\n",
+        serverHotkey,
+        pDiscoveredServer->serverDescription.szHostApp,
+        pDiscoveredServer->serverDescription.HostAppVersion[0],
+        pDiscoveredServer->serverDescription.HostAppVersion[1],
+        pDiscoveredServer->serverAddress,
+        warning);
+
+    MOCAPdevice::g_discoveredServers.push_back(*pDiscoveredServer);
+}
+
+void MOCAPdevice::scanForServers() {
+    // If no arguments were specified on the command line,
+    // attempt to discover servers on the local network.
+
+    // Do asynchronous server discovery.
+    printf("Looking for servers on the local network.\n");
+
+    NatNetDiscoveryHandle discovery;
+    char g_discoveredMulticastGroupAddr[kNatNetIpv4AddrStrLenMax] = NATNET_DEFAULT_MULTICAST_ADDRESS;
+    NatNet_CreateAsyncServerDiscovery(&discovery, serverDiscoveredCallback);
+
+    const size_t serverIndex = 0; // First server detected will be selected
+
+    //An initial wait is necessary until at least one server is found.
+    while(!(serverIndex < MOCAPdevice::g_discoveredServers.size())) {
+        printf("\rScanning");
+    }
+
+    if (serverIndex < MOCAPdevice::g_discoveredServers.size())
+    {
+
+        const sNatNetDiscoveredServer& discoveredServer = MOCAPdevice::g_discoveredServers[serverIndex];
+        if (discoveredServer.serverDescription.bConnectionInfoValid)
+        {
+            // Build the connection parameters.
+
+#ifdef _WIN32
+            _snprintf_s(
+#else
+            snprintf(
+#endif
+                g_discoveredMulticastGroupAddr, sizeof g_discoveredMulticastGroupAddr,
+                "%" PRIu8 ".%" PRIu8".%" PRIu8".%" PRIu8"",
+                discoveredServer.serverDescription.ConnectionMulticastAddress[0],
+                discoveredServer.serverDescription.ConnectionMulticastAddress[1],
+                discoveredServer.serverDescription.ConnectionMulticastAddress[2],
+                discoveredServer.serverDescription.ConnectionMulticastAddress[3]
+            );
+
+            g_connectParams.connectionType = discoveredServer.serverDescription.ConnectionMulticast ? ConnectionType_Multicast : ConnectionType_Unicast;
+            g_connectParams.serverCommandPort = discoveredServer.serverCommandPort;
+            g_connectParams.serverDataPort = discoveredServer.serverDescription.ConnectionDataPort;
+            g_connectParams.serverAddress = discoveredServer.serverAddress;
+            g_connectParams.localAddress = discoveredServer.localAddress;
+            g_connectParams.multicastAddress = g_discoveredMulticastGroupAddr;
+        }
+        else
+        {
+            // We're missing some info because it's a legacy server.
+            // Guess the defaults and make a best effort attempt to connect.
+            g_connectParams.connectionType = kDefaultConnectionType;
+            g_connectParams.serverCommandPort = discoveredServer.serverCommandPort;
+            g_connectParams.serverDataPort = 0;
+            g_connectParams.serverAddress = discoveredServer.serverAddress;
+            g_connectParams.localAddress = discoveredServer.localAddress;
+            g_connectParams.multicastAddress = NULL;
+        }
+    }
+
+    NatNet_FreeAsyncServerDiscovery(discovery);
+}
+
 struct EulerAngles MOCAPdevice::applyCalibration(struct Quaternions quatern) {
     struct Quaternions finalQuat;
 
@@ -320,13 +415,13 @@ struct EulerAngles MOCAPdevice::applyCalibration(struct Quaternions quatern) {
 struct EulerAngles MOCAPdevice::converToEuler(struct Quaternions quaternAngles, bool radianes) {
     struct EulerAngles angles;
     double ori = 0;
-	
-	if (radianes ==0)
+
+    if (radianes ==0)
         ori = 180 / M_PI;	// sexagesimal degrees
-	else
+    else
         ori = 1;
-    
-	// roll (z-axis rotation)
+
+    // roll (z-axis rotation)
     double sinr_cosp = 2 * (quaternAngles.qw * quaternAngles.qz + quaternAngles.qx * quaternAngles.qy);
     double cosr_cosp = 1 - 2 * (quaternAngles.qz * quaternAngles.qz + quaternAngles.qx * quaternAngles.qx);
     angles.roll = ori * atan2(sinr_cosp, cosr_cosp);
@@ -361,6 +456,21 @@ struct EulerAngles MOCAPdevice::getBodyRollPitchYaw(sRigidBodyData rigidBody) {
     return converToEuler(getBodyQuaternions(rigidBody), 0);
 }
 
-
-
-
+void MOCAPdevice::sendAnglesYarp(struct EulerAngles eulerAngles) {
+    //Euler angles are sended in the order defined in <outputYarpEuler>
+    for (int i=0;i<outputYarpEuler.size();i++) {
+        switch (outputYarpEuler[i]){
+            case 'r':
+                bot.addDouble(eulerAngles.roll);
+                break;
+            case 'p':
+                bot.addDouble(eulerAngles.pitch);
+                break;
+            case 'y':
+                bot.addDouble(eulerAngles.yaw);
+                break;
+        }
+    }
+    yarpPort.write(bot);
+    bot.clear();
+}

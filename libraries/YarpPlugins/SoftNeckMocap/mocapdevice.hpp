@@ -36,20 +36,34 @@
 #include <NatNetCAPI.h>
 #include <NatNetClient.h>
 
+using namespace std;
+
 using yarp::os::Bottle;
 using yarp::os::Network;
 
+// -------------------------------------------------------
+
+struct EulerAngles
+{
+    double roll, pitch, yaw;
+};
+
+struct Quaternions
+{
+    double qw, qx, qy, qz;
+};
+
 // ---------------   Defines of our device   ---------------
-#define DEFAULT_RIGIDBODYID 3
+#define DEFAULT_OUTPUTYARPANGLES "rp"  // Roll - Pitch
+#define DEFAULT_RIGIDBODYID -1 // Set to -1 in order to take the first detected rigid body streamed by
 #define DEFAULT_CALIBRATION 0
 #define DEFAULT_CALIBRNUMSAMPLES 200
 
-#define DEFAULT_SERVERIP "2.2.2.103"
+#define DEFAULT_SERVERIP "" // Set to "" (empty) in order to take the first detected server
 #define DEFAULT_OUTPORT "/softmocap"
 
 //Default period time
 #define DEFAULT_CMC_PERIOD 0.01 // seconds
-
 
 // -------------------------------------------------------
 
@@ -64,7 +78,8 @@ public:
 					sensoredRigidBodyID(DEFAULT_RIGIDBODYID),
                     calibration(DEFAULT_CALIBRATION),
 					calibrRotMatrix{},
-					calibrNumSamples(DEFAULT_CALIBRNUMSAMPLES), 
+                    calibrNumSamples(DEFAULT_CALIBRNUMSAMPLES),
+                    outputYarpEuler(DEFAULT_OUTPUTYARPANGLES),
                     yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD)
     {}
 
@@ -88,9 +103,11 @@ private:
 	int connectClient();
 	void resetClient();
 	float get_frameRate(NatNetClient *g_pClient);
-	//(Next two methods are necessarily static with fixed parameters in order to match with the functions "NatNet_SetLogCallback" and "SetFrameReceivedCallback")
+    void scanForServers();
+    //(Next three methods are necessarily static with fixed parameters in order to match with the functions "NatNet_SetLogCallback", "SetFrameReceivedCallback" and "NatNet_CreateAsyncServerDiscovery")
     static void NATNET_CALLCONV messageHandler(Verbosity msgType, const char* msg);      // receives NatNet error messages 
     static void NATNET_CALLCONV dataHandler(sFrameOfMocapData* data, void* pUserData);    // receives data from the server
+    static void NATNET_CALLCONV serverDiscoveredCallback(const sNatNetDiscoveredServer* pDiscoveredServer, void* pUserContext);
 
     struct EulerAngles applyCalibration(struct Quaternions quaternAngles);
 	
@@ -99,6 +116,8 @@ private:
     struct EulerAngles converToEuler(struct Quaternions quaternAngles, bool radianes=0);
     void createRotMatrixQuaternion(struct Quaternions qAngles);
 
+    void sendAnglesYarp(struct EulerAngles eulerAngles);
+
     //NatNet variables
     NatNetClient *g_pClient;
 	sNatNetClientConnectParams g_connectParams;
@@ -106,6 +125,7 @@ private:
     sServerDescription g_serverDescription;
 
     static sFrameOfMocapData* frame; // Necessarily static in order to be accessed in the static method "dataHandler"
+    static std::vector< sNatNetDiscoveredServer > g_discoveredServers; // Necessarily static in order to be accessed in the static method "serverDiscoveredCallback"
 
     std::string serverIP;
     int32_t sensoredRigidBodyID;
@@ -120,6 +140,7 @@ private:
     yarp::os::Port yarpPort;
     std::string nameyarpoutport;
     Bottle bot;
+    std::string outputYarpEuler;
 	
 	//PeriodicThread parameters
 	double cmcPeriod;
@@ -127,15 +148,5 @@ private:
 };
 
 // -------------------------------------------------------
-
-struct EulerAngles 
-{
-    double roll, pitch, yaw;
-};
-
-struct Quaternions
-{
-    double qw, qx, qy, qz;
-};
 
 #endif // MOCAPDEVICE_H

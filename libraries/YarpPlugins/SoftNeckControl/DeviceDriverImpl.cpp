@@ -114,13 +114,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
     {
         std::string remoteSerial = config.find("ImuSparkfun").asString();
 
-        if (!serialPort.open(prefix + "/imu:i"))
+        if (!sensorPort.open(prefix + "/imu:i"))
         {
             CD_ERROR("Unable to open local serial port.\n");
             return false;
         }
 
-        if (!yarp::os::Network::connect(remoteSerial, serialPort.getName(), "udp"))
+        if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp"))
         {
             CD_ERROR("Unable to connect to remote serial port.\n");
             return false;
@@ -128,27 +128,47 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
         sensorType = '0';
         serialStreamResponder = new IMUSerialStreamResponder(sensorTimeout);
-        serialPort.useCallback(*serialStreamResponder);
+        sensorPort.useCallback(*serialStreamResponder);
     }
 
     // New Yarp Sensor
     if (config.check("Imu3DMGX510", "remote yarp port of IMU sensor")){
         std::string remoteSerial = config.find("Imu3DMGX510").asString();
 
-        if (!serialPort.open(prefix + "/imu:i"))
+        if (!sensorPort.open(prefix + "/imu:i"))
         {
             CD_ERROR("Unable to open local serial port.\n");
             return false;
         }
 
-        if (!yarp::os::Network::connect(remoteSerial, serialPort.getName(), "udp")) // remoteSerial + "/out"
+        if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
         {
             CD_ERROR("Unable to connect to remote serial port.\n");
             return false;
         }
         sensorType = '1';
         immu3dmgx510StreamResponder = new IMU3DMGX510StreamResponder(sensorTimeout);
-        serialPort.useCallback(*immu3dmgx510StreamResponder);
+        sensorPort.useCallback(*immu3dmgx510StreamResponder);
+    }
+
+    // Mocap Sensor
+    if (config.check("Mocap", "remote yarp port of Mocap sensor")){
+        std::string remoteSerial = config.find("Mocap").asString();
+
+        if (!sensorPort.open(prefix + "/mocap:i"))
+        {
+            CD_ERROR("Unable to open local serial port.\n");
+            return false;
+        }
+
+        if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
+        {
+            CD_ERROR("Unable to connect to remote serial port.\n");
+            return false;
+        }
+        sensorType = '2';
+        mocapStreamResponder = new MocapStreamResponder(sensorTimeout);
+        sensorPort.useCallback(*mocapStreamResponder);
     }
 
 
@@ -175,7 +195,7 @@ bool SoftNeckControl::close()
     delete serialStreamResponder;
     delete immu3dmgx510StreamResponder;
     robotDevice.close();
-    serialPort.close();
+    sensorPort.close();
     //testingFile.close();
     return true;
 }

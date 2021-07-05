@@ -20,7 +20,7 @@ namespace
 
 bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timestamp)
 {
-    if (!serialPort.isClosed())
+    if (!sensorPort.isClosed())
     {
         std::vector<double> x_imu;
         switch (sensorType) {
@@ -99,7 +99,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     else CD_ERROR("Control mode not defined\n");
 
 
-    if (serialPort.isClosed()) //no IMU
+    if (sensorPort.isClosed()) //no IMU
     {
         if (!sendTargets(xd))
         {

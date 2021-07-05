@@ -119,6 +119,29 @@ private:
 
 /**
  * @ingroup SoftNeckControl
+ * @brief Responds to streaming data bottles of Mocap sensor
+ */
+class MocapStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+{
+public:
+
+    MocapStreamResponder(double timeout);
+    ~MocapStreamResponder();
+    void onRead(yarp::os::Bottle & b);
+    bool getLastData(std::vector<double> & v);
+
+private:
+
+    const double timeout;
+    double localArrivalTime;
+    std::vector<double> x;
+    mutable std::mutex mutex;
+    SystemBlock * polarFilterSensor;
+    SystemBlock * azimuthFilterSensor;
+};
+
+/**
+ * @ingroup SoftNeckControl
  * @brief The SoftNeckControl class implements ICartesianControl.
  */
 class SoftNeckControl : public yarp::dev::DeviceDriver,
@@ -210,9 +233,10 @@ private:
     yarp::dev::ITorqueControl * iTorqueControl;
     yarp::dev::IPositionDirect * iPositionDirect;
 
-    yarp::os::BufferedPort<yarp::os::Bottle> serialPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> sensorPort;
     IMUSerialStreamResponder * serialStreamResponder;
     IMU3DMGX510StreamResponder* immu3dmgx510StreamResponder;
+    MocapStreamResponder* mocapStreamResponder;
 
     string controlType;
     int currentState;

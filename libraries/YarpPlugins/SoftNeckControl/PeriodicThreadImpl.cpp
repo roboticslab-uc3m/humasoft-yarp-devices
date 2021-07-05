@@ -22,16 +22,16 @@ void SoftNeckControl::run()
     case VOCAB_CC_MOVJ_CONTROLLING:
         if(controlType=="ioCoupled"){
             CD_INFO_NO_HEADER("Starting Inclination Orientation Coupled Contro\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
+            !sensorPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="ioUncoupled"){
             CD_INFO_NO_HEADER("Starting Inclination Orientation Uncoupled Control\n");
-            !serialPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
+            !sensorPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="rpUncoupled"){
             CD_INFO_NO_HEADER("Starting Roll Pitch Uncoupled Control\n");
 
-            !serialPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
+            !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
         else CD_ERROR("Control mode not defined\n");                
         break;
@@ -87,6 +87,12 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
             {
                 CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
+            } break;
+        case '2':
+            if (!mocapStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated Mocap stream data.\n");
+                iVelocityControl->stop();
             } break;
     }
 
@@ -175,6 +181,12 @@ void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
                 CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
                 iVelocityControl->stop();
             } break;
+        case '2':
+            if (!mocapStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated Mocap stream data.\n");
+                iVelocityControl->stop();
+            } break;
     }
 
     std::vector<double> xd = targetPose;
@@ -251,10 +263,19 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     std::vector<double> xd(2);
     //std::vector<double> xd = targetPose;
 
-    if (!immu3dmgx510StreamResponder->getLastData(x_imu))
-    {
-        CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
-        iPositionControl->stop();
+    switch (sensorType) {
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                iPositionControl->stop();
+            } break;
+        case '2':
+            if (!mocapStreamResponder->getLastData(x_imu))
+            {
+                CD_WARNING("Outdated Mocap stream data.\n");
+                iPositionControl->stop();
+            } break;
     }
 
     rollError = targetPose[0] - x_imu[0];

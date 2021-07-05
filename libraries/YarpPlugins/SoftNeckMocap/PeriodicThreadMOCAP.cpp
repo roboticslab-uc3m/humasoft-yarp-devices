@@ -40,10 +40,7 @@ void MOCAPdevice::run()
 					rotAngles.yaw);
 
 				//Orientation data is sended to yarp
-				bot.addDouble(rotAngles.roll);
-				bot.addDouble(rotAngles.pitch);
-				yarpPort.write(bot);
-				bot.clear();
+                sendAnglesYarp(rotAngles);
 				break;
 			}
 		}

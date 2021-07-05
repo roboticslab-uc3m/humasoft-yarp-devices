@@ -17,6 +17,7 @@ if(NOT SKIP_SoftNeckControl)
                                     PeriodicThreadImpl.cpp
                                     IMUSerialStreamResponder.cpp
 				    IMU3DMGX510StreamResponder.cpp
+                                    MocapStreamResponder.cpp
                                     Kinematics.cpp)
 
     target_link_libraries(SoftNeckControl YARP::YARP_OS
