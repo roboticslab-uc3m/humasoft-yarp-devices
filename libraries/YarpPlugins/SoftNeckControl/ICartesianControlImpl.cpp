@@ -22,7 +22,9 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 {
     if (!sensorPort.isClosed())
     {
-        std::vector<double> x_imu;
+        std::vector<double> x_imu; // roll,pitch
+
+
         switch (sensorType) {
             case '0':
                 if (!serialStreamResponder->getLastData(x_imu))
@@ -42,6 +44,14 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
                     CD_WARNING("Outdated Mocap stream data.\n");
                 }
             break;
+        }
+
+        if(sensorType!=0){
+            // transform [roll.pitch] to [inc, ori]
+            double inc = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
+            double ori = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
+            x_imu[0] = inc;
+            x_imu[1] = ori;
         }
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
