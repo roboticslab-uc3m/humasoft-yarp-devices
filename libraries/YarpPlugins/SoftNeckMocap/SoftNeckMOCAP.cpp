@@ -16,8 +16,6 @@ bool MOCAPdevice::setupMOCAP() {
     // create NatNet client
     g_pClient = new NatNetClient();
 
-    // set the frame callback handler
-    g_pClient->SetFrameReceivedCallback(dataHandler, g_pClient);	// this function will receive data
 
     yarpPort.open(nameyarpoutport+"/out");
     printf("Yarp port: %s/out has been correctly opened\n", nameyarpoutport.c_str());
@@ -29,6 +27,9 @@ bool MOCAPdevice::setupMOCAP() {
 
     else
         scanForServers();
+
+    // set the frame callback handler
+    g_pClient->SetFrameReceivedCallback(dataHandler, g_pClient);	// this function will receive data
 
     int iResult;
 
@@ -76,7 +77,39 @@ void MOCAPdevice::getDataDescriptions() {
         for (int i = 0; i < pDataDefs->nDataDescriptions; i++)
         {
             printf("Data Description # %d (type=%d)\n", i, pDataDefs->arrDataDescriptions[i].type);
-            if (pDataDefs->arrDataDescriptions[i].type == Descriptor_MarkerSet)
+            if (pDataDefs->arrDataDescriptions[i].type == Descriptor_RigidBody)
+            {
+                // RigidBody
+                sRigidBodyDescription* pRB = pDataDefs->arrDataDescriptions[i].Data.RigidBodyDescription;
+                printf("RigidBody Name : %s\n", pRB->szName);
+                printf("RigidBody ID : %d\n", pRB->ID);
+                printf("RigidBody Parent ID : %d\n", pRB->parentID);
+                printf("Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
+
+                if (sensoredRigidBodyID == -1) {
+                    printf("Adquiriendo rigidBody\n");
+                    sensoredRigidBodyID = pRB->ID;
+                }
+
+
+                if (pRB->MarkerPositions != NULL && pRB->MarkerRequiredLabels != NULL)
+                {
+                    for (int markerIdx = 0; markerIdx < pRB->nMarkers; ++markerIdx)
+                    {
+                        const MarkerData& markerPosition = pRB->MarkerPositions[markerIdx];
+                        const int markerRequiredLabel = pRB->MarkerRequiredLabels[markerIdx];
+
+                        printf("\tMarker #%d:\n", markerIdx);
+                        printf("\t\tPosition: %.2f, %.2f, %.2f\n", markerPosition[0], markerPosition[1], markerPosition[2]);
+
+                        if (markerRequiredLabel != 0)
+                        {
+                            printf("\t\tRequired active label: %d\n", markerRequiredLabel);
+                        }
+                    }
+                }
+            }
+            /*else if (pDataDefs->arrDataDescriptions[i].type == Descriptor_MarkerSet)
             {
                 // MarkerSet
                 sMarkerSetDescription* pMS = pDataDefs->arrDataDescriptions[i].Data.MarkerSetDescription;
@@ -94,8 +127,11 @@ void MOCAPdevice::getDataDescriptions() {
                 printf("RigidBody Parent ID : %d\n", pRB->parentID);
                 printf("Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
 
-                if (sensoredRigidBodyID == -1)
+                if (sensoredRigidBodyID == -1) {
+                    printf("Adquiriendo rigidBody\n");
                     sensoredRigidBodyID = pRB->ID;
+                }
+
 
                 if (pRB->MarkerPositions != NULL && pRB->MarkerRequiredLabels != NULL)
                 {
@@ -118,7 +154,7 @@ void MOCAPdevice::getDataDescriptions() {
             {
                 printf("Unknown data type.");
                 // Unknown
-            }
+            }*/
         }
     }
 }
@@ -178,7 +214,6 @@ void MOCAPdevice::calibrate() {
 
     unsigned int iSample = 0;
 
-    struct Quaternions quaternAngles = {};
     int32_t iFrame = 0;
 
     //Samples are taken
@@ -196,10 +231,10 @@ void MOCAPdevice::calibrate() {
                     {
                         float progress = (iSample*100)/calibrNumSamples;
                         printf("\rSampling.....%.0f%%", progress);
-                        quaternAngles.qw += nowFrame->RigidBodies[iBody].qw;
-                        quaternAngles.qx += nowFrame->RigidBodies[iBody].qx;
-                        quaternAngles.qy += nowFrame->RigidBodies[iBody].qy;
-                        quaternAngles.qz += nowFrame->RigidBodies[iBody].qz;
+                        quatInit.qw += nowFrame->RigidBodies[iBody].qw;
+                        quatInit.qx += nowFrame->RigidBodies[iBody].qx;
+                        quatInit.qy += nowFrame->RigidBodies[iBody].qy;
+                        quatInit.qz += nowFrame->RigidBodies[iBody].qz;
                         iSample++;
                         break;
                     }
@@ -213,48 +248,20 @@ void MOCAPdevice::calibrate() {
     while(iSample < calibrNumSamples);
 
     //Average of the samples taken is made
-    quaternAngles.qw = quaternAngles.qw / calibrNumSamples;
-    quaternAngles.qx = quaternAngles.qx / calibrNumSamples;
-    quaternAngles.qy = quaternAngles.qy / calibrNumSamples;
-    quaternAngles.qz = quaternAngles.qz / calibrNumSamples;
+    quatInit.qw = quatInit.qw / calibrNumSamples;
+    quatInit.qx = quatInit.qx / calibrNumSamples;
+    quatInit.qy = quatInit.qy / calibrNumSamples;
+    quatInit.qz = quatInit.qz / calibrNumSamples;
 
     //Print quaternions taken for calibration
     printf("\n\tqx   \tqy   \tqz   \tqw\n");
     printf("\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-        quaternAngles.qx,
-        quaternAngles.qy,
-        quaternAngles.qz,
-        quaternAngles.qw);
-
-    //Building rotation matrix
-    createRotMatrixQuaternion(quaternAngles);
-
-    //Print rotation matrix
-    for(int x=0;x<4;x++)
-    {
-        for(int y=0;y<4;y++)
-        {
-            printf("\t %3.2f", calibrRotMatrix[x][y]);
-        }
-        printf("\n");
-    }
+        quatInit.qx,
+        quatInit.qy,
+        quatInit.qz,
+        quatInit.qw);
 
     printf("Calibration Done\n");
-}
-
-void MOCAPdevice::createRotMatrixQuaternion(struct Quaternions qAngles) {
-    double rotMat[4][4] = {{qAngles.qw,    -qAngles.qz,    qAngles.qy,     qAngles.qx},
-                            {qAngles.qz,    qAngles.qw,     -qAngles.qx,    qAngles.qy},
-                            {-qAngles.qy,   qAngles.qx,     qAngles.qw,     qAngles.qz},
-                            {-qAngles.qx,   -qAngles.qy,    -qAngles.qz,    qAngles.qw}};
-
-    for (int row = 0; row < 4; row++)
-    {
-        for (int col = 0; col < 4; col++)
-        {
-            calibrRotMatrix[row][col] = rotMat[row][col];
-        }
-    }
 }
 
 float MOCAPdevice::get_frameRate(NatNetClient *g_pClient) {
@@ -378,14 +385,15 @@ void MOCAPdevice::scanForServers() {
             );
 
             g_connectParams.connectionType = discoveredServer.serverDescription.ConnectionMulticast ? ConnectionType_Multicast : ConnectionType_Unicast;
-            g_connectParams.serverCommandPort = discoveredServer.serverCommandPort;
-            g_connectParams.serverDataPort = discoveredServer.serverDescription.ConnectionDataPort;
+            //g_connectParams.serverCommandPort = discoveredServer.serverCommandPort;
+            //g_connectParams.serverDataPort = discoveredServer.serverDescription.ConnectionDataPort;
             g_connectParams.serverAddress = discoveredServer.serverAddress;
-            g_connectParams.localAddress = discoveredServer.localAddress;
-            g_connectParams.multicastAddress = g_discoveredMulticastGroupAddr;
+            //g_connectParams.localAddress = discoveredServer.localAddress;
+            //g_connectParams.multicastAddress = g_discoveredMulticastGroupAddr;
         }
         else
         {
+            printf("\n--------------->Inside--------\n\n");
             // We're missing some info because it's a legacy server.
             // Guess the defaults and make a best effort attempt to connect.
             g_connectParams.connectionType = kDefaultConnectionType;
@@ -400,16 +408,21 @@ void MOCAPdevice::scanForServers() {
     NatNet_FreeAsyncServerDiscovery(discovery);
 }
 
-struct EulerAngles MOCAPdevice::applyCalibration(struct Quaternions quatern) {
-    struct Quaternions finalQuat;
+struct EulerAngles MOCAPdevice::applyCalibration(struct Quaternions actualQuat) {
+    struct Quaternions invQuatInit;
+    struct Quaternions relatQuat;
 
-    //  Apply rotation correction for the orientation angles
-    finalQuat.qx = (calibrRotMatrix[0][0] * quatern.qx + calibrRotMatrix[0][1] * quatern.qy + calibrRotMatrix[0][2] * quatern.qz + calibrRotMatrix[0][3] * quatern.qw);
-    finalQuat.qy = (calibrRotMatrix[1][0] * quatern.qx + calibrRotMatrix[1][1] * quatern.qy + calibrRotMatrix[1][2] * quatern.qz + calibrRotMatrix[1][3] * quatern.qw);
-    finalQuat.qz = (calibrRotMatrix[2][0] * quatern.qx + calibrRotMatrix[2][1] * quatern.qy + calibrRotMatrix[2][2] * quatern.qz + calibrRotMatrix[2][3] * quatern.qw);
-    finalQuat.qw = (calibrRotMatrix[3][0] * quatern.qx + calibrRotMatrix[3][1] * quatern.qy + calibrRotMatrix[3][2] * quatern.qz + calibrRotMatrix[3][3] * quatern.qw);
+    invQuatInit.qw = quatInit.qw;
+    invQuatInit.qx = -quatInit.qx;
+    invQuatInit.qy = -quatInit.qy;
+    invQuatInit.qz = -quatInit.qz;
 
-    return converToEuler(finalQuat, 0); // orientation in euler angles (sexagesimal degrees)
+    relatQuat.qw = (invQuatInit.qw  * actualQuat.qw - invQuatInit.qx  * actualQuat.qx - invQuatInit.qy  * actualQuat.qy - invQuatInit.qz  * actualQuat.qz);
+    relatQuat.qx = (invQuatInit.qw  * actualQuat.qx + invQuatInit.qx  * actualQuat.qw + invQuatInit.qy  * actualQuat.qz - invQuatInit.qz  * actualQuat.qy);
+    relatQuat.qy = (invQuatInit.qw  * actualQuat.qy - invQuatInit.qx  * actualQuat.qz + invQuatInit.qy  * actualQuat.qw + invQuatInit.qz  * actualQuat.qx);
+    relatQuat.qz = (invQuatInit.qw  * actualQuat.qz + invQuatInit.qx  * actualQuat.qy - invQuatInit.qy  * actualQuat.qx + invQuatInit.qz  * actualQuat.qw);
+
+    return converToEuler(relatQuat, 0); // orientation in euler angles (sexagesimal degrees)
 }
 
 struct EulerAngles MOCAPdevice::converToEuler(struct Quaternions quaternAngles, bool radianes) {
