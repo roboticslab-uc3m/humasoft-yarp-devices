@@ -73,3 +73,15 @@ launchCanBus --from softNeck.ini
       ```
       * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
 
+  - With **MOCAP** system: 
+      * Terminal 1: closed loop Uncoupled Control module using MOCAP system (roll-pitch)
+      ```bash
+      yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Mocap /softmocap/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled --cmcPeriod 0.02
+      ```
+      * Terminal 2: to send commands to Uncoupled control module using MOCAP system (roll-pitch)
+      ```bash
+      yarp rpc /SoftNeckControl/rpc_transform:s
+      > stat        # to know the current MOCAP rigid body position (roll pitch)
+      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      ```
+
