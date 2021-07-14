@@ -278,6 +278,11 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
             } break;
     }
 
+    // transform [roll.pitch] to [inc, ori]
+    std::vector<double> io_imu(2); // inc, ori
+    io_imu[0] = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
+    io_imu[1] = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
+
     rollError = targetPose[0] - x_imu[0];
     pitchError = targetPose[1] - x_imu[1];
 
@@ -317,10 +322,13 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
     double totaltime = elapsedNanoseconds.count();
 
+    cout << "-----------------------------\n" << endl;
     cout << "Total time: ms " << (totaltime/1000000) << endl;
-    cout << "Euler Angles (IMU) >>>>> Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
-    cout << "RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
-    cout << "Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
+    cout << "Inclination: " << io_imu[0] << "  Orientation: " << io_imu[1] << endl;
+    cout << "Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
+    cout << "-> RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+    cout << "-> Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
+    cout << "-----------------------------\n" << endl;
 
     std::vector<double> qd={p1,p2,p3};
 
