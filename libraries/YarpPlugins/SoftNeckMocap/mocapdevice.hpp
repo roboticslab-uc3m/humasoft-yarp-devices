@@ -77,7 +77,7 @@ public:
 					serverIP(DEFAULT_SERVERIP),
 					sensoredRigidBodyID(DEFAULT_RIGIDBODYID),
                     calibration(DEFAULT_CALIBRATION),
-					calibrRotMatrix{},
+                    quatInit{},
                     calibrNumSamples(DEFAULT_CALIBRNUMSAMPLES),
                     outputYarpEuler(DEFAULT_OUTPUTYARPANGLES),
                     yarp::os::PeriodicThread(DEFAULT_CMC_PERIOD)
@@ -114,7 +114,6 @@ private:
     struct Quaternions getBodyQuaternions(sRigidBodyData rigidBody);
     struct EulerAngles getBodyRollPitchYaw(sRigidBodyData rigidBody);
     struct EulerAngles converToEuler(struct Quaternions quaternAngles, bool radianes=0);
-    void createRotMatrixQuaternion(struct Quaternions qAngles);
 
     void sendAnglesYarp(struct EulerAngles eulerAngles);
 
@@ -133,7 +132,7 @@ private:
 	//Calibration variables
     bool calibration;
 	unsigned int calibrNumSamples;
-    double calibrRotMatrix[4][4];
+    struct Quaternions quatInit;
 	
     //Outport to publish mocap data. This kind of port allow us to start a server in the background
     yarp::os::Network Yarp;

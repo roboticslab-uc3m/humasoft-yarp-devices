@@ -1,4 +1,5 @@
 #!/bin/bash
+sleep 5
 echo "movj 30 0" |  yarp rpc /SoftNeckControl/rpc_transform:s
 sleep 12
 echo "movj 30 45" |  yarp rpc /SoftNeckControl/rpc_transform:s
