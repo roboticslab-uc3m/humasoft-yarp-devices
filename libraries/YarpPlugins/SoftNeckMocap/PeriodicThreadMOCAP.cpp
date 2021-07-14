@@ -4,15 +4,14 @@
 
 void MOCAPdevice::run()
 {
-    if (MOCAPdevice::frame!= nullptr)
-    //if (false)
+    if (MOCAPdevice::frame!= NULL)
 	{
 		// labeled markers - this includes all markers (Active, Passive, and 'unlabeled' (markers with no asset but a PointCloud ID)
 		printf("Markers [Count=%d]\n\n", MOCAPdevice::frame->nLabeledMarkers);
 		// Rigid Bodies
 		printf("Rigid Bodies [Count=%d]\n", MOCAPdevice::frame->nRigidBodies);
 		for (int i = 0; i < MOCAPdevice::frame->nRigidBodies; i++)
-		{
+		{        
 			if (MOCAPdevice::frame->RigidBodies[i].ID == sensoredRigidBodyID)
 			{
 				// params
