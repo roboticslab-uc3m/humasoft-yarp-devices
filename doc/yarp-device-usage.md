@@ -19,6 +19,11 @@ yarpdev --device serialport --name /softimu --comport /dev/ttyACM0 --baudrate 96
 sudo yarpdev --device SoftNeckIMU
 ```
 
+* **MOCAP:** 
+```bash
+yarpdev --device SoftNeckMOCAP --serverIP 2.2.2.103 --rigidBodyID 6
+```
+
 * **launchCanBus:** Start the iPOS, activating the motor control in position mode and open the necessary ports to control each of the 3 engines through the yarp network. `softNeck.ini` refers to the configuration of each iPOS
 ```bash
 launchCanBus --from softNeck.ini
