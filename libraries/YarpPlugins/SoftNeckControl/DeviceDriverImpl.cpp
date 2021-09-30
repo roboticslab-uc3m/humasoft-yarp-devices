@@ -5,7 +5,7 @@
 #include <yarp/os/Network.h>
 #include <yarp/os/Property.h>
 
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 using namespace humasoft;
 
@@ -13,7 +13,7 @@ using namespace humasoft;
 
 bool SoftNeckControl::open(yarp::os::Searchable & config)
 {
-    CD_DEBUG("%s.\n", config.toString().c_str());
+    yDebug("%s.\n", config.toString().c_str());
 
     std::string prefix = config.check("prefix", yarp::os::Value(DEFAULT_PREFIX), "local port prefix").asString();
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
@@ -47,43 +47,43 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     if (!robotDevice.open(robotOptions))
     {
-        CD_ERROR("Unable to open robot device.\n");
+        yError() <<"Unable to open robot device.";
         return false;
     }
 
     if (!robotDevice.view(iEncoders))
     {
-        CD_ERROR("Unable to view IEncoders in robot device.\n");
+        yError() <<"Unable to view IEncoders in robot device.";
         return false;
     }
 
     if (!robotDevice.view(iControlMode))
     {
-        CD_ERROR("Unable to view IControlMode in robot device.\n");
+        yError() <<"Unable to view IControlMode in robot device.";
         return false;
     }
 
     if (!robotDevice.view(iPositionControl))
     {
-        CD_ERROR("Unable to view IPositionControl in robot device.\n");
+        yError() <<"Unable to view IPositionControl in robot device.";
         return false;
     }
 
     if (!robotDevice.view(iVelocityControl))
     {
-        CD_ERROR("Unable to view IVelocityControl in robot device.\n");
+        yError() <<"Unable to view IVelocityControl in robot device.";
         return false;
     }
 
     if (!robotDevice.view(iTorqueControl))
     {
-        CD_ERROR("Unable to view ITorqueControl in robot device.\n");
+        yError() <<"Unable to view ITorqueControl in robot device.";
         return false;
     }
 
     if (!robotDevice.view(iPositionDirect))
     {
-        CD_ERROR("Unable to view IPositionDirect in robot device.\n");
+        yError() <<"Unable to view IPositionDirect in robot device.";
         return false;
     }
 
@@ -91,13 +91,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     if (!iEncoders->getAxes(&numRobotJoints))
     {
-        CD_ERROR("Unable to retrieve number of robot joints.\n");
+        yError() <<"Unable to retrieve number of robot joints.";
         return false;
     }
 
     if (numRobotJoints != NUM_ROBOT_JOINTS)
     {
-        CD_ERROR("Expected %d robot joints, got %d.\n", NUM_ROBOT_JOINTS, numRobotJoints);
+        yError("Expected %d robot joints, got %d.\n", NUM_ROBOT_JOINTS, numRobotJoints);
         return false;
     }
 
@@ -105,7 +105,7 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
     if (!iPositionControl->getRefSpeeds(qRefSpeeds.data()))
     {
-        CD_ERROR("Unable to retrieve reference speeds.\n");
+        yError() <<"Unable to retrieve reference speeds.";
         return false;
     }
 
@@ -116,13 +116,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
         if (!sensorPort.open(prefix + "/imu:i"))
         {
-            CD_ERROR("Unable to open local serial port.\n");
+            yError() <<"Unable to open local serial port.";
             return false;
         }
 
         if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp"))
         {
-            CD_ERROR("Unable to connect to remote serial port.\n");
+            yError() <<"Unable to connect to remote serial port.";
             return false;
         }
 
@@ -137,13 +137,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
         if (!sensorPort.open(prefix + "/imu:i"))
         {
-            CD_ERROR("Unable to open local serial port.\n");
+            yError() <<"Unable to open local serial port.";
             return false;
         }
 
         if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
         {
-            CD_ERROR("Unable to connect to remote serial port.\n");
+            yError() <<"Unable to connect to remote serial port.";
             return false;
         }
         sensorType = '1';
@@ -157,13 +157,13 @@ bool SoftNeckControl::open(yarp::os::Searchable & config)
 
         if (!sensorPort.open(prefix + "/mocap:i"))
         {
-            CD_ERROR("Unable to open local serial port.\n");
+            yError() <<"Unable to open local serial port.";
             return false;
         }
 
         if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
         {
-            CD_ERROR("Unable to connect to remote serial port.\n");
+            yError() <<"Unable to connect to remote serial port.";
             return false;
         }
         sensorType = '2';

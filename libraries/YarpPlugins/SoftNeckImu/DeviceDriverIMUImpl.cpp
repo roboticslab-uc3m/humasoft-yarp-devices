@@ -1,5 +1,5 @@
 #include "imudevice.hpp"
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 // ------------------- DeviceDriver Related ------------------------------------
 

@@ -40,8 +40,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/find-modules)
 
 # Hard dependencies.
 find_package(YCM 0.10 REQUIRED)
-find_package(YARP 3.2 REQUIRED COMPONENTS os dev)
-find_package(COLOR_DEBUG REQUIRED)
+find_package(YARP 3.4 REQUIRED COMPONENTS os dev)
 
 # SoftNeckControl dependencies.
 find_package(Eigen3 REQUIRED)
@@ -50,8 +49,8 @@ find_package(fcontrol REQUIRED)
 
 # SoftNeckIMU dependencies.
 add_subdirectory(libraries/YarpPlugins/SoftNeckImu/sensor-integration) #KEY LINE
-set(SUBDIR_INCLUDE_DIRECTORIES ${SUBDIR_INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-set(SUBDIR_LINK_NAMES ${SUBDIR_LINK_NAMES} ${PROJECT_NAME} PARENT_SCOPE)
+# set(SUBDIR_INCLUDE_DIRECTORIES ${SUBDIR_INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+# set(SUBDIR_LINK_NAMES ${SUBDIR_LINK_NAMES} ${PROJECT_NAME} PARENT_SCOPE)
 INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES})
 target_link_libraries(${KEYWORD} SensorIntegration)
 

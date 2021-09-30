@@ -5,7 +5,7 @@
 #include <cmath> // std::isnormal
 
 #include <KinematicRepresentation.hpp>
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 //In order to clasify the system, we are using fstream library
 #include <fstream>
@@ -21,19 +21,19 @@ void SoftNeckControl::run()
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
         if(controlType=="ioCoupled"){
-            CD_INFO_NO_HEADER("Starting Inclination Orientation Coupled Contro\n");
+            yInfo() <<"Starting Inclination Orientation Coupled Contro";
             !sensorPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="ioUncoupled"){
-            CD_INFO_NO_HEADER("Starting Inclination Orientation Uncoupled Control\n");
+            yInfo() <<"Starting Inclination Orientation Uncoupled Control";
             !sensorPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="rpUncoupled"){
-            CD_INFO_NO_HEADER("Starting Roll Pitch Uncoupled Control\n");
+            yInfo() <<"Starting Roll Pitch Uncoupled Control";
 
             !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
-        else CD_ERROR("Control mode not defined\n");                
+        else yError() <<"Control mode not defined";
         break;
     default:
         break;
@@ -49,7 +49,7 @@ void SoftNeckControl::handleMovjOpenLoop()
 
     if (!iPositionControl->checkMotionDone(&done))
     {
-        CD_ERROR("Unable to query current robot state.\n");
+        yError() <<"Unable to query current robot state.";
         cmcSuccess = false;
         stopControl();
         return;
@@ -61,7 +61,7 @@ void SoftNeckControl::handleMovjOpenLoop()
 
         if (!iPositionControl->setRefSpeeds(qRefSpeeds.data()))
         {
-            CD_WARNING("setRefSpeeds (to restore) failed.\n");
+            yWarning() <<"setRefSpeeds (to restore) failed.";
         }
     }
 }
@@ -81,17 +81,17 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
         case '0':
             if (!serialStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
+                yWarning() <<"Outdated SparkfunIMU serial stream data.";
             } break;
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
+                yWarning() <<"Outdated 3DMGX510IMU stream data.";
             } break;
         case '2':
             if (!mocapStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated Mocap stream data.\n");
+                yWarning() <<"Outdated Mocap stream data.";
                 iVelocityControl->stop();
             } break;
     }
@@ -122,7 +122,7 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
      */
     if(targetPose[0]>5)
     {
-        CD_INFO_NO_HEADER("> Controlando en orientación\n");
+        yInfo() <<"> Controlando en orientación";
         azimuthCs = azimuthError > *controllerAzimuth;
 
         if (!std::isnormal(azimuthCs))
@@ -133,12 +133,12 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
         xd[1] = azimuthCs;
     }
 
-    CD_DEBUG_NO_HEADER("- Polar:   target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], polarError, polarCs);
-    CD_DEBUG_NO_HEADER("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], azimuthError, azimuthCs);
+    yDebug("- Polar:   target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], polarError, polarCs);
+    yDebug("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], azimuthError, azimuthCs);
 
     if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
-        CD_ERROR("encodePose failed.\n");
+        yError() <<"encodePose failed.";
         cmcSuccess = false;
         stopControl();
         return;
@@ -146,7 +146,7 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
 
     if (!sendTargets(xd))
     {
-        CD_WARNING("Command error, not updating control this iteration.\n");
+        yWarning() <<"Command error, not updating control this iteration.";
     }
 }
 
@@ -172,19 +172,19 @@ void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
         case '0':
             if (!serialStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated serial stream data.\n");
+                yWarning() <<"Outdated serial stream data.";
                 iVelocityControl->stop();
             } break;
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                yWarning() <<"Outdated IMU 3dmgx510 stream data.";
                 iVelocityControl->stop();
             } break;
         case '2':
             if (!mocapStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated Mocap stream data.\n");
+                yWarning() <<"Outdated Mocap stream data.";
                 iVelocityControl->stop();
             } break;
     }
@@ -247,7 +247,7 @@ void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
     printf("> sensor(i%f o%f) motors (%f %f %f)\n",x_imu[0], x_imu[1], cs[0], cs[1], cs[2]);
     if (!iVelocityControl->velocityMove(3,m.data(),cs.data()));
     {
-        //CD_ERROR("velocityMove failed.\n");
+        //yError() <<"velocityMove failed.\n");
     }
 }
 
@@ -267,13 +267,13 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated IMU 3dmgx510 stream data.\n");
+                yWarning() <<"Outdated IMU 3dmgx510 stream data.";
                 iPositionControl->stop();
             } break;
         case '2':
             if (!mocapStreamResponder->getLastData(x_imu))
             {
-                CD_WARNING("Outdated Mocap stream data.\n");
+                yWarning() <<"Outdated Mocap stream data.";
                 iPositionControl->stop();
             } break;
     }
@@ -334,7 +334,7 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
     if (!iPositionControl->positionMove(qd.data()))
     {
-        CD_ERROR("positionMove failed.\n");
+        yError() <<"positionMove failed.";
     }
 
     //Uncomment it to receive data from testing

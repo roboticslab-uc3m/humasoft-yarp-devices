@@ -8,7 +8,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../../cmake/find-modules)
 
 # Hard dependencies.
 find_package(YARP 3.2 REQUIRED COMPONENTS os dev)
-find_package(COLOR_DEBUG REQUIRED)
 
 # SoftNeckControl dependencies.
 find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
@@ -23,7 +22,6 @@ target_link_libraries(continuousPositionSend YARP::YARP_os
                                              YARP::YARP_dev
                                              Eigen3::Eigen
                                              FControl::fcontrol
-                                             ROBOTICSLAB::ColorDebug
                                              ROBOTICSLAB::KinematicsDynamicsInterfaces
                                              ROBOTICSLAB::KinematicRepresentationLib)
 

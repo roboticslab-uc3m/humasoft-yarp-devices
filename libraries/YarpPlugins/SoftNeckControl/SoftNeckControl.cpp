@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 
 using namespace humasoft;
@@ -57,7 +57,7 @@ bool SoftNeckControl::presetStreamingCommand(int command)
     case VOCAB_CC_MOVI:
         return setControlModes(VOCAB_CM_POSITION_DIRECT);
     default:
-        CD_ERROR("Unrecognized or unsupported streaming command vocab.\n");
+        yError() << "Unrecognized or unsupported streaming command vocab.";
     }
 
     return false;
@@ -71,7 +71,7 @@ bool SoftNeckControl::setControlModes(int mode)
 
     if (!iControlMode->getControlModes(modes.data()))
     {
-        CD_WARNING("getControlModes failed.\n");
+        yWarning() <<"getControlModes failed.";
         return false;
     }
 
@@ -91,7 +91,7 @@ bool SoftNeckControl::setControlModes(int mode)
 
         if (!iControlMode->setControlModes(jointIds.size(), jointIds.data(), modes.data()))
         {
-            CD_WARNING("setControlModes failed (%s).\n", yarp::os::Vocab::decode(mode).c_str());
+            yWarning("setControlModes failed (%s).\n", yarp::os::Vocab::decode(mode).c_str());
             return false;
         }
     }
@@ -113,7 +113,7 @@ void SoftNeckControl::computeIsocronousSpeeds(const std::vector<double> & q, con
     {
         if (qRefSpeeds[joint] <= 0.0)
         {
-            CD_WARNING("Zero or negative velocities sent at joint %d, not moving: %f.\n", joint, qRefSpeeds[joint]);
+            yWarning("Zero or negative velocities sent at joint %d, not moving: %f.\n", joint, qRefSpeeds[joint]);
             return;
         }
 
@@ -142,7 +142,7 @@ bool SoftNeckControl::sendTargets(const std::vector<double> & xd)
 
     if (!iEncoders->getEncoders(q.data()))
     {
-        CD_ERROR("getEncoders failed.\n");
+        yError() <<"getEncoders failed.";
         return false;
     }
 
@@ -150,7 +150,7 @@ bool SoftNeckControl::sendTargets(const std::vector<double> & xd)
 
     if (!inv(xd, qd))
     {
-        CD_ERROR("inv failed.\n");
+        yError() <<"inv failed.";
         return false;
     }
 
@@ -159,13 +159,13 @@ bool SoftNeckControl::sendTargets(const std::vector<double> & xd)
 
     if (!iPositionControl->setRefSpeeds(vmo.data()))
     {
-         CD_ERROR("setRefSpeeds failed.\n");
+         yError() <<"setRefSpeeds failed.";
          return false;
     }
 
     if (!iPositionControl->positionMove(qd.data()))
     {
-        CD_ERROR("positionMove failed.\n");
+        yError() <<"positionMove failed.";
         return false;
     }
 

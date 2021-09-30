@@ -24,7 +24,6 @@ if(NOT SKIP_SoftNeckControl)
                                           YARP::YARP_dev
                                           Eigen3::Eigen
                                           FControl::fcontrol
-                                          ROBOTICSLAB::ColorDebug
                                           ROBOTICSLAB::KinematicsDynamicsInterfaces
                                           ROBOTICSLAB::KinematicRepresentationLib)
 

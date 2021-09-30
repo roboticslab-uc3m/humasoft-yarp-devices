@@ -18,7 +18,7 @@
 #include <yarp/os/PeriodicThread.h>
 #include <yarp/os/PortReaderBuffer.h>
 #include <yarp/os/Network.h>
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 #include <ace/DEV_Connector.h>
 #include <ace/TTY_IO.h>
 

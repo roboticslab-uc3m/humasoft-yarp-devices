@@ -6,7 +6,7 @@
 #include <yarp/os/Vocab.h>
 #include <math.h>
 #include <KinematicRepresentation.hpp>
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 using namespace humasoft;
 using namespace roboticslab::KinRepresentation;
@@ -29,19 +29,19 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
             case '0':
                 if (!serialStreamResponder->getLastData(x_imu))
                 {
-                    CD_WARNING("Outdated SparkfunIMU serial stream data.\n");
+                    yWarning() << "Outdated SparkfunIMU serial stream data.";
                 }
             break;
             case '1':
                 if (!immu3dmgx510StreamResponder->getLastData(x_imu))
                 {
-                    CD_WARNING("Outdated 3DMGX510IMU stream data.\n");
+                    yWarning() << "Outdated 3DMGX510IMU stream data.";
                 }
             break;
             case '2':
                 if (!mocapStreamResponder->getLastData(x_imu))
                 {
-                    CD_WARNING("Outdated Mocap stream data.\n");
+                    yWarning() << "Outdated Mocap stream data.";
                 }
             break;
         }
@@ -56,7 +56,7 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
-            CD_ERROR("encodePose failed.\n");
+            yError() <<"encodePose failed.";
             return false;
         }
         *state = getCurrentState();
@@ -64,7 +64,7 @@ bool SoftNeckControl::stat(std::vector<double> & x, int * state, double * timest
         return true;
     }
 
-    CD_WARNING("Serial stream not available.\n");
+    yWarning() << "Serial stream not available.";
     return false;
 }
 
@@ -76,7 +76,7 @@ bool SoftNeckControl::inv(const std::vector<double> & xd, std::vector<double> & 
 
     if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::RADIANS))
     {
-        CD_ERROR("decodePose failed.\n");
+        yError() <<"decodePose failed.";
         return false;
     }
 
@@ -92,7 +92,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     {
         if (!setControlModes(VOCAB_CM_POSITION))
         {
-            CD_ERROR("Unable to set position mode.\n");
+            yError() <<"Unable to set position mode.";
             return false;
         }
     }
@@ -100,7 +100,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     {
         if (!setControlModes(VOCAB_CM_VELOCITY))
         {
-            CD_ERROR("Unable to set velocity mode.\n");
+            yError() <<"Unable to set velocity mode.";
             return false;
         }
     }
@@ -108,11 +108,11 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     {
         if (!setControlModes(VOCAB_CM_POSITION))
         {
-            CD_ERROR("Unable to set position mode.\n");
+            yError() <<"Unable to set position mode.";
             return false;
         }
     }
-    else CD_ERROR("Control mode not defined\n");
+    else yError() <<"Control mode not defined";
 
 
     if (sensorPort.isClosed()) //no IMU
@@ -126,7 +126,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
     {
         if (!decodePose(xd, targetPose, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES)) // con IMU
         {
-            CD_ERROR("decodePose failed.\n");
+            yError() <<"decodePose failed.";
             return false;
         }
 
@@ -153,7 +153,7 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
 
 bool SoftNeckControl::relj(const std::vector<double> & xd)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -161,7 +161,7 @@ bool SoftNeckControl::relj(const std::vector<double> & xd)
 
 bool SoftNeckControl::movl(const std::vector<double> & xd)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -169,7 +169,7 @@ bool SoftNeckControl::movl(const std::vector<double> & xd)
 
 bool SoftNeckControl::movv(const std::vector<double> & xdotd)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented." ;
     return false;
 }
 
@@ -177,7 +177,7 @@ bool SoftNeckControl::movv(const std::vector<double> & xdotd)
 
 bool SoftNeckControl::gcmp()
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -185,7 +185,7 @@ bool SoftNeckControl::gcmp()
 
 bool SoftNeckControl::forc(const std::vector<double> & td)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -195,7 +195,7 @@ bool SoftNeckControl::stopControl()
 {
     if (!iPositionControl->stop())
     {
-        CD_WARNING("stop() failed.\n");
+        yWarning() << "stop() failed.";
     }
 
     setCurrentState(VOCAB_CC_NOT_CONTROLLING);
@@ -219,7 +219,7 @@ bool SoftNeckControl::wait(double timeout)
     {
         if (timeout != 0.0 && yarp::os::Time::now() - start > timeout)
         {
-            CD_WARNING("Timeout reached (%f seconds), stopping control.\n", timeout);
+            yWarning("Timeout reached (%f seconds), stopping control.\n", timeout);
             stopControl();
             break;
         }
@@ -235,7 +235,7 @@ bool SoftNeckControl::wait(double timeout)
 
 bool SoftNeckControl::tool(const std::vector<double> & x)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -243,7 +243,7 @@ bool SoftNeckControl::tool(const std::vector<double> & x)
 
 bool SoftNeckControl::act(int command)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
     return false;
 }
 
@@ -251,14 +251,14 @@ bool SoftNeckControl::act(int command)
 
 void SoftNeckControl::twist(const std::vector<double> & xdot)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
 }
 
 // -----------------------------------------------------------------------------
 
 void SoftNeckControl::pose(const std::vector<double> & x, double interval)
 {
-    CD_WARNING("Not implemented.\n");
+    yWarning() << "Not implemented.";
 }
 
 // -----------------------------------------------------------------------------
@@ -267,7 +267,7 @@ void SoftNeckControl::movi(const std::vector<double> & x)
 {
     if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
     {
-        CD_ERROR("Streaming command not preset.\n");
+        yError() <<"Streaming command not preset.";
         return;
     }
 
@@ -275,13 +275,13 @@ void SoftNeckControl::movi(const std::vector<double> & x)
 
     if (!inv(x, qd))
     {
-        CD_ERROR("inv failed.\n");
+        yError() <<"inv failed.";
         return;
     }
 
     if (!iPositionDirect->setPositions(qd.data()))
     {
-        CD_ERROR("setPositions failed.\n");
+        yError() <<"setPositions failed.";
     }
 }
 
@@ -291,7 +291,7 @@ bool SoftNeckControl::setParameter(int vocab, double value)
 {
     if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING)
     {
-        CD_ERROR("Unable to set config parameter while controlling.\n");
+        yError() <<"Unable to set config parameter while controlling.";
         return false;
     }
 
@@ -300,7 +300,7 @@ bool SoftNeckControl::setParameter(int vocab, double value)
     case VOCAB_CC_CONFIG_CMC_PERIOD:
         if (!yarp::os::PeriodicThread::setPeriod(value * 0.001))
         {
-            CD_ERROR("Cannot set new CMC period.\n");
+            yError() <<"Cannot set new CMC period.";
             return false;
         }
         cmcPeriod = value * 0.001;
@@ -308,7 +308,7 @@ bool SoftNeckControl::setParameter(int vocab, double value)
     case VOCAB_CC_CONFIG_WAIT_PERIOD:
         if (value <= 0.0)
         {
-            CD_ERROR("Wait period cannot be negative nor zero.\n");
+            yError() <<"Wait period cannot be negative nor zero.";
             return false;
         }
         waitPeriod = value * 0.001;
@@ -316,20 +316,20 @@ bool SoftNeckControl::setParameter(int vocab, double value)
     case VOCAB_CC_CONFIG_FRAME:
         if (value != roboticslab::ICartesianSolver::BASE_FRAME)
         {
-            CD_ERROR("Unrecognized or unsupported reference frame vocab.\n");
+            yError() <<"Unrecognized or unsupported reference frame vocab.";
             return false;
         }
         break;
     case VOCAB_CC_CONFIG_STREAMING_CMD:
         if (!presetStreamingCommand(value))
         {
-            CD_ERROR("Unable to preset streaming command.\n");
+            yError() <<"Unable to preset streaming command.";
             return false;
         }
         streamingCommand = value;
         break;
     default:
-        CD_ERROR("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
         return false;
     }
 
@@ -355,7 +355,7 @@ bool SoftNeckControl::getParameter(int vocab, double * value)
         *value = streamingCommand;
         break;
     default:
-        CD_ERROR("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
         return false;
     }
 
@@ -368,7 +368,7 @@ bool SoftNeckControl::setParameters(const std::map<int, double> & params)
 {
     if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING)
     {
-        CD_ERROR("Unable to set config parameters while controlling.\n");
+        yError() <<"Unable to set config parameters while controlling.";
         return false;
     }
 

@@ -24,7 +24,7 @@
 
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
 #include <KinematicRepresentation.hpp> // encodePose, decodePose
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 #include "fcontrol.h"
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     yarp::os::Network yarp;
     if (!yarp::os::Network::checkNetwork())
     {
-        CD_ERROR("Please start a yarp name server first.\n");
+        yError() <<"Please start a yarp name server first.";
         return 1;
     }
 
@@ -50,18 +50,18 @@ int main(int argc, char *argv[])
     FILE *file = 0;
         if(argc!=2)
         {
-            CD_INFO_NO_HEADER("running demo without csv results..\n");
+            yInfo() <<"running demo without csv results..";
         }
 
         else if(argv[1]==std::string("csv"))
         {
-            CD_INFO_NO_HEADER("running demo with csv results..\n");
+            yInfo() <<"running demo with csv results..";
             file = fopen("../data.csv","w+");
             fprintf(file, "time, mouse_inclination, filtered_inclination, sensor_inclination, mouse_orientation, filtered_orientation, sensor_orientation\n");
         }
         else
         {
-            CD_ERROR("incorrect parameter\n");
+            yError() <<"incorrect parameter";
             return 0;
         }
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     if (!device.isValid())
     {
-        CD_ERROR("Device not available.\n");
+        yError() <<"Device not available.";
         return 1;
     }
 
@@ -85,11 +85,11 @@ int main(int argc, char *argv[])
 
     if (!device.view(iCartesianControl))
     {
-        CD_ERROR("Problems acquiring interface.\n");
+        yError() <<"Problems acquiring interface.";
         return 1;
     }
 
-    CD_SUCCESS("Acquired interface.\n");
+    printf("Acquired interface.\n");
 
 
     // Config SpaceMouse (joystick)
@@ -110,18 +110,18 @@ int main(int argc, char *argv[])
     yarp::dev::IAnalogSensor *iAnalogSensor;
     if (!spaceMouse.view(iAnalogSensor) )
     {
-        CD_ERROR("Problems acquiring interface\n");
+        yError() <<"Problems acquiring interface";
         return 1;
     }
 
-    CD_SUCCESS("Acquired interface [ok]\n");
+    printf("Acquired interface [ok]\n");
 
 
     int channels = iAnalogSensor->getChannels();
 
     if(channels==0)
     {
-        CD_ERROR("Failed number of channels\n");
+        yError() <<"Failed number of channels";
         return 1;
     }
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
         if(iAnalogSensor->read(mouseValues) != yarp::dev::IAnalogSensor::AS_OK)
         {
-            CD_ERROR("not values\n");
+            yError() <<"not values";
             break;
         }
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
         if (!decodePose(inValues, outValues, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
-            CD_ERROR("decodePose failed.\n");
+            yError() <<"decodePose failed.";
             return false;
         }
 

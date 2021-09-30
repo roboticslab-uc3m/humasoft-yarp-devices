@@ -15,7 +15,7 @@
  */
 
 #include <vector>
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Property.h>
 #include <yarp/dev/PolyDriver.h>
@@ -26,15 +26,15 @@
 
 using namespace roboticslab::KinRepresentation;
 
-int main(int argc, char *argv[])
+int main()
 {    
-    double timeout = 10.0; // configuring timeout (s)
+    // double timeout = 10.0; // configuring timeout (s)
     std::vector<double> target = {0.0, 0.0};
 
     yarp::os::Network yarp;
     if (!yarp::os::Network::checkNetwork())
     {
-        CD_ERROR("Please start a yarp name server first.\n");
+        yError() <<"Please start a yarp name server first.";
         return 1;
     }
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     if (!device.isValid())
     {
-        CD_ERROR("Device not available.\n");
+        yError() <<"Device not available.";
         return 1;
     }
 
@@ -57,11 +57,11 @@ int main(int argc, char *argv[])
 
     if (!device.view(iCartesianControl))
     {
-        CD_ERROR("Problems acquiring interface.\n");
+        yError() <<"Problems acquiring interface.";
         return 1;
     }
 
-    CD_SUCCESS("Acquired interface.\n");
+    printf("Acquired interface.\n");
 
 
     // Config SpaceMouse
@@ -82,18 +82,18 @@ int main(int argc, char *argv[])
     yarp::dev::IAnalogSensor *iAnalogSensor;
     if (!spaceMouse.view(iAnalogSensor) )
     {
-        CD_ERROR("Problems acquiring interface\n");
+        yError() <<"Problems acquiring interface";
         return 1;
     }
 
-    CD_SUCCESS("Acquired interface [ok]\n");
+    printf("Acquired interface [ok]");
 
 
     int channels = iAnalogSensor->getChannels();
 
     if(channels==0)
     {
-        CD_ERROR("Failed number of channels\n");
+        yError() <<"Failed number of channels";
         return 1;
     }
     bool sended;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
         if(iAnalogSensor->read(mouseValues) != yarp::dev::IAnalogSensor::AS_OK)
         {
-            CD_ERROR("not values\n");
+            yError() <<"not values";
             break;
         }
 
@@ -122,8 +122,8 @@ int main(int argc, char *argv[])
 
         if (!decodePose(inValues, outValues, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
-            CD_ERROR("decodePose failed.\n");
-            return false;
+            yError() <<"decodePose failed.";
+            return 1;
         }
 
         if(outValues[0]>15.0) outValues[0]-= 15; // empezando a leer a partir de 15º para mayor precisión en orientación
@@ -142,13 +142,13 @@ int main(int argc, char *argv[])
         if(imu[1]< 0.0) imu[1] += 360; // corregimos la orientación negativa a partir de 180º
 
         printf("-----------------------------------------------------------\n");
-        CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", target[0], imu[0]);
-        CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", target[1], imu[1]);
-        CD_WARNING_NO_HEADER("> NaveSpace: Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
+        yInfo("> Inclination: target(%.4f) sensor(%.4f)\n", target[0], imu[0]);
+        yInfo("> Orientation: target(%.4f) sensor(%.4f)\n", target[1], imu[1]);
+        yWarning("> NaveSpace: Inclination (%f) Orientation (%f)\n", outValues[0], outValues[1]);
 
         if(mouseValues[7]!=0.0 && !sended) // botón 1 pulsado
         {
-            CD_SUCCESS_NO_HEADER("\nSending position I(%f) O(%f) to SoftNeckControl\n");
+            printf("\nSending position to SoftNeckControl\n");
             target = outValues;
             iCartesianControl->movj(target);
             sended = true;
@@ -157,7 +157,5 @@ int main(int argc, char *argv[])
         yarp::os::Time::delay(0.005);
 
     }
-
-
     return 0;
 }

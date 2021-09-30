@@ -19,7 +19,7 @@
 #include <yarp/os/Property.h>
 #include <yarp/dev/PolyDriver.h>
 #include <ICartesianControl.h> // we need this to work with the CartesianControlClient device
-#include <ColorDebug.h>
+#include <yarp/os/LogStream.h>
 
 int main(int argc, char *argv[])
 {
@@ -27,25 +27,25 @@ int main(int argc, char *argv[])
 
     if (!yarp::os::Network::checkNetwork())
     {
-        CD_ERROR("Please start a yarp name server first.\n");
+        yError() <<"Please start a yarp name server first.";
         return 1;
     }
 
     FILE *file = 0;
     if(argc!=2)
     {
-        CD_INFO_NO_HEADER("running demo without csv results..\n");
+        yInfo() <<"running demo without csv results..";
     }
 
     else if(argv[1]==std::string("csv"))
     {
-        CD_INFO_NO_HEADER("running demo with csv results..\n");
+        yInfo() <<"running demo with csv results..";
         file = fopen("../data.csv","w+");
         fprintf(file, "time, target_inclination, sensor_inclination, target_orientation, sensor_orientation\n");
     }
     else
     {
-        CD_ERROR("incorrect parameter\n");
+        yError() <<"incorrect parameter";
         return 0;
     }
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     if (!dd.isValid())
     {
-        CD_ERROR("Device not available.\n");
+        yError() <<"Device not available.";
         return 1;
     }
 
@@ -67,11 +67,11 @@ int main(int argc, char *argv[])
 
     if (!dd.view(iCartesianControl))
     {
-        CD_ERROR("Problems acquiring interface.\n");
+        yError() <<"Problems acquiring interface.";
         return 1;
     }
 
-    CD_SUCCESS("Acquired interface.\n");
+    printf("Acquired interface.");
 
 
     std::vector<double> pose[3];
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     while(true){
         for(int i=0; i<3; i++)
         {
-            CD_INFO_NO_HEADER("moving to pose [%d]: [%f] [%f]\n", i, pose[i][0], pose[i][1]);
+            yInfo("moving to pose [%d]: [%f] [%f]\n", i, pose[i][0], pose[i][1]);
             double initTime = yarp::os::Time::now();
             iCartesianControl->movj(pose[i]);
             while(yarp::os::Time::now() - initTime < timeout)
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 
                 // fix negative orientation
                 if(imu[1]<0.0) imu[1]+= 360;
-                CD_INFO_NO_HEADER("> Inclination: target(%.4f) sensor(%.4f)\n", pose[i][0], imu[0]);
-                CD_INFO_NO_HEADER("> Orientation: target(%.4f) sensor(%.4f)\n", pose[i][1], imu[1]);
+                yInfo("> Inclination: target(%.4f) sensor(%.4f)\n", pose[i][0], imu[0]);
+                yInfo("> Orientation: target(%.4f) sensor(%.4f)\n", pose[i][1], imu[1]);
                 if(file!=0)
                 {
                     fprintf(file,"%.2f, ", yarp::os::Time::now() - initTime);
