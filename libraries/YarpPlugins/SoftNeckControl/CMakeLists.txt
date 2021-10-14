@@ -16,11 +16,11 @@ if(NOT SKIP_SoftNeckControl)
                                     ICartesianControlImpl.cpp
                                     PeriodicThreadImpl.cpp
                                     IMUSerialStreamResponder.cpp
-				    IMU3DMGX510StreamResponder.cpp
+				     IMU3DMGX510StreamResponder.cpp
                                     MocapStreamResponder.cpp
                                     Kinematics.cpp)
 
-    target_link_libraries(SoftNeckControl YARP::YARP_OS
+    target_link_libraries(SoftNeckControl YARP::YARP_os
                                           YARP::YARP_dev
                                           Eigen3::Eigen
                                           FControl::fcontrol
