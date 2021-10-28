@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/find-modules)
 find_package(YCM 0.11 REQUIRED)
 find_package(YARP 3.4 REQUIRED COMPONENTS os dev)
 
-# SoftNeckControl dependencies.
+# SoftNeckControl/SoftArmControl dependencies.
 find_package(Eigen3 REQUIRED)
 find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
 find_package(fcontrol REQUIRED)

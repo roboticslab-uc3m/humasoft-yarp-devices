@@ -1,4 +1,5 @@
 add_subdirectory(SoftNeckControl)
+add_subdirectory(SoftArmControl)
 add_subdirectory(SoftNeckImu)
 add_subdirectory(SoftNeckMocap)
 
