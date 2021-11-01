@@ -74,7 +74,18 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
 
-    computeIk(x_out[0], x_out[1], q);
+    //computeIk(x_out[0], x_out[1], q); // mathematical form
+
+    bool ok = true;
+    ok &= initTableIk(csvTableIk);
+    ok &= readTableIk(x_out[0], x_out[1], q);
+
+    if (!ok)
+    {
+        std::printf("ERROR: Problems getting IK from CSV table\n");
+        return false;
+    }
+
     return true;
 }
 

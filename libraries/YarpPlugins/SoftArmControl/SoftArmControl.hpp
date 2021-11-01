@@ -44,6 +44,7 @@
 #define DEFAULT_GEOM_A 0.052 // meters
 #define DEFAULT_GEOM_B 0.052 // meters
 #define DEFAULT_GEOM_L0 0.107 // meters
+#define DEFAULT_IK_TABLE "Tabla170.csv"
 
 #define DEFAULT_POLAR_CONTROLLER_KP 0.0
 #define DEFAULT_POLAR_CONTROLLER_KD 0.9636125
@@ -182,6 +183,11 @@ public:
 private:
 
     void computeIk(double theta, double phi, std::vector<double> & lengths);
+    int initTableIk(string csvfileName);
+    int readTableIk(double incl, double orien, std::vector<double> & lengths);
+    vector < vector<long> > lookupIndex;
+    vector < vector<double> > lookupTable;
+    string csvTableIk;
 
     void setupControllers();
     int getCurrentState() const;

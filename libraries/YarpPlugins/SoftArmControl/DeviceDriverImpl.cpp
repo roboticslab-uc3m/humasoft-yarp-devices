@@ -26,6 +26,8 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     geomB = config.check("geomB", yarp::os::Value(DEFAULT_GEOM_B), "distance between B and mobile platform (meters)").asFloat64();
     geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "arm length (meters)").asFloat64();
 
+    csvTableIk =  config.check("tableIk", yarp::os::Value(DEFAULT_IK_TABLE), "path of the IK table").asFloat64();
+
     controlPolarKp = config.check("controlPolarKp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KP), "polar controller Kp param").asFloat64();
     controlPolarKd = config.check("controlPolarKd", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KD), "polar controller Kd param").asFloat64();
     controlPolarExp = config.check("controlPolarExp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_EXP), "polar controller exp param").asFloat64();
