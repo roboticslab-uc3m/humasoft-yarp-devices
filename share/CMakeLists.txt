@@ -6,3 +6,6 @@ yarp_install(DIRECTORY contexts/launchCanBus
 
 yarp_install(DIRECTORY robots/teoSoftNeck
              DESTINATION ${HUMASOFT-YARP-DEVICES_ROBOTS_INSTALL_DIR})
+
+yarp_install(DIRECTORY robots/teoSoftArm
+             DESTINATION ${HUMASOFT-YARP-DEVICES_ROBOTS_INSTALL_DIR})
