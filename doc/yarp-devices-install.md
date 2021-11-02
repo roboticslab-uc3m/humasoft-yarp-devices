@@ -68,6 +68,5 @@ sudo make install  # Install :-)
 cp ../scripts/gnome/yarp-devices.desktop $HOME/Desktop/
 ```
 In order to get resourcefinder to locate those robot-specific directories, the environment variable `YARP_ROBOT_NAME` should be set accordingly.
-Add the line `YARP_ROBOT_NAME=teoSoftNeck` to `/etc/environment` or `.bashrc`
-
+Add the lines `export YARP_ROBOT_NAME=teoSoftNeck` and `export YARP_ROBOT_NAME=teoSoftArm` to `/etc/environment` or `.bashrc`
 For additional options use `ccmake` instead of `cmake`.
