@@ -86,6 +86,11 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
 
+    // Angular position
+    q[0] = (geomLg0 - q[0]) / winchRadius;
+    q[1] = (geomLg0 - q[1]) / winchRadius;
+    q[2] = (geomLg0 - q[2]) / winchRadius;
+
     return true;
 }
 
