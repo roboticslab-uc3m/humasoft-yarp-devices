@@ -184,7 +184,7 @@ public:
 
 private:
 
-    void computeIk(double theta, double phi, std::vector<double> & lengths);
+    bool computeIk(double theta, double phi, std::vector<double> & lengths);
     int initTableIk(string csvfileName);
     int readTableIk(double incl, double orien, std::vector<double> & lengths);
     vector < vector<long> > lookupIndex;
