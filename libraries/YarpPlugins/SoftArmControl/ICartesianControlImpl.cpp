@@ -74,8 +74,14 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
 
-    //computeIk(x_out[0], x_out[1], q); // mathematical form
+    // mathematical form
+    if(!computeIk(x_out[0], x_out[1], q))
+    {
+        yError() <<"computeIk failed.";
+        return false;
+    }
 
+    /*
     bool ok = true;
     ok &= initTableIk(csvTableIk);
     ok &= readTableIk(x_out[0], x_out[1], q);
@@ -85,7 +91,7 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         std::printf("ERROR: Problems getting IK from CSV table\n");
         return false;
     }
-
+    */
     // Angular position
     q[0] = (geomLg0 - q[0]) / winchRadius;
     q[1] = (geomLg0 - q[1]) / winchRadius;
@@ -122,7 +128,7 @@ bool SoftArmControl::movj(const std::vector<double> & xd)
             return false;
         }
     }
-    else yError() <<"Control mode not defined";
+    else yWarning() <<"Control mode not defined";
 
 
     if (sensorPort.isClosed()) //no IMU
