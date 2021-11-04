@@ -41,9 +41,9 @@
 #define DEFAULT_CMC_PERIOD 0.02 // seconds  // tiempo de lectura del sensor (periodo hilo)
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
 
-#define DEFAULT_GEOM_A 0.052 // meters
-#define DEFAULT_GEOM_B 0.052 // meters
-#define DEFAULT_GEOM_L0 0.107 // meters
+#define DEFAULT_GEOM_A 0.035 // meters
+#define DEFAULT_GEOM_B 0.035 // meters
+#define DEFAULT_GEOM_L0 0.2 // meters
 #define DEFAULT_GEOM_LG0 0.2 // meters (20 centimetros de cable)
 #define DEFAULT_WINCH_RADIUS 0.0093 // meters
 #define DEFAULT_IK_TABLE "Tabla170.csv"
@@ -230,8 +230,8 @@ private:
     double geomL0;
     double geomLg0;
     double winchRadius;
-    double theta,phi;
-    double t11, t12, t13, t21, t22, t23, t31, t32, t33, R, s0, t0, P, L;
+    double theta,phi, psi;
+    double R, phi1, phi2, phi3;
 
     double controlPolarKp;
     double controlPolarKd;
