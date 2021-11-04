@@ -12,74 +12,33 @@ using namespace sofia;
 
 bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & lengths)
 {
-    bool ok = false;
+    theta=incl*M_PI/180;
+    psi=orien*M_PI/180;
 
-    //    if (incl == 0) return -1;
-        theta=incl*M_PI/180;
-        if (incl == 0) theta=0.001*M_PI/180;
-        phi=orien*M_PI/180;
+    //Pendiente
+    // Calcular angulo de bloque y usar arco
 
-       //Matrix A
-        MatrixXd A(4,3);
-      A <<  0, -sqrt(3)*geomA/2, sqrt(3)*geomA/2,
-            geomA,       -0.5*geomA,  -0.5*geomA,
-            0,            0,           0,
-            1,            1,           1;
+      if (theta!=0)
+      {
+          R=geomL0/theta;
 
+          phi1= M_PI/2-psi;
 
-      //Matrix B
-      MatrixXd B(4,3);
-      B <<  0,      -sqrt(3)*geomB/2, sqrt(3)*geomB/2,
-            geomB,       -0.5*geomB,  -0.5*geomB,
-            0,            0,           0,
-            1,            1,           1;
+          phi2= 7*M_PI/6-psi;
 
-      //Matrix R
-      MatrixXd R(3,3);
-      t11 = pow(sin(phi),2)+cos(theta)*pow(cos(phi),2);
-      t12=(cos(theta)-1)*cos(phi)*sin(phi);
-      t21=t12;
-      t13=sin(theta)*cos(phi);
-      t31=-t13;
-      t23=sin(theta)*sin(phi);
-      t32=-t23;
-      t22=pow(cos(phi),2)+cos(theta)*pow(sin(phi),2);
-      t33=cos(theta);
+          phi3= 11*M_PI/6-psi;
 
-     R <<  t11, t12, t13,
-           t21, t22, t23,
-           t31, t32, t33;
-
-     //s0 and t0
-     s0=geomL0*(1-cos(theta))/theta;
-     t0=geomL0*sin(theta)/theta;
-
-
-
-     //Matrix P traslation
-     MatrixXd P(3,1);
-     P<<   s0*cos(phi),
-           s0*sin(phi),
-                    t0;
-
-
-     //Matrix T Homogenia
-     MatrixXd T(4,4);
-     T << R, P,
-          0, 0, 0, 1;
-
-     //Matrix length
-     MatrixXd L(4,3);
-     L= T*B-A;
-
-     //Total Length
-     lengths[0]=sqrt(pow(L(0,0),2)+pow(L(1,0),2)+pow(L(2,0),2));//L1
-     lengths[1]=sqrt(pow(L(0,1),2)+pow(L(1,1),2)+pow(L(2,1),2));//L2
-     lengths[2]=sqrt(pow(L(0,2),2)+pow(L(1,2),2)+pow(L(2,2),2));//L3
-
-     ok = true;
-
-     return ok;
+          lengths[0]=geomL0 - theta * geomA * cos(phi1);
+          lengths[1]=geomL0 - theta * geomA * cos(phi2);
+          lengths[2]=geomL0 - theta * geomA * cos(phi3);
+      }
+      else
+      {
+          lengths[0]=geomL0;
+          lengths[1]=geomL0;
+          lengths[2]=geomL0;
+      }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
