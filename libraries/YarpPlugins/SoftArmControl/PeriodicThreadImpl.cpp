@@ -33,7 +33,7 @@ void SoftArmControl::run()
 
             !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
-        else yError() <<"Control mode not defined";
+        // else yWarning() <<"Control mode not defined. Running in open loop...";
         break;
     default:
         break;
