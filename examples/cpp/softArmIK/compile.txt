@@ -1,1 +1,1 @@
-g++ -I /usr/include/eigen3 softArmIK.cpp -o softArmIK
+g++ -I softArmIK.cpp -o softArmIK
