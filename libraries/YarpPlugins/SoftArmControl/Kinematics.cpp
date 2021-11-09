@@ -29,16 +29,15 @@ bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & 
 
           phi3= 11*M_PI/6-psi;
 
-          lengths[0]=geomL0 - theta * geomA * cos(phi1);
-          lengths[1]=geomL0 - theta * geomA * cos(phi2);
-          lengths[2]=geomL0 - theta * geomA * cos(phi3);
+          lengths[0]= -theta * geomA * cos(phi1);
+          lengths[1]= -theta * geomA * cos(phi2);
+          lengths[2]= -theta * geomA * cos(phi3);
       }
       else
       {
-          lengths[0]=geomL0;
-          lengths[1]=geomL0;
-          lengths[2]=geomL0;
+          lengths={0,0,0};
       }
+
     return true;
 }
 

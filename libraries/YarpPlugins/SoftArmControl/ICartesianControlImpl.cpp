@@ -83,10 +83,6 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
 
-    q[0] = geomLg0 - q[0];
-    q[1] = geomLg0 - q[1];
-    q[2] = geomLg0 - q[2];
-
     cout <<"lenghts: "<<q[0] <<","<<q[1]<<","<<q[2]<<"\n";
 
     /*
@@ -99,8 +95,11 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         std::printf("ERROR: Problems getting IK from CSV table\n");
         return false;
     }
-    */
 
+    q[0] = geomLg0 - q[0];
+    q[1] = geomLg0 - q[1];
+    q[2] = geomLg0 - q[2];
+    */
     return true;
 }
 
