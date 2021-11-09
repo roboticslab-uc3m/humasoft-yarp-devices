@@ -49,20 +49,25 @@ bool computeIk(double incl, double orien, std::vector<double> & lengths)
     return true;
 }
     
-int main()
+int main(int argc, char *argv[])
 {
-      double inc = 5;
-      double ori = 5;
+      double inc = atof(argv[1]);
+      double ori = atof(argv[2]);
 
       cout << "running softArm IK solver: inclination: "<<inc<<", orientation: "<<ori<<endl;
       vector<double> v(3);
+      vector<double> p(3);
       computeIk(inc,ori,v);
       cout <<"lenghts: "<<v[0] <<","<<v[1]<<","<<v[2]<<"\n";
 
-      // Angular position
-      v[0] = (geomLg0 - v[0]) / winchRadius;
-      v[1] = (geomLg0 - v[1]) / winchRadius;
-      v[2] = (geomLg0 - v[2]) / winchRadius;
-      cout <<"angular motors: "<< v[0] <<","<<v[1]<<","<<v[2]<<"\n";
+      
+      p[0] = geomLg0 - v[0];
+      p[1] = geomLg0 - v[1];
+      p[2] = geomLg0 - v[2];
+
+      //p[0] = (geomLg0 - v[0]) / winchRadius;
+      //p[1] = (geomLg0 - v[1]) / winchRadius;
+      //p[2] = (geomLg0 - v[2]) / winchRadius;
+      cout <<"angular motors: "<< p[0] <<","<<p[1]<<","<<p[2]<<"\n";
 }
 

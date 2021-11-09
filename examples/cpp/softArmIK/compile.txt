@@ -1,1 +1,1 @@
-g++ -I softArmIK.cpp -o softArmIK
+g++ softArmIK.cpp -o softArmIK
