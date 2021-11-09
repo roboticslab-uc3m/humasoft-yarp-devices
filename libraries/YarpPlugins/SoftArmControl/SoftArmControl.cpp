@@ -154,8 +154,6 @@ bool SoftArmControl::sendTargets(const std::vector<double> & xd)
         return false;
     }
 
-    std::cout<<"angular position: "<<qd[0]<<" "<<qd[1]<<" "<<qd[2]<<endl;
-
     std::vector<double> vmo(NUM_ROBOT_JOINTS);
     computeIsocronousSpeeds(q, qd, vmo);
 
