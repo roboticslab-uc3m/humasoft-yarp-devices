@@ -66,20 +66,28 @@ bool SoftArmControl::stat(std::vector<double> & x, int * state, double * timesta
 
 bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
-    std::vector<double> x_out;
+    std::vector<double> x_out(2);
 
-    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::RADIANS))
+    if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
         yError() <<"decodePose failed.";
         return false;
     }
 
     // mathematical form
+    cout <<"input: "<<x_out[0] <<","<<x_out[1]<<"\n";
+
     if(!computeIk(x_out[0], x_out[1], q))
     {
         yError() <<"computeIk failed.";
         return false;
     }
+
+    q[0] = geomLg0 - q[0];
+    q[1] = geomLg0 - q[1];
+    q[2] = geomLg0 - q[2];
+
+    cout <<"lenghts: "<<q[0] <<","<<q[1]<<","<<q[2]<<"\n";
 
     /*
     bool ok = true;
@@ -92,10 +100,6 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
     */
-    // Angular position
-    q[0] = (geomLg0 - q[0]) / winchRadius;
-    q[1] = (geomLg0 - q[1]) / winchRadius;
-    q[2] = (geomLg0 - q[2]) / winchRadius;
 
     return true;
 }
