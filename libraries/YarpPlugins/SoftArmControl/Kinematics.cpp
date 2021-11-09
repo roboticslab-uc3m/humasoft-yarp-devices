@@ -17,6 +17,7 @@ bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & 
 
     //Pendiente
     // Calcular angulo de bloque y usar arco
+    lengths.resize(NUM_ROBOT_JOINTS);
 
       if (theta!=0)
       {
