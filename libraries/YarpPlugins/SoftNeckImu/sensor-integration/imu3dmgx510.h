@@ -49,8 +49,10 @@ public:
     double* get_euleranglesPolling();
 
     long GetPitchRoll(double & pitch, double & roll);
+    long GetPitchRollYaw(double &pitch, double &roll, double &yaw);
+    long Reset();
 
-   //This methods are developed to plot specified numbres of samples on Matlab
+    //This methods are developed to plot specified numbres of samples on Matlab
     //We will get a vector to be copy pasted in Matlab to plot it
     std::tuple <double*,double*,double*> get_gyroStreaming (int); //This funcion gives us gyro data
     std::tuple <double*,double*,double,double> get_euleranglesStreaming (int); //This funcion gives us pitch and roll, and both initial pitch offset and initial roll offset
@@ -80,11 +82,9 @@ private: //Attributes
     //Initial offset
     double rolloffset;
     double pitchoffset;
+    double true_yawoff;//CR
+    double tmpYaw;
 
-//    //Setting of GyroBias
-//    double bx = -0.002786;
-//    double by = -0.001833;
-//    double bz = -0.001066;
     //Setting of GyroBias
     double bx = -0.002681;
     double by = -0.002166;

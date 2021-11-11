@@ -591,6 +591,13 @@ double* IMU3DMGX510::get_euleranglesPolling() {
 
 long IMU3DMGX510::GetPitchRoll(double &pitch, double &roll)
 {
+    GetPitchRollYaw(pitch,roll,tmpYaw);
+    return 0;
+}
+
+// Function obteined from https://github.com/HUMASoft/sensor-integration_Archived
+long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
+{
     port.WriteLine(polling);
     portResponse.clear();
 
@@ -599,8 +606,6 @@ long IMU3DMGX510::GetPitchRoll(double &pitch, double &roll)
     usleep(10*1000); //10 milliseconds
 
     FindPortLine(poll_data,portResponse);
-//    ShowCode(portResponse);
-
     string reading = portResponse;
     if (reading.size() < 32) return -1;
 
@@ -643,26 +648,33 @@ long IMU3DMGX510::GetPitchRoll(double &pitch, double &roll)
     if (isnan(ax*ay*az*gx*gy*gz))
     {
         cout << ax*ay*az*gx*gy*gz << endl;
+        estimador.setAttitudeFused(yaw,pitch, roll,1);
         return -1;
     }
 
     {
-        //accelerations x and y need -9.81???!!!!
-    estimador.update(period,0.01*(gx-0.5*gy),0.01*(gy-0.5*gx),0.01*gz,ax,ay,az,0,0,0);
-//    pitch = estimador.eulerPitch();
-//    roll = estimador.eulerRoll();
+
+    estimador.update(period,gx,gy,gz,ax,ay,az,0,0,0);
     pitch = estimador.fusedPitch();
     roll = estimador.fusedRoll();
-//    pitch = gx;
-//    roll = gy;
+    if (abs(gz)<0.003){
+        gz=0;
+    }
+    true_yawoff=true_yawoff+(gz*period/2);
+    yaw=true_yawoff;
+
     }
 
-//    cout << "Values: "  << period << "," << gx << "," <<  gy<< "," << gz<< "," << ax<< "," << ay<< "," << az<< "," << endl;
+    return 0;
+}
 
-
-
+long IMU3DMGX510::Reset()
+{
+    estimador.setAttitude(1,0,0,0);
+    true_yawoff=0;
 
     return 0;
+
 }
 
 std::tuple <double*,double*,double*> IMU3DMGX510::get_gyroStreaming(int samples){
