@@ -200,9 +200,7 @@ private:
     bool sendTargets(const std::vector<double> & xd);
 
     void handleMovjOpenLoop();
-    void handleMovjClosedLoopIOCoupled();
-    void handleMovjClosedLoopIOUncoupled();
-    void handleMovjClosedLoopRPUncoupled();
+    void handleMovjClosedLoop();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
