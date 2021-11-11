@@ -4,12 +4,23 @@
 
 void IMUdevice::run()
 {
-    //Once imu is initilized, we get euler angles from it
-    eulerdata = sensor->EulerAngles();
+    //Once imu is initilized, we get euler angles from it   
+    if(output=="rp") //softneck output
+    {
+        eulerdata = sensor->EulerAngles();
+        data.addDouble( eulerdata[0]);
+        data.addDouble( eulerdata[1]);
+    }
 
-    //Publication of euler angles in Yarp
-    data.addDouble( eulerdata[0]);
-    data.addDouble( eulerdata[1]); // up sensor position
+    if(output=="rpy") //softarm output
+    {
+        // roll, pitch, yaw
+        sensor->GetPitchRollYaw(eulerdata[0],eulerdata[1],eulerdata[2]);
+        data.addDouble( eulerdata[0]);
+        data.addDouble( eulerdata[1]);
+        data.addDouble( eulerdata[2]);
+    }
+
     yarpPort.write(data);
     cout << "Writing bottle: " << data.toString() << endl;
     data.clear();

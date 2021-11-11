@@ -37,6 +37,7 @@ using yarp::os::Network;
 #define DEFAULT_PREFIX "/SoftNeckIMU"
 #define DEFAULT_COMPORT "/dev/ttyUSB0"
 #define DEFAULT_OUTPORT "/softimu"
+#define DEFAULT_OUTPUT "rp"
 
  //Setting of GyroBias
 #define DEFAULT_BX  -0.002786
@@ -104,6 +105,7 @@ private:
     double period;
     double frequency;
     std::string comport;
+    std::string output;
     double *eulerdata;
     double *gyrodatos;
 
