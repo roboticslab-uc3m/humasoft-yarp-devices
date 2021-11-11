@@ -15,28 +15,30 @@ bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & 
     theta=incl*M_PI/180;
     psi=orien*M_PI/180;
 
-    //Pendiente
-    // Calcular angulo de bloque y usar arco
-    lengths.resize(NUM_ROBOT_JOINTS);
+    if (theta!=0)
+    {
+        R=geomL0/theta;
 
-      if (theta!=0)
-      {
-          R=geomL0/theta;
+        phi1= M_PI/2-psi;
 
-          phi1= M_PI/2-psi;
+        phi2= 7*M_PI/6-psi;
 
-          phi2= 7*M_PI/6-psi;
+        phi3= 11*M_PI/6-psi;
 
-          phi3= 11*M_PI/6-psi;
+        lengths[0]=geomL0 - theta * geomA * cos(phi1);
+        lengths[1]=geomL0 - theta * geomA * cos(phi2);
+        lengths[2]=geomL0 - theta * geomA * cos(phi3);
+    }
+    else
+    {
+        lengths[0]=geomL0;
+        lengths[1]=geomL0;
+        lengths[2]=geomL0;
+    }
 
-          lengths[0]= -theta * geomA * cos(phi1);
-          lengths[1]= -theta * geomA * cos(phi2);
-          lengths[2]= -theta * geomA * cos(phi3);
-      }
-      else
-      {
-          lengths={0,0,0};
-      }
+    lengths[0] = geomLg0 - lengths[0];
+    lengths[1] = geomLg0 - lengths[1];
+    lengths[2] = geomLg0 - lengths[2];
 
     return true;
 }
