@@ -29,14 +29,6 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     winchRadius = config.check("radiusWinch", yarp::os::Value(DEFAULT_WINCH_RADIUS), "winch radius (meters)").asFloat64();
     csvTableIk =  config.check("tableIk", yarp::os::Value(DEFAULT_IK_TABLE), "path of the IK table").asFloat64();
 
-    controlPolarKp = config.check("controlPolarKp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KP), "polar controller Kp param").asFloat64();
-    controlPolarKd = config.check("controlPolarKd", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_KD), "polar controller Kd param").asFloat64();
-    controlPolarExp = config.check("controlPolarExp", yarp::os::Value(DEFAULT_POLAR_CONTROLLER_EXP), "polar controller exp param").asFloat64();
-
-    controlAzimuthKp = config.check("controlAzimuthKp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KP), "azimuth controller Kp param").asFloat64();
-    controlAzimuthKd = config.check("controlAzimuthKd", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_KD), "azimuth controller Kd param").asFloat64();
-    controlAzimuthExp = config.check("controlAzimuthExp", yarp::os::Value(DEFAULT_AZIMUTH_CONTROLLER_EXP), "azimuth controller exp param").asFloat64();
-
     controlType = config.check("controlType",yarp::os::Value(DEFAULT_CONTROL_TYPE),"the /type of control to be used").asString();
 
     yarp::os::Property robotOptions;
@@ -110,43 +102,22 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     }
 
     // New Yarp Sensor
-    if (config.check("Imu3DMGX510", "remote yarp port of IMU sensor")){
-        std::string remoteSerial = config.find("Imu3DMGX510").asString();
+    if (config.check("remoteSensor", "remote yarp port sensor")){
+        std::string remoteSensorPort = config.find("remoteSensor").asString();
 
-        if (!sensorPort.open(prefix + "/imu:i"))
+        if (!sensorPort.open(prefix + "/sensor:i"))
         {
-            yError() <<"Unable to open local serial port.";
+            yError() <<"Unable to open local sensor port.";
             return false;
         }
 
-        if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
+        if (!yarp::os::Network::connect(remoteSensorPort, sensorPort.getName(), "udp")) // remoteSerial + "/out"
         {
-            yError() <<"Unable to connect to remote serial port.";
+            yError() <<"Unable to connect to remote sensor port.";
             return false;
         }
-        sensorType = '1';
-        immu3dmgx510StreamResponder = new IMU3DMGX510StreamResponder(sensorTimeout);
-        sensorPort.useCallback(*immu3dmgx510StreamResponder);
-    }
-
-    // Mocap Sensor
-    if (config.check("Mocap", "remote yarp port of Mocap sensor")){
-        std::string remoteSerial = config.find("Mocap").asString();
-
-        if (!sensorPort.open(prefix + "/mocap:i"))
-        {
-            yError() <<"Unable to open local serial port.";
-            return false;
-        }
-
-        if (!yarp::os::Network::connect(remoteSerial, sensorPort.getName(), "udp")) // remoteSerial + "/out"
-        {
-            yError() <<"Unable to connect to remote serial port.";
-            return false;
-        }
-        sensorType = '2';
-        mocapStreamResponder = new MocapStreamResponder(sensorTimeout);
-        sensorPort.useCallback(*mocapStreamResponder);
+        sensorStreamResponder = new SensorStreamResponder(sensorTimeout);
+        sensorPort.useCallback(*sensorStreamResponder);
     }
 
 
@@ -165,12 +136,8 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
 bool SoftArmControl::close()
 {
     stopControl();
-    yarp::os::PeriodicThread::stop();
-    delete controllerPolar;
-    delete controllerAzimuth;
-    delete controllerRollFracc;
-    delete controllerPitchFracc;
-    delete immu3dmgx510StreamResponder;
+    yarp::os::PeriodicThread::stop();    
+    delete sensorStreamResponder;
     robotDevice.close();
     sensorPort.close();
     //testingFile.close();
