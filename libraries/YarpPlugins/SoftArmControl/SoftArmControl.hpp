@@ -71,37 +71,14 @@ namespace sofia
 
 /**
  * @ingroup SoftArmControl
- * @brief Responds to streaming data bottles of 3DMGX510 sensor
+ * @brief Responds to streaming data bottles of a sensor
  */
-class IMU3DMGX510StreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
+class SensorStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
 {
 public:
 
-    IMU3DMGX510StreamResponder(double timeout);
-    ~IMU3DMGX510StreamResponder();
-    void onRead(yarp::os::Bottle & b);
-    bool getLastData(std::vector<double> & v);
-
-private:
-
-    const double timeout;
-    double localArrivalTime;
-    std::vector<double> x;
-    mutable std::mutex mutex;
-    SystemBlock * polarFilterSensor;
-    SystemBlock * azimuthFilterSensor;
-};
-
-/**
- * @ingroup SoftArmControl
- * @brief Responds to streaming data bottles of Mocap sensor
- */
-class MocapStreamResponder : public yarp::os::TypedReaderCallback<yarp::os::Bottle>
-{
-public:
-
-    MocapStreamResponder(double timeout);
-    ~MocapStreamResponder();
+    SensorStreamResponder(double timeout);
+    ~SensorStreamResponder();
     void onRead(yarp::os::Bottle & b);
     bool getLastData(std::vector<double> & v);
 
@@ -131,8 +108,7 @@ public:
                         iEncoders(0),
                         iPositionControl(0),
                         iPositionDirect(0),
-                        immu3dmgx510StreamResponder(0),
-                        mocapStreamResponder(0),
+                        sensorStreamResponder(0),
                         currentState(VOCAB_CC_NOT_CONTROLLING),
                         cmcSuccess(true),
                         streamingCommand(VOCAB_CC_NOT_SET),
@@ -141,14 +117,8 @@ public:
                         geomA(DEFAULT_GEOM_A),
                         geomB(DEFAULT_GEOM_B),
                         geomL0(DEFAULT_GEOM_L0),
-                        controlPolarKp(DEFAULT_POLAR_CONTROLLER_KP),
-                        controlPolarKd(DEFAULT_POLAR_CONTROLLER_KD),
-                        controlPolarExp(DEFAULT_POLAR_CONTROLLER_EXP),
-                        controlAzimuthKp(DEFAULT_AZIMUTH_CONTROLLER_KP),
-                        controlAzimuthKd(DEFAULT_AZIMUTH_CONTROLLER_KD),
-                        controlAzimuthExp(DEFAULT_AZIMUTH_CONTROLLER_EXP),
-                        controllerPolar(0),
-                        controllerAzimuth(0)
+                        fraccControllerPitch(0),
+                        fraccControllerYaw(0)
     {}
 
     // -- ICartesianControl declarations. Implementation in ICartesianControlImpl.cpp --
@@ -211,8 +181,7 @@ private:
     yarp::dev::IPositionDirect * iPositionDirect;
 
     yarp::os::BufferedPort<yarp::os::Bottle> sensorPort;
-    IMU3DMGX510StreamResponder* immu3dmgx510StreamResponder;
-    MocapStreamResponder* mocapStreamResponder;
+    SensorStreamResponder* sensorStreamResponder;
 
     string controlType;
     int currentState;
@@ -231,23 +200,8 @@ private:
     double theta,phi, psi;
     double R, phi1, phi2, phi3;
 
-    double controlPolarKp;
-    double controlPolarKd;
-    double controlPolarExp;
-
-    double controlAzimuthKp;
-    double controlAzimuthKd;
-    double controlAzimuthExp;
-
-    FPDBlock * controllerPolar;
-    FPDBlock * controllerAzimuth;
-    FPDBlock * controllerRollFracc;
-    FPDBlock * controllerPitchFracc;
-
-    char sensorType;
-
-    PIDBlock  *incon;
-    PIDBlock  *orcon;
+    FPDBlock * fraccControllerPitch;
+    FPDBlock * fraccControllerYaw;
 
     std::vector<double> targetPose;
 

@@ -10,20 +10,20 @@ using namespace sofia;
 
 // -----------------------------------------------------------------------------
 
-MocapStreamResponder::MocapStreamResponder(double _timeout)
+SensorStreamResponder::SensorStreamResponder(double _timeout)
     : timeout(_timeout),
       localArrivalTime(0.0),
       x(2, 0.0)
 {
 }
 
-MocapStreamResponder::~MocapStreamResponder()
+SensorStreamResponder::~SensorStreamResponder()
     {
     }
 
 // -----------------------------------------------------------------------------
 
-void MocapStreamResponder::onRead(yarp::os::Bottle & b)
+void SensorStreamResponder::onRead(yarp::os::Bottle & b)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -42,7 +42,7 @@ void MocapStreamResponder::onRead(yarp::os::Bottle & b)
 
 // -----------------------------------------------------------------------------
 
-bool MocapStreamResponder::getLastData(std::vector<double> & v)
+bool SensorStreamResponder::getLastData(std::vector<double> & v)
 {
     std::lock_guard<std::mutex> lock(mutex);
     v=x ;

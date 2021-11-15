@@ -15,8 +15,7 @@ if(NOT SKIP_SoftArmControl)
                                     DeviceDriverImpl.cpp
                                     ICartesianControlImpl.cpp
                                     PeriodicThreadImpl.cpp
-                                    IMU3DMGX510StreamResponder.cpp
-                                    MocapStreamResponder.cpp
+                                    SensorStreamResponder.cpp
                                     Kinematics.cpp)
 
     target_link_libraries(SoftArmControl  YARP::YARP_os
