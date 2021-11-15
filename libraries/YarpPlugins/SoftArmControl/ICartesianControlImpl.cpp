@@ -22,31 +22,19 @@ bool SoftArmControl::stat(std::vector<double> & x, int * state, double * timesta
 {
     if (!sensorPort.isClosed())
     {
-        std::vector<double> x_imu; // roll,pitch
+        std::vector<double> x_imu; // pitch, yaw
 
-
-        switch (sensorType) {
-            case '1':
-                if (!immu3dmgx510StreamResponder->getLastData(x_imu))
-                {
-                    yWarning() << "Outdated 3DMGX510IMU stream data.";
-                }
-            break;
-            case '2':
-                if (!mocapStreamResponder->getLastData(x_imu))
-                {
-                    yWarning() << "Outdated Mocap stream data.";
-                }
-            break;
+        if (!sensorStreamResponder->getLastData(x_imu))
+        {
+            yWarning() << "Outdated 3DMGX510IMU stream data.";
         }
 
-        if(sensorType!=0){
-            // transform [roll.pitch] to [inc, ori]
-            double inc = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
-            double ori = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
-            x_imu[0] = inc;
-            x_imu[1] = ori;
-        }
+        /* transform [roll.pitch] to [inc, ori]
+        double inc = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
+        double ori = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
+        x_imu[0] = inc;
+        x_imu[1] = ori;
+        */
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
