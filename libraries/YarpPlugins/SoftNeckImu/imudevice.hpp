@@ -21,6 +21,7 @@
 #include <yarp/os/LogStream.h>
 #include <ace/DEV_Connector.h>
 #include <ace/TTY_IO.h>
+#include <math.h>
 
 #include <yarp/conf/version.h>
 #if YARP_VERSION_MINOR >= 3

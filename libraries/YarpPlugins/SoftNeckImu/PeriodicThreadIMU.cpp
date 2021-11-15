@@ -12,13 +12,12 @@ void IMUdevice::run()
         data.addDouble( eulerdata[1]);
     }
 
-    if(output=="rpy") //softarm output
+    if(output=="py") //softarm output
     {
-        // roll, pitch, yaw
+        // pitch, yaw
         sensor->GetPitchRollYaw(eulerdata[0],eulerdata[1],eulerdata[2]);
-        data.addDouble( eulerdata[0]);
-        data.addDouble( eulerdata[1]);
-        data.addDouble( eulerdata[2]);
+        data.addDouble( eulerdata[0]*180/M_PI); // pitch in degrees
+        data.addDouble( eulerdata[2]*180/M_PI); // yaw in degrees
     }
 
     yarpPort.write(data);

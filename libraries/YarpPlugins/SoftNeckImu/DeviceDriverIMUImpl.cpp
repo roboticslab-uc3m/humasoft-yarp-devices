@@ -7,7 +7,7 @@ bool IMUdevice::open(yarp::os::Searchable & config)
 {
      nameyarpoutport = config.check("sendport", yarp::os::Value(DEFAULT_OUTPORT), "local outport yarp").asString();
      comport = config.check("comport",yarp::os::Value(DEFAULT_COMPORT),"name of the serial port where imu is connected to").asString().c_str();
-     output = config.check("output",yarp::os::Value(DEFAULT_OUTPUT),"output orientation: rp (softneck) or rpy (softarm)").asString().c_str();
+     output = config.check("output",yarp::os::Value(DEFAULT_OUTPUT),"output orientation: rp (softneck) or py (softarm)").asString().c_str();
      bx = config.check("bx", yarp::os::Value(DEFAULT_BX), "Gyro bias x").asFloat64();
      by = config.check("by", yarp::os::Value(DEFAULT_BY), "Gyro bias y").asFloat64();
      bz = config.check("bz", yarp::os::Value(DEFAULT_BZ), "Gyro bias z").asFloat64();
