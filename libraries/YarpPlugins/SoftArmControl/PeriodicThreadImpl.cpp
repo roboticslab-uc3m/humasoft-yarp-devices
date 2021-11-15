@@ -17,15 +17,7 @@ using namespace roboticslab::KinRepresentation;
 
 void SoftArmControl::run()
 {
-    switch (getCurrentState())
-    {
-    case VOCAB_CC_MOVJ_CONTROLLING:
-        !sensorPort.isClosed() ? handleMovjClosedLoop() : handleMovjOpenLoop();
-        // else yWarning() <<"Control mode not defined. Running in open loop...";
-        break;
-    default:
-        break;
-    }
+    !sensorPort.isClosed() ? handleMovjClosedLoop() : handleMovjOpenLoop();
 }
 
 // -----------------------------------------------------------------------------
@@ -59,76 +51,53 @@ void SoftArmControl::handleMovjOpenLoop()
 void SoftArmControl::handleMovjClosedLoop()
 {
     std::vector<double> x_imu;
-    double polarError,
-           azimuthError,
-           polarCs,
-           azimuthCs
+    double pitchError,
+           yawError,
+           pitchCs,
+           yawCs
            = 0.0;
 
-    switch (sensorType) {
-        case '1':
-            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
-            {
-                yWarning() <<"Outdated 3DMGX510IMU stream data.";
-            } break;
-        case '2':
-            if (!mocapStreamResponder->getLastData(x_imu))
-            {
-                yWarning() <<"Outdated Mocap stream data.";
-                iVelocityControl->stop();
-            } break;
-    }
-
-    std::vector<double> xd = targetPose;   
-    polarError   = xd[0] - x_imu[0];
-    azimuthError = xd[1] - x_imu[1];
-
-    if(std::abs(azimuthError)> 180 )
-    {
-        if(azimuthError > 0)
-            azimuthError = azimuthError - 360.0;
-        else
-            azimuthError = azimuthError + 360.0;
-    }
-
-    // controlamos siempre en inclinación
-    polarCs   = polarError   > *controllerPolar;
-    if (!std::isnormal(polarCs))
-    {
-        polarCs = 0.0;
-    }
-
-    xd[0] = polarCs;
-
-    /* control en orientacion solo si:
-     * (inclinacion > 5)
-     */
-    if(targetPose[0]>5)
-    {
-        yInfo() <<"> Controlando en orientación";
-        azimuthCs = azimuthError > *controllerAzimuth;
-
-        if (!std::isnormal(azimuthCs))
+        if (!sensorStreamResponder->getLastData(x_imu))
         {
-            azimuthCs = 0.0;
+            yWarning() <<"Outdated sensor stream data.";
         }
 
-        xd[1] = azimuthCs;
+
+    std::vector<double> xd = targetPose;
+    std::vector<double> cs(2);
+    pitchError = xd[0] - x_imu[0];
+    yawError   = xd[1] - x_imu[1];
+
+
+    pitchCs = pitchError > *fraccControllerPitch;
+    if (!std::isnormal(pitchCs))
+    {
+        pitchCs = 0.0;
     }
 
-    yDebug("- Polar:   target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], polarError, polarCs);
-    yDebug("- Azimuth: target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], azimuthError, azimuthCs);
+    cs[0] = pitchCs;
 
-    if (!encodePose(xd, xd, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
+    yawCs = yawError > *fraccControllerYaw;
+    if (!std::isnormal(yawCs))
     {
-        yError() <<"encodePose failed.";
-        cmcSuccess = false;
-        stopControl();
-        return;
+        yawCs = 0.0;
     }
 
-    if (!sendTargets(xd))
+    cs[1] = yawCs;
+
+
+    yDebug("- Pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], pitchError, pitchCs);
+    yDebug("- Yaw  : target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], yawError, yawCs);
+
+    double p1=0.001*( cs[0] / 1.5);
+    // INVERTIDO
+    double p2=0.001*( - (cs[0] / 3) - (cs[1] / 1.732) ); //Antiguo tendon 3
+    double p3=0.001*( (cs[1] / 1.732) - (cs[0] / 3) ); //Antiguo tendon 2
+
+    std::vector<double> qd={p1,p2,p3};
+
+    if (!iPositionControl->positionMove(qd.data()))
     {
-        yWarning() <<"Command error, not updating control this iteration.";
+        yError() <<"positionMove failed.";
     }
 }
