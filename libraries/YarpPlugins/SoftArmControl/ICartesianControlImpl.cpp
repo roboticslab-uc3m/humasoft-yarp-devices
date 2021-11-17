@@ -26,7 +26,7 @@ bool SoftArmControl::stat(std::vector<double> & x, int * state, double * timesta
 
         if (!sensorStreamResponder->getLastData(x_imu))
         {
-            yWarning() << "Outdated 3DMGX510IMU stream data.";
+            yWarning() << "Outdated sensor stream data.";
         }
 
         /* transform [roll.pitch] to [inc, ori]
