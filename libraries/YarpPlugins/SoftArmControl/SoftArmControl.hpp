@@ -35,9 +35,9 @@
 #include "fcontrol.h"
 
 #define DEFAULT_PREFIX "/SoftArmControl"
-#define DEFAULT_REMOTE_ROBOT "/teo/head"
-#define DEFAULT_CONTROL_TYPE "docked" //docked (acoplado), undocked (desacoplado)
-#define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
+#define DEFAULT_REMOTE_ROBOT "/teo/rightArm" // future implementation
+
+#define DEFAULT_SENSOR_TIMEOUT 0.1 // 0.1 seconds
 #define DEFAULT_CMC_PERIOD 0.02 // seconds  // tiempo de lectura del sensor (periodo hilo)
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
 
