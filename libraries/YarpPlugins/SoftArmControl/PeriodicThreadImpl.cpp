@@ -17,7 +17,15 @@ using namespace roboticslab::KinRepresentation;
 
 void SoftArmControl::run()
 {
-    !sensorPort.isClosed() ? handleMovjClosedLoop() : handleMovjOpenLoop();
+    switch (getCurrentState())
+    {
+    case VOCAB_CC_MOVJ_CONTROLLING:
+        !sensorPort.isClosed() ? handleMovjClosedLoop() : handleMovjOpenLoop();
+        break;
+    default:
+        break;
+    }
+
 }
 
 // -----------------------------------------------------------------------------
@@ -50,6 +58,7 @@ void SoftArmControl::handleMovjOpenLoop()
 
 void SoftArmControl::handleMovjClosedLoop()
 {
+
     std::vector<double> x_imu;
     double pitchError,
            yawError,
@@ -57,11 +66,11 @@ void SoftArmControl::handleMovjClosedLoop()
            yawCs
            = 0.0;
 
-        if (!sensorStreamResponder->getLastData(x_imu))
-        {
-            yWarning() <<"Outdated sensor stream data.";
-        }
-
+    if (!sensorStreamResponder->getLastData(x_imu))
+    {
+        yWarning() <<"Outdated sensor stream data.";
+        //return;
+    }
 
     std::vector<double> xd = targetPose;
     std::vector<double> cs(2);
@@ -83,9 +92,10 @@ void SoftArmControl::handleMovjClosedLoop()
         yawCs = 0.0;
     }
 
-    cs[1] = yawCs;
+    //cs[1] = yawCs;
+    cs[1] = 0.0;
 
-
+    yDebug("-----------------------------------------------\n");
     yDebug("- Pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], pitchError, pitchCs);
     yDebug("- Yaw  : target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], yawError, yawCs);
 
@@ -100,4 +110,5 @@ void SoftArmControl::handleMovjClosedLoop()
     {
         yError() <<"positionMove failed.";
     }
+
 }
