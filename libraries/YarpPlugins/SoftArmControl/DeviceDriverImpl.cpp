@@ -18,7 +18,7 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     std::string prefix = config.check("prefix", yarp::os::Value(DEFAULT_PREFIX), "local port prefix").asString();
     std::string remoteRobot = config.check("remoteRobot", yarp::os::Value(DEFAULT_REMOTE_ROBOT), "remote head port").asString();
 
-    double sensorTimeout = config.check("serialTimeout", yarp::os::Value(DEFAULT_SERIAL_TIMEOUT), "serial timeout (seconds)").asFloat64();
+    double sensorTimeout = config.check("sensorTimeout", yarp::os::Value(DEFAULT_SENSOR_TIMEOUT), "sensor timeout (seconds)").asFloat64();
     cmcPeriod = config.check("cmcPeriod", yarp::os::Value(DEFAULT_CMC_PERIOD), "CMC period (seconds)").asFloat64();
     waitPeriod = config.check("waitPeriod", yarp::os::Value(DEFAULT_WAIT_PERIOD), "CMC wait check period (seconds)").asFloat64();
 
@@ -28,8 +28,6 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     geomLg0 = config.check("geomLg0", yarp::os::Value(DEFAULT_GEOM_LG0), "arm offset or thread length (meters)").asFloat64();
     winchRadius = config.check("radiusWinch", yarp::os::Value(DEFAULT_WINCH_RADIUS), "winch radius (meters)").asFloat64();
     csvTableIk =  config.check("tableIk", yarp::os::Value(DEFAULT_IK_TABLE), "path of the IK table").asFloat64();
-
-    controlType = config.check("controlType",yarp::os::Value(DEFAULT_CONTROL_TYPE),"the /type of control to be used").asString();
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
