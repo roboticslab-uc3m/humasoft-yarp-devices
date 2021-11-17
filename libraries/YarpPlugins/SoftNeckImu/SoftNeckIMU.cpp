@@ -5,8 +5,8 @@ void IMUdevice::setupIMU() {
     //This method initializes the IMU, setting it to get euler angles at the desired frequency
     sensor = new IMU3DMGX510(comport, DEFAULT_FREQUENCY); //Main key changing constructor of IMU3DMGX510 atribute string --> string portname = "..."
     if (sensor->check()){
-        yarpPort.open(nameyarpoutport+"/out");
-        cout << "Yarp port: " << nameyarpoutport+"/out" << " has been correctly opened." << endl;
+        yarpPort.open(nameyarpoutport+"/sensor:o");
+        cout << "Yarp port: " << nameyarpoutport+"/sensor:o" << " has been correctly opened." << endl;
     }
 
     //IMU will be calibrated at DEFAULT_FREQUENCY
