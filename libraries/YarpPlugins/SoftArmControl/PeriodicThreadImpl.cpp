@@ -92,23 +92,27 @@ void SoftArmControl::handleMovjClosedLoop()
         yawCs = 0.0;
     }
 
-    //cs[1] = yawCs;
-    cs[1] = 0.0;
+    cs[1] = yawCs;
+    //cs[1] = 0.0;
 
     yDebug("-----------------------------------------------\n");
     yDebug("- Pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], pitchError, pitchCs);
     yDebug("- Yaw  : target %f, sensor %f, error %f, cs: %f\n", targetPose[1], x_imu[1], yawError, yawCs);
 
+
     double p1=0.001*( cs[0] / 1.5);
     // INVERTIDO
     double p2=0.001*( - (cs[0] / 3) - (cs[1] / 1.732) ); //Antiguo tendon 3
     double p3=0.001*( (cs[1] / 1.732) - (cs[0] / 3) ); //Antiguo tendon 2
+    yDebug("- Motors: [%f. %f, %f]\n", p1, p2, p3);
 
     std::vector<double> qd={p1,p2,p3};
+
 
     if (!iPositionControl->positionMove(qd.data()))
     {
         yError() <<"positionMove failed.";
     }
+
 
 }
