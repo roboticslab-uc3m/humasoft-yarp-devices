@@ -95,32 +95,12 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
 
 bool SoftArmControl::movj(const std::vector<double> & xd)
 {
-    if(controlType=="ioCoupled")
-    {
-        if (!setControlModes(VOCAB_CM_POSITION))
-        {
-            yError() <<"Unable to set position mode.";
-            return false;
-        }
-    }
-    else if(controlType=="ioUncoupled")
-    {
-        if (!setControlModes(VOCAB_CM_VELOCITY))
-        {
-            yError() <<"Unable to set velocity mode.";
-            return false;
-        }
-    }
-    else if(controlType=="rpUncoupled")
-    {
-        if (!setControlModes(VOCAB_CM_POSITION))
-        {
-            yError() <<"Unable to set position mode.";
-            return false;
-        }
-    }
-    else yWarning() <<"Control mode not defined";
 
+    if (!setControlModes(VOCAB_CM_POSITION))
+    {
+        yError() <<"Unable to set position mode.";
+        return false;
+    }
 
     if (sensorPort.isClosed()) //no IMU
     {
@@ -138,18 +118,10 @@ bool SoftArmControl::movj(const std::vector<double> & xd)
         }
 
         // equations to solve the transformation: inclnation-orientation -> roll-pitch
-        if(controlType == "rpUncoupled"){
-            double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
-            double roll = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
-            targetPose[0] = roll;
-            targetPose[1] = pitch;
-        }
-
-        else
-        {
-            if(targetPose[1]<0.0) targetPose[1]+= 360;
-        }
-
+        //double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
+        //double yaw = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
+        //targetPose[0] = pitch;
+        //targetPose[1] = yaw;
     }
     cmcSuccess = true;
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
