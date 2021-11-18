@@ -4,6 +4,12 @@
 
 void IMUdevice::run()
 {
+    if(output!="rp" && output!="py")
+    {
+        cout << "Error: wrong output option" << endl;
+        return;
+    }
+
     //Once imu is initilized, we get euler angles from it   
     if(output=="rp") //softneck output
     {
