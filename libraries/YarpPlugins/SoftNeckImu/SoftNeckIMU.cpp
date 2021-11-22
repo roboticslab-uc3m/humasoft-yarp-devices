@@ -19,11 +19,12 @@ void IMUdevice::setupIMU() {
     //cout << "Calibration done" << endl;
 
     //Once it has been done, it's prepared to stream euler angles
-    //sensor->set_freq(frequency);
+    sensor->set_freq(frequency);
     //sensor->set_IDLEmode();
     //sensor->set_devicetogetgyroacc();
 
     //Once the device is correctly connected, it's set to IDLE mode to stop transmitting data till user requests it
+
     sensor->set_streamon();
 
 }
