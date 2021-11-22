@@ -200,8 +200,8 @@ private:
     double theta,phi, psi;
     double R, phi1, phi2, phi3;
 
-    FPDBlock * fraccControllerPitch;
-    FPDBlock * fraccControllerYaw;
+    PIDBlock * fraccControllerPitch;
+    PIDBlock * fraccControllerYaw;
 
     std::vector<double> targetPose;
 
