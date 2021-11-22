@@ -13,8 +13,8 @@ using namespace sofia;
 
 void SoftArmControl::setupControllers()
 {
-    fraccControllerPitch  = new FPDBlock(0.95,1.6,0, cmcPeriod);
-    fraccControllerYaw    = new FPDBlock(0.1 ,1  ,0, cmcPeriod);
+    fraccControllerPitch  = new PIDBlock(0.95,1.6,0, cmcPeriod);
+    fraccControllerYaw    = new PIDBlock(0.1 ,1  ,0, cmcPeriod);
 }
 
 // ---------------------------------------------------------------------------
