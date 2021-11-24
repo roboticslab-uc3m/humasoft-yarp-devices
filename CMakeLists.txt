@@ -5,6 +5,9 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(HUMASOFT_YARP_DEVICES)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Add suffix for debug libraries.
 if(MSVC)
     message(STATUS "Running on windows")
