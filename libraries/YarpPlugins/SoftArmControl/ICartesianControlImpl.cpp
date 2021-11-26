@@ -64,6 +64,7 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
 
     // mathematical form
     cout <<"input: "<<x_out[0] <<","<<x_out[1]<<"\n";
+    q.resize(3, 0.0);
 
     if(!computeIk(x_out[0], x_out[1], q))
     {
