@@ -92,8 +92,7 @@ void SoftArmControl::handleMovjClosedLoop()
         yawCs = 0.0;
     }
 
-    //cs[1] = yawCs;
-    cs[1] =  0.0;
+    cs[1] = yawCs;
 
     yDebug("-----------------------------------------------\n");
     yDebug("- Pitch: target %f, sensor %f, error %f, cs: %f\n", targetPose[0], x_imu[0], pitchError, cs[0]);
