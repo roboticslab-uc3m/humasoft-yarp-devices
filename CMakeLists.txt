@@ -47,7 +47,7 @@ find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
 find_package(fcontrol REQUIRED)
 
 # SoftNeckIMU dependencies.
-add_subdirectory(libraries/YarpPlugins/SoftNeckImu/sensor-integration) #KEY LINE
+add_subdirectory(libraries/SensorIntegrationLib) #KEY LINE
 INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES})
 target_link_libraries(${KEYWORD} SensorIntegration)
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <ios>
+#include <cmath>
 
 // -------------------------  Constructor  -------------------------------
 
@@ -13,10 +14,10 @@ IMU3DMGX510::IMU3DMGX510(string portName, int new_freq) : port(portName)
     //3DMGX10 device will be calibrated once port where it has been connected to has been correctly opened thanks to SerialComm constructor.
     estimador.setMagCalib(0.0, 0.0, 0.0); //Device 3DMGX10 has no magnetometer
     estimador.setGyroBias(bx,by,bz); //Setting of gyro bias
+
 //    estimador.setPIGains(Kp, Ti, KpQuick, TiQuick); //Setting of device gains
 //    estimador.setAccMethod(estimador.ME_FUSED_YAW);        // Optional: Use if you wish to experiment with varying acc-only resolution methods
 //    set_reset();
-
 
 //    //Calibration
     set_IDLEmode();
@@ -32,9 +33,11 @@ IMU3DMGX510::IMU3DMGX510(string portName, int new_freq) : port(portName)
     //Once the device is correctly connected, it's set to IDLE mode to stop transmitting data till user requests it
     set_IDLEmode();
 
-    double initPitch,initiRoll;
+    double initPitch,initiRoll, initYaw;
     for (int i = 0; i < 200; ++i) {
-        GetPitchRoll(initPitch,initiRoll);
+//        GetPitchRoll(initPitch,initiRoll);
+        GetPitchRollYaw(initPitch,initiRoll,initYaw);//CR
+
     }
 
     cout << "Calibration done" << endl;
@@ -70,6 +73,8 @@ long IMU3DMGX510::calibrate(){
     char descriptor;
     double roll=0.0;
     double pitch=0.0;
+    double yaw=0.0; //CR
+
     ulf accx,accy,accz,gyrox,gyroy,gyroz;
 
     for (int h=0; h<=CAL_LOOPS;h++)
@@ -130,6 +135,7 @@ long IMU3DMGX510::calibrate(){
         longitud = port.GetChar();
         answer+=longitud;
 
+
         for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
             c = port.GetChar();
             answer+=c;
@@ -166,15 +172,23 @@ long IMU3DMGX510::calibrate(){
             ss5>> std::hex >> gyroz.ul;
             f5 = gyroz.f;
 
+            if (isnan(f3*f4*f5*f*f1*f2)) return -1;
             estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
+            //estimador.update(period,f3,f4,f5,f,f1,f2,0,0,0);//CR
+            //stimador.update(period,0.01*(f3-0.5*f4),0.01*(f4-0.5*f3),0.01*f5,f,f1,f2,0,0,0);
+
+
             roll = estimador.eulerRoll();
             pitch= estimador.eulerPitch();
+            yaw= estimador.eulerYaw();
 
             //First 150 measures are ignored because they are not stable
             if (h>=150 && h<=500){
                 rolloffset= rolloffset+ roll ;
                 pitchoffset= pitchoffset +pitch ;
+                yawoffset= yawoffset +yaw;
             }
+            true_yawoff=0;
         }
     }
 //    rolloffset = rolloffset / 350;
@@ -402,8 +416,8 @@ std::tuple <float, float, float> IMU3DMGX510::get_gyroPolling() {
 double* IMU3DMGX510::get_euleranglesPolling() {
 
     string reading;
-    double roll, pitch;
-    static double estimation[2];
+    double roll, pitch, yaw;
+    static double estimation[3];
     char c;
     int comp=0;
     int fin=0;
@@ -586,16 +600,20 @@ double* IMU3DMGX510::get_euleranglesPolling() {
 
     estimation[0]=estimador.eulerRoll();
     estimation[1]=estimador.eulerPitch();
+    estimation[2]=estimador.eulerYaw();
     return estimation;
 }
+
+
 
 long IMU3DMGX510::GetPitchRoll(double &pitch, double &roll)
 {
     GetPitchRollYaw(pitch,roll,tmpYaw);
+
     return 0;
+
 }
 
-// Function obteined from https://github.com/HUMASoft/sensor-integration_Archived
 long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
 {
     port.WriteLine(polling);
@@ -606,6 +624,8 @@ long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
     usleep(10*1000); //10 milliseconds
 
     FindPortLine(poll_data,portResponse);
+//    ShowCode(portResponse);
+
     string reading = portResponse;
     if (reading.size() < 32) return -1;
 
@@ -653,10 +673,15 @@ long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
     }
 
     {
-
+        //accelerations x and y need -9.81???!!!!
+//    estimador.update(period,0.01*(gx-0.5*gy),0.01*(gy-0.5*gx),0.01*gz,ax,ay,az,0,0,0);
     estimador.update(period,gx,gy,gz,ax,ay,az,0,0,0);
+//    pitch = estimador.eulerPitch();
+//    roll = estimador.eulerRoll();
     pitch = estimador.fusedPitch();
     roll = estimador.fusedRoll();
+//    yaw = estimador.eulerYaw();
+    //yaw = atan2(ay,ax); //PRUEBA CARLOS
     if (abs(gz)<0.003){
         gz=0;
     }
@@ -665,7 +690,13 @@ long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
 
     }
 
+    //cout << "Values: "  << period << "," << gx << "," <<  gy<< "," << gz<< "," << ax<< "," << ay<< "," << az<< "," << endl;
+
+
+
+
     return 0;
+
 }
 
 long IMU3DMGX510::Reset()
@@ -778,8 +809,12 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
     char descriptor;
     static double rollvector[10000];
     static double pitchvector[10000];
+    static double yawvector[10000];
+
     double rollaverage=0.0;
     double pitchaverage=0.0;
+    double yawaverage=0.0;
+
 
     //        The methodology will be the next:
     //           1) First, we will go through the 1st do-while loop untill we find 'ue' in our data packet. Then, varible "fin" will be set to 1.
@@ -876,17 +911,21 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
                 estimador.update(period,f3,f4,f5,f*9.81,f1*9.81,f2*9.81,0,0,0);
                 rollvector[h-100]=estimador.eulerRoll();
                 pitchvector[h-100]=estimador.eulerPitch();
-                cout << "My attitude is (YX Euler): (" << estimador.eulerPitch() << "," << estimador.eulerRoll() << ")" << endl;
+                yawvector[h-100]=estimador.eulerYaw();
+                cout << "My attitude is : (" << estimador.eulerPitch() << "," << estimador.eulerRoll() << "," << estimador.eulerYaw() << ")" << endl;
 
                 if(h>=225 && h<=350){
 
                     rollaverage= rollaverage + estimador.eulerRoll();
                     pitchaverage= pitchaverage + estimador.eulerPitch();
+                    yawaverage= yawaverage + estimador.eulerYaw();
+
 
                     if (h==350){
 
                         rollaverage = rollaverage/125;
                         pitchaverage = pitchaverage/125;
+                        yawaverage = yawaverage/125;
                     }
                 }
             }
@@ -898,134 +937,115 @@ std::tuple <double*,double*,double,double> IMU3DMGX510::get_euleranglesStreaming
 
 double* IMU3DMGX510::EulerAngles() {
 
-    string answer, str, str1, str2, str3, str4, str5;
-    char c, longitud, descriptorgeneral, descriptormsg1, descriptormsg2;
-    static double EulerAngles[2];
+    static double EulerAngles[3];
 
-    //Reset of the variables to avoid infinite loops.
-    answer.clear();
-    str.clear();
-    str1.clear();
-    str2.clear();
-    str3.clear();
-    str4.clear();
-    str5.clear();
-    int comp = 0;
-    int fin = 0;
-    ulf accx,accy,accz,gyrox,gyroy,gyroz;
-    double f=0;
-    double f1=0;
-    double f2=0;
-    double f3=0;
-    double f4=0;
-    double f5=0;
-    c = '0';
-    longitud = '0';
-    descriptorgeneral = '0';
-    descriptormsg1 = '0';
-    descriptormsg2 = '0';
 
-    //Start of the loop
-    do{
-        c = '0';
-        c = port.GetChar();
-        switch (c) {
-        case 'u':{
-            comp=1;
-            answer+=c;
-            break;}
-        case 'e':{
-            if (comp==1){
-                fin=1;
-                answer+=c;
-            }else{
-                comp=0;
-                answer.clear();
-            }
-            break;}
 
-        default:{
-            answer.clear();
-            break;}
-        }
-    }while(fin==0);
+//        if (abs(gy)<0.003){
+//            gy=0;
+//        }
+//        if (abs(gx)<0.003){
+//            gx=0;
+//        }
 
-    descriptorgeneral = port.GetChar();
-    answer+=descriptorgeneral;
 
-    longitud = port.GetChar();
-    answer+=longitud;
 
-    for (int j = 0 ; j<= ((int)longitud + 1) ; j++){
-        c = port.GetChar();
-        answer+=c;
+
+    //////////////////////////////////////////
+
+    port.WriteLine(polling);
+    portResponse.clear();
+
+    //Really bad hardcoded time wait!!
+    //TODO: Compute the wait time correctly!!
+    usleep(10*1000); //10 milliseconds
+
+    FindPortLine(poll_data,portResponse);
+//    ShowCode(portResponse);
+
+    string reading = portResponse;
+    if (reading.size() < 32){
+
+
+        EulerAngles[2]=0/0;
+        return EulerAngles;
     }
 
-    //We'll get NaN values when IMU sends data packets corrupted, where two of its three descriptors are wrongly located.
-    //To correct this failure, a second if condition has been implemented.
-    //It will check if 2nd and 3nd descriptors are both correct
+    ulf accx;
+    std::string str =hex(reading.substr(6,4));
+    std::stringstream ss(str);
+    ss >> std::hex >> accx.ul;
+    double ax = accx.f;
 
-    // Correct ---> 75 65 80 1C 0E 04 BB 16 DF 76 3C 2F B0 49 3F 80 1A 85 0E 05 BB 5E 50 00 B9 B3 AE D4 BA FB B0 C6 05 FF
+    ulf accy;
+    std::string str1 =hex(reading.substr(10,4));
+    std::stringstream ss1(str1);
+    ss1 >> std::hex >> accy.ul;
+    double ay = accy.f;
 
-    // Incorrect ---> 75 65 80 1C 0E 04 F7 E4 BB 13 A5 1A BB 0A FF A6 BA 94 75 65 80 1C 0E 04 3B 1A 8C 74 3C 1E 34 89 3F 7F
+    ulf accz;
+    std::string str2 =hex(reading.substr(14,4));
+    std::stringstream ss2(str2);
+    ss2 >> std::hex >> accz.ul;
+    double az = accz.f;
 
+    ulf gyrox;
+    std::string str3 =hex(reading.substr(20,4));
+    std::stringstream ss3(str3);
+    ss3 >> std::hex >> gyrox.ul;
+    double gx = gyrox.f;
 
-    if (int(longitud) == 28 && int(descriptorgeneral) == -128 ){
+    ulf gyroy;
+    std::string str4 =hex(reading.substr(24,4));
+    std::stringstream ss4(str4);
+    ss4 >> std::hex >> gyroy.ul;
+    double gy = gyroy.f;
 
-        descriptormsg1 = answer.at(5);
-        descriptormsg2 = answer.at(19);
+    ulf gyroz;
+    std::string str5 =hex(reading.substr(28,4));
+    std::stringstream ss5(str5);
+    ss5>> std::hex >> gyroz.ul;
+    double gz = gyroz.f;
 
-        if ( int(descriptormsg1) == 4 && int(descriptormsg2) == 5){
+    if (isnan(ax*ay*az*gx*gy*gz))
+    {
+        cout << ax*ay*az*gx*gy*gz << endl;
+        EulerAngles[0]=0/0; //rads
+        EulerAngles[1]=0/0; //rads
+        EulerAngles[2]=0/0;
+        return EulerAngles;
 
-        str =hex(answer.substr(6,4));
-        std::stringstream ss(str);
-        ss >> std::hex >> accx.ul;
-        f = accx.f;
-
-        str1 =hex(answer.substr(10,4));
-        std::stringstream ss1(str1);
-        ss1 >> std::hex >> accy.ul;
-        f1 = accy.f;
-
-        str2 =hex(answer.substr(14,4));
-        std::stringstream ss2(str2);
-        ss2 >> std::hex >> accz.ul;
-        f2 = accz.f;
-
-        str3 =hex(answer.substr(20,4));
-        std::stringstream ss3(str3);
-        ss3 >> std::hex >> gyrox.ul;
-        f3 = gyrox.f;
-
-        str4 =hex(answer.substr(24,4));
-        std::stringstream ss4(str4);
-        ss4 >> std::hex >> gyroy.ul;
-        f4 = gyroy.f;
-
-        str5 =hex(answer.substr(28,4));
-        std::stringstream ss5(str5);
-        ss5>> std::hex >> gyroz.ul;
-        f5 = gyroz.f;
-
-        estimador.update(period,f3,f4,f5,f*-9.81,f1*-9.81,f2*-9.81,0,0,0);
-//        EulerAngles[0]=estimador.eulerRoll() - rolloffset; //rads
-//        EulerAngles[1]=estimador.eulerPitch() - pitchoffset; //rads
-        EulerAngles[0]=estimador.fusedRoll() - rolloffset; //rads
-        EulerAngles[1]=estimador.fusedPitch() - pitchoffset; //rads
-
-        EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
-        EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
-
-        }else{
-            cout << "Bad" << endl;
-        }
-
-    }else {
-        cout << "Bad" << endl;
     }
 
-    answer.clear();
+    {
+    estimador.update(period,gx,gy,gz,ax*-9.81,ay*-9.81,az*-9.81,0,0,0);
+    //estimador.update(period,gx,gy,gz,ax,ay,az,0,0,0);
+
+    //estimador.update(period,0.01*(gx-0.5*gy),0.01*(gy-0.5*gx),0.01*gz,ax,ay,az,0,0,0);
+    //estimador.update(period,gx,(gy),(gz),ax,ay,az,0,0,0);
+
+    EulerAngles[0]=estimador.eulerRoll(); //rads
+    EulerAngles[1]=estimador.eulerPitch(); //rads
+
+    if (abs(gz)<0.003){
+        gz=0;
+    }
+
+    EulerAngles[2]=true_yawoff+(gz*period/2);
+    true_yawoff=true_yawoff+(gz*period/2);
+
+    //EulerAngles[2]=estimador.eulerYaw();//-0.00078; //rads
+
+    //cout <<true_yawoff<<" " <<EulerAngles[2]<<" "<<gz<<endl;
+
+    EulerAngles[0] = EulerAngles[0]*180/M_PI; //rad to degrees
+    EulerAngles[1] = EulerAngles[1]*180/M_PI; //rad to degrees
+    EulerAngles[2] = EulerAngles[2]*180/M_PI; //rad to degrees
+
+    }
+
     return EulerAngles;
+
 }
 double* IMU3DMGX510::GyroData(){
 
@@ -1089,7 +1109,7 @@ double* IMU3DMGX510::GyroData(){
         std::stringstream ss1(str1);
         ss1 >> std::hex >> y.ul;
         float f1 = y.f;
-        GyrosData[1] = f;
+        GyrosData[1] = f1;
 
         //z
         ulf z;
@@ -1097,7 +1117,7 @@ double* IMU3DMGX510::GyroData(){
         std::stringstream ss2(str2);
         ss2 >> std::hex >> z.ul;
         float f2 = z.f;
-        GyrosData[2] = f;
+        GyrosData[2] = f2;
     }
 
     return GyrosData;
