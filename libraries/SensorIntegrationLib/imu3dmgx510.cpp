@@ -37,7 +37,6 @@ IMU3DMGX510::IMU3DMGX510(string portName, int new_freq) : port(portName)
     for (int i = 0; i < 200; ++i) {
 //        GetPitchRoll(initPitch,initiRoll);
         GetPitchRollYaw(initPitch,initiRoll,initYaw);//CR
-
     }
 
     cout << "Calibration done" << endl;
@@ -673,16 +672,13 @@ long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
     }
 
     {
-        //accelerations x and y need -9.81???!!!!
-//    estimador.update(period,0.01*(gx-0.5*gy),0.01*(gy-0.5*gx),0.01*gz,ax,ay,az,0,0,0);
+
     estimador.update(period,gx,gy,gz,ax,ay,az,0,0,0);
-//    pitch = estimador.eulerPitch();
-//    roll = estimador.eulerRoll();
     pitch = estimador.fusedPitch();
     roll = estimador.fusedRoll();
-//    yaw = estimador.eulerYaw();
-    //yaw = atan2(ay,ax); //PRUEBA CARLOS
-    if (abs(gz)<0.003){
+
+    if (abs(gz)<0.003)
+    {
         gz=0;
     }
     true_yawoff=true_yawoff+(gz*period/2);
@@ -690,13 +686,7 @@ long IMU3DMGX510::GetPitchRollYaw(double &pitch, double &roll, double &yaw)
 
     }
 
-    //cout << "Values: "  << period << "," << gx << "," <<  gy<< "," << gz<< "," << ax<< "," << ay<< "," << az<< "," << endl;
-
-
-
-
     return 0;
-
 }
 
 long IMU3DMGX510::Reset()
@@ -1018,6 +1008,7 @@ double* IMU3DMGX510::EulerAngles() {
     }
 
     {
+
     estimador.update(period,gx,gy,gz,ax*-9.81,ay*-9.81,az*-9.81,0,0,0);
     //estimador.update(period,gx,gy,gz,ax,ay,az,0,0,0);
 

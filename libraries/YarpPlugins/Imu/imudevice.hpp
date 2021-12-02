@@ -107,7 +107,7 @@ private:
     double frequency;
     std::string comport;
     std::string output;
-    double *eulerdata;
+    double pitch,roll,yaw;
     double *gyrodatos;
 
     //PeriodicThread parameters
