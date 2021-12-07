@@ -118,11 +118,10 @@ bool SoftArmControl::movj(const std::vector<double> & xd)
             return false;
         }
 
-        // equations to solve the transformation: inclnation-orientation -> roll-pitch
-        //double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
-        //double yaw = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
-        //targetPose[0] = pitch;
-        //targetPose[1] = yaw;
+        // equations to solve the transformation: inc-ori -> pitch-yaw
+        double pitch = targetPose[0] * cos(-targetPose[1] * M_PI/180); // pitch
+        double yaw =   targetPose[0] * sin(-targetPose[1] * M_PI/180); // yaw
+        targetPose = {pitch, yaw};
     }
     cmcSuccess = true;
     setCurrentState(VOCAB_CC_MOVJ_CONTROLLING);
