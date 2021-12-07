@@ -8,6 +8,12 @@ yarp_prepare_plugin(Imu
 
 if(NOT SKIP_Imu)
 
+    # Imu dependencies
+    add_subdirectory(../../../libraries/SensorIntegrationLib
+    ${CMAKE_CURRENT_BINARY_DIR}/SensorIntegrationLib)
+    INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES})
+    target_link_libraries(${KEYWORD} SensorIntegration)
+
 
     set(CMAKE_INCLUDE_CURRENT_DIR TRUE) # yarp plugin builder needs this
 

@@ -46,13 +46,6 @@ find_package(Eigen3 REQUIRED)
 find_package(ROBOTICSLAB_KINEMATICS_DYNAMICS REQUIRED)
 find_package(fcontrol REQUIRED)
 
-# SoftNeckIMU dependencies.
-add_subdirectory(libraries/SensorIntegrationLib) #KEY LINE
-INCLUDE_DIRECTORIES (${SUBDIR_INCLUDE_DIRECTORIES})
-target_link_libraries(${KEYWORD} SensorIntegration)
-
-
-
 # Always build YARP devices as MODULE libraries.
 set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "Force dynamic plugins")
 
