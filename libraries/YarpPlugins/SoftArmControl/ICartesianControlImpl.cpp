@@ -29,12 +29,11 @@ bool SoftArmControl::stat(std::vector<double> & x, int * state, double * timesta
             yWarning() << "Outdated sensor stream data.";
         }
 
-        /* transform [roll.pitch] to [inc, ori]
-        double inc = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
-        double ori = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
-        x_imu[0] = inc;
-        x_imu[1] = ori;
-        */
+        //transform [pitch, yaw] to [inc, ori]
+        double ori = -atan2(x_imu[1], x_imu[0])* 180/M_PI;
+        double inc = x_imu[0]/cos(-ori* M_PI/180);
+        x_imu = {inc,ori};
+
 
         if (!encodePose(x_imu, x, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
         {
