@@ -41,6 +41,14 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
         return false;
     }
 
+    if( ! robotDevice.isValid() )
+    {
+        std::printf("%s not available.\n", remoteRobot.c_str());
+        robotDevice.close();
+        yarp::os::Network::fini(); //disconnect from the YARP network
+        return false;
+    }
+
     if (!robotDevice.view(iEncoders))
     {
         yError() <<"Unable to view IEncoders in robot device.";
