@@ -52,7 +52,7 @@ launchCanBus --from softArm.ini
       ```    
       * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (pitch-yaw)
       ```bash
-      yarp rpc /SoftNeckControl/rpc_transform:s
+      yarp rpc /SoftArmControl/rpc_transform:s
       > stat        # to know the current IMU position (inclination orientation)
       > movj 20 90  # to move it in 20º inclination and 10º orientation 
       ```
