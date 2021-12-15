@@ -5,8 +5,9 @@
 Installation instructions for installing from source can be found [here](doc/yarp-devices-install.md).
 
 ## Usage instructions:
-
-Usage instructions for running different YARP modules can be found [here](doc/yarp-device-usage.md).
+Usage instructions for running different YARP modules can be found
+* **SoftNeck:** [here](doc/softneck-usage.md)
+* **SoftArm:**  [here](doc/softarm-usage.md)
 
 ## Demostration programs and results:
 Programs to test the control and obtain system results:
