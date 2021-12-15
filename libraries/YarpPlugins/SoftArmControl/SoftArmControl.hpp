@@ -155,11 +155,11 @@ public:
 private:
 
     bool computeIk(double theta, double phi, std::vector<double> & lengths);
-    int initTableIk(string csvfileName);
+    int initTableIk(string csvfileName, vector<int> tableDimensions);
     int readTableIk(double incl, double orien, std::vector<double> & lengths);
     vector < vector<long> > lookupIndex;
     vector < vector<double> > lookupTable;
-    string csvTableIk;
+    yarp::os::Value *csvTableIk;
 
     void setupControllers();
     int getCurrentState() const;

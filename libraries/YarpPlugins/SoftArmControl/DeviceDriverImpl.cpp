@@ -27,13 +27,22 @@ bool SoftArmControl::open(yarp::os::Searchable & config)
     geomL0 = config.check("geomL0", yarp::os::Value(DEFAULT_GEOM_L0), "arm length (meters)").asFloat64();
     geomLg0 = config.check("geomLg0", yarp::os::Value(DEFAULT_GEOM_LG0), "arm offset or thread length (meters)").asFloat64();
     winchRadius = config.check("radiusWinch", yarp::os::Value(DEFAULT_WINCH_RADIUS), "winch radius (meters)").asFloat64();
-    csvTableIk =  config.check("tableIk", yarp::os::Value(DEFAULT_IK_TABLE), "path of the IK table").asFloat64();
+    //csvTableIk =  config.check("tableIk", yarp::os::Value(DEFAULT_IK_TABLE), "path of the IK table").asFloat64();
+
+    if (config.check("tableIk", csvTableIk)){
+        yInfo() << "Loaded IK table at: " << csvTableIk;
+    }
+    else
+    {
+        csvTableIk = NULL;
+    }
 
     yarp::os::Property robotOptions;
     robotOptions.put("device", "remote_controlboard");
     robotOptions.put("remote", remoteRobot);
     robotOptions.put("local", prefix + remoteRobot);
     robotOptions.setMonitor(config.getMonitor(), "remoteRobot");
+
 
     if (!robotDevice.open(robotOptions))
     {

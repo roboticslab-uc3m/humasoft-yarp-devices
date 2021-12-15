@@ -45,7 +45,6 @@ void SoftNeckControl::run()
 void SoftNeckControl::handleMovjOpenLoop()
 {
     bool done;
-    cout << "Bucle abierto" << endl;
 
     if (!iPositionControl->checkMotionDone(&done))
     {

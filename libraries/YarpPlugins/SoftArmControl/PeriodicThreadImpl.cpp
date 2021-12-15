@@ -33,7 +33,6 @@ void SoftArmControl::run()
 void SoftArmControl::handleMovjOpenLoop()
 {
     bool done;
-    cout << "Bucle abierto" << endl;
 
     if (!iPositionControl->checkMotionDone(&done))
     {

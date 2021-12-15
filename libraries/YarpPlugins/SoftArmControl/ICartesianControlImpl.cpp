@@ -54,6 +54,7 @@ bool SoftArmControl::stat(std::vector<double> & x, int * state, double * timesta
 bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q)
 {
     std::vector<double> x_out(2);
+    q.resize(3, 0.0);
 
     if (!decodePose(xd, x_out, coordinate_system::NONE, orientation_system::POLAR_AZIMUTH, angular_units::DEGREES))
     {
@@ -61,33 +62,38 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
         return false;
     }
 
-    // mathematical form
-    cout <<"input: "<<x_out[0] <<","<<x_out[1]<<"\n";
-    q.resize(3, 0.0);
-
-    if(!computeIk(x_out[0], x_out[1], q))
+    if(csvTableIk!=NULL)
     {
-        yError() <<"computeIk failed.";
-        return false;
+        // table form
+        bool ok = true;
+        ok &= initTableIk(csvTableIk->asString(), vector<int>{41,360});
+        cout << x_out[0] <<endl;
+        cout << x_out[1] <<endl;
+        ok &= readTableIk(x_out[0], x_out[1], q);
+
+        if (!ok)
+        {
+            yError()<< "Problems getting IK from CSV table";
+            return false;
+        }
+
+        q[0] = geomLg0 - q[0];
+        q[1] = geomLg0 - q[1];
+        q[2] = geomLg0 - q[2];
+
+    }
+    else
+    {
+        // mathematical form
+
+        if(!computeIk(x_out[0], x_out[1], q))
+        {
+            yError() <<"computeIk failed.";
+            return false;
+        }
     }
 
     cout <<"lenghts: "<<q[0] <<","<<q[1]<<","<<q[2]<<"\n";
-
-    /*
-    bool ok = true;
-    ok &= initTableIk(csvTableIk);
-    ok &= readTableIk(x_out[0], x_out[1], q);
-
-    if (!ok)
-    {
-        std::printf("ERROR: Problems getting IK from CSV table\n");
-        return false;
-    }
-
-    q[0] = geomLg0 - q[0];
-    q[1] = geomLg0 - q[1];
-    q[2] = geomLg0 - q[2];
-    */
     return true;
 }
 

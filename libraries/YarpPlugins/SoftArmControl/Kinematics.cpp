@@ -45,18 +45,16 @@ bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & 
 
 // -----------------------------------------------------------------------------
 
-int SoftArmControl::initTableIk(string csvfileName)
+int SoftArmControl::initTableIk(string csvfileName, vector<int> tableDimensions)
 {
-
     ifstream csv;
     csv.open(csvfileName);
     csv.seekg(0);
 
     string line;
+
     double i1,i2;
     double l1,l2,l3;
-
-    vector<int> tableDimensions{41,360};
 
     getline(csv,line);
 
@@ -94,6 +92,7 @@ int SoftArmControl::initTableIk(string csvfileName)
             //add another line to table
             lookupTable.push_back(vector<double>{l1,l2,l3});
         }
+
     }
 
     return 0;
@@ -105,7 +104,7 @@ int SoftArmControl::initTableIk(string csvfileName)
 int SoftArmControl::readTableIk(double incl, double orien, std::vector<double> & lengths)
 {
     //  cout << lookupIndex.size();
-       long index = lookupIndex[theta][phi];
+       long index = lookupIndex[incl][orien];
        if (lengths.size()!=lookupTable[index].size())
        {
            cout << "Wrong size." << endl;
