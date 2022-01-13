@@ -15,4 +15,5 @@ add_executable(exampleCartesianControlClient exampleCartesianControlClient.cpp)
 target_link_libraries(exampleCartesianControlClient YARP::YARP_os
                                                     YARP::YARP_init
                                                     YARP::YARP_dev
-                                                    ROBOTICSLAB::KinematicsDynamicsInterfaces)
+                                                    ROBOTICSLAB::KinematicsDynamicsInterfaces
+                                                    ROBOTICSLAB::KinematicRepresentationLib)
