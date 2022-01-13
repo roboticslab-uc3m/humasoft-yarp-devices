@@ -57,13 +57,13 @@ int main(int argc, char *argv[])
       cout << "running softArm IK solver: inclination: "<<inc<<", orientation: "<<ori<<endl;
       vector<double> l(3);
       vector<double> p(3);
-      computeIk(inc,ori,v);
+      computeIk(inc,ori,l);
       cout <<"total lenghts: "<<l[0] <<","<<l[1]<<","<<l[2]<<"\n";
 
       
-      p[0] = geomLg0 - v[0];
-      p[1] = geomLg0 - v[1];
-      p[2] = geomLg0 - v[2];
+      p[0] = geomLg0 - l[0];
+      p[1] = geomLg0 - l[1];
+      p[2] = geomLg0 - l[2];
 
       cout <<"partial lenghts: "<< p[0] <<","<<p[1]<<","<<p[2]<<"\n";
 }
