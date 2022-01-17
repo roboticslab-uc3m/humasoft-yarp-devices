@@ -52,8 +52,7 @@ int main(int argc, char *argv[])
     yarp::os::Property options {
         {"device", yarp::os::Value("CartesianControlClient")},
         {"cartesianRemote", yarp::os::Value("/SoftArmControl")},
-        {"cartesianLocal", yarp::os::Value("/SoftArmCartesianControlClient")},
-        {"transform", yarp::os::Value(1)}
+        {"cartesianLocal", yarp::os::Value("/SoftArmCartesianControlClient")}
     };
 
     yarp::dev::PolyDriver dd(options);
