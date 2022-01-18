@@ -48,70 +48,55 @@ bool SoftArmControl::computeIk(double incl, double orien, std::vector<double> & 
 int SoftArmControl::initTableIk(string csvfileName, vector<int> tableDimensions)
 {
     ifstream csv;
-    csv.open(csvfileName);
-    csv.seekg(0);
+       csv.open(csvfileName);
+       csv.seekg(0);
 
-    string line;
+       string line;
+       double i1,i2;
+       double l1,l2,l3;
 
-    double i1,i2;
-    double l1,l2,l3;
+       getline(csv,line);
+       lookupIndex.resize(tableDimensions[0]);
 
-    getline(csv,line);
+       for (int i=0; i<lookupIndex.size(); i++)
+       {
+           lookupIndex[i].resize(tableDimensions[1]);
 
+           for (int j=0; j<lookupIndex[i].size(); j++)
+           {
+               //get line from file
+               getline(csv,line);
+               istringstream ss(line);
 
-    lookupIndex.resize(tableDimensions[0]);
-    for (int i=1; i<lookupIndex.size(); i++)
-    {
-        lookupIndex[i].resize(tableDimensions[1]);
+               //compare index
+               ss >> i1;
+               ss >> i2;
+               ss >> l1;
+               ss >> l2;
+               ss >> l3;
 
-        for (int j=0; j<lookupIndex[i].size(); j++)
-        {
-            //get line from file
-            getline(csv,line);
-            istringstream ss(line);
-            //compare index
-            ss >> i1;
-            ss >> i2;
-
-            if( (i1!=i) | (i2!=j) )
-            {
-                //cout << "line : " << line;
-                cout << "index : ";
-                cout << "i " << i << ", i1 " << i1 << ", j " << j << ", i2 " << i2 << endl;
-            }
-            //compression
-            ss >> line;
-            //and the values
-            ss >> l1;
-            ss >> l2;
-            ss >> l3;
-
-
-            //store index
-            lookupIndex[i][j]=lookupTable.size();
-            //add another line to table
-            lookupTable.push_back(vector<double>{l1,l2,l3});
-        }
-
-    }
-
-    return 0;
-
+               //store index
+               lookupIndex[i][j]=lookupTable.size();
+               //add another line to table
+               lookupTable.push_back(vector<double>{l1,l2,l3});
+           }
+       }
+       return true;
 }
 
 // -----------------------------------------------------------------------------
 
 int SoftArmControl::readTableIk(double incl, double orien, std::vector<double> & lengths)
 {
-    //  cout << lookupIndex.size();
-       long index = lookupIndex[incl][orien];
-       if (lengths.size()!=lookupTable[index].size())
-       {
-           cout << "Wrong size." << endl;
-           return -1;
-       }
+     long index = lookupIndex[incl][orien];
 
-       lengths = lookupTable[index];
+     if (lengths.size()!=lookupTable[index].size())
+     {
+         cout << "Wrong size." << endl;
+         return -1;
+     }
 
-       return 0;
+     lengths = lookupTable[index];
+
+     return true;
 }

@@ -66,9 +66,7 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
     {
         // table form
         bool ok = true;
-        ok &= initTableIk(csvTableIk->asString(), vector<int>{41,360});
-        cout << x_out[0] <<endl;
-        cout << x_out[1] <<endl;
+        ok &= initTableIk(csvTableIk->asString(), vector<int>{171,360});
         ok &= readTableIk(x_out[0], x_out[1], q);
 
         if (!ok)
@@ -85,7 +83,6 @@ bool SoftArmControl::inv(const std::vector<double> & xd, std::vector<double> & q
     else
     {
         // mathematical form
-
         if(!computeIk(x_out[0], x_out[1], q))
         {
             yError() <<"computeIk failed.";
