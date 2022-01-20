@@ -46,7 +46,6 @@
 #define DEFAULT_GEOM_L0 0.2 // meters
 #define DEFAULT_GEOM_LG0 0.2 // meters (20 centimetros de cable)
 #define DEFAULT_WINCH_RADIUS 0.0093 // meters
-#define DEFAULT_IK_TABLE "Tabla170.csv"
 
 #define DEFAULT_POLAR_CONTROLLER_KP 0.0
 #define DEFAULT_POLAR_CONTROLLER_KD 0.9636125
