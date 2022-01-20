@@ -24,7 +24,7 @@ launchCanBus --from softArm.ini
 
 ### Control module:
 
-* **soft-arm-control in open-loop**: It will reach the commanded position starting from the initial position in which the neck is. Ideal for controlling with the SpaceMouse Wireless without using the IMU sensor.
+* **soft-arm-control in open-loop**: It will reach the commanded position starting from the initial position in which the neck is. Note: in open loop, the system will solve the inverse kinematic using mathematical method by default. If you want, the system can take the IK result using a table adding the parameter: --tableIk *pathFile*. For example, you can add [Table170.csv](https://drive.google.com/file/d/11WGYk2OSIJfw9gZr_Mzdz_D2S0rOdJqH/view?usp=sharing) writing --tableIk ~/Table170.csv if you've located this file in your home dir.
    * Terminal 1: open loop control module
     ```bash
     yarpdev --device SoftArmControl --name /SoftArmControl --remoteRobot /softarm --fkPeriod 0 --coordRepr none --angleRepr polarAzimuth --angularUnits degrees
@@ -34,7 +34,7 @@ launchCanBus --from softArm.ini
     yarp rpc /SoftArmControl/rpc_transform:s    
     > movj 20 10 # to move it in 20º inclination and 10º orientation    
     ```
-    Additionally you can connect this module with the **SpaceMouse Wireless**:
+    This is deal for controlling with the SpaceMouse Wireless without using the IMU sensor. You can connect this module with the **SpaceMouse Wireless**:
     * Terminal 3: to open new yarp ports where you are going to publish the mouse position outputs
     ```bash
     yarpdev --device SpaceNavigator --period 5 --name /spacenavigator --ports "(mouse buttons)" --channels 8 --mouse 0 5 0 5 --buttons 6 7 0 1
