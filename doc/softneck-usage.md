@@ -18,9 +18,10 @@ yarpdev --device serialport --name /softimu --comport /dev/ttyACM0 --baudrate 96
 ```
 *Note*: For Arduino Nano, change `--comport / dev / ttyACM0` to `--comport / dev / ttyUSB0`
 
-* **3DMGX510 IMU:** 
+* **3DMGX510 IMU:**
 ```bash
-sudo yarpdev --device Imu
+sudo chmod 666 /dev/ttyUSB0 # To get permissions to access to /dev/ttyUSB0
+yarpdev --device Imu --period 0.02
 ```
 
 * **MOCAP:** 
