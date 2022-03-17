@@ -225,6 +225,7 @@ private:
     void handleMovjClosedLoopIOCoupled();
     void handleMovjClosedLoopIOUncoupled();
     void handleMovjClosedLoopRPUncoupled();
+    void handleMovjNewClosedLoop();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;

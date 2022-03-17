@@ -33,7 +33,12 @@ void SoftNeckControl::run()
 
             !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
-        else yError() <<"Control mode not defined";
+        else if(controlType=="newControl"){
+            yInfo() <<"Starting NEW Control";
+
+            !sensorPort.isClosed() ? handleMovjNewClosedLoop() : handleMovjOpenLoop();
+        }
+        else yInfo() <<"Control mode not defined. Running in open loop...";
         break;
     default:
         break;
@@ -279,8 +284,8 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
     // transform [roll.pitch] to [inc, ori]
     std::vector<double> io_imu(2); // inc, ori
-    io_imu[0] = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
-    io_imu[1] = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
+    //io_imu[0] = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
+    //io_imu[1] = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
 
     rollError = targetPose[0] - x_imu[0];
     pitchError = targetPose[1] - x_imu[1];
@@ -300,9 +305,9 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     }
     xd[1] = pitchCs;
 
-    double p1 = 0.001*(xd[1] / 1.5);
-    double p2 = 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
-    double p3 = 0.001*( (xd[1] / -3) - (xd[0] / 1.732) );
+    double p1 = - 0.001*(xd[1] / 1.5);
+    double p2 = - 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
+    double p3 = - 0.001*( (xd[1] / -3) - (xd[0] / 1.732) );
 
     if (p3<0){
         p3=p3*0.5;
@@ -323,7 +328,7 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
     cout << "-----------------------------\n" << endl;
     cout << "Total time: ms " << (totaltime/1000000) << endl;
-    cout << "Inclination: " << io_imu[0] << "  Orientation: " << io_imu[1] << endl;
+    //cout << "Inclination: " << io_imu[0] << "  Orientation: " << io_imu[1] << endl;
     cout << "Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "-> RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
     cout << "-> Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
@@ -339,5 +344,10 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     //Uncomment it to receive data from testing
     //testingFile << yarp::os::Time::now()*numtime << "," << targetPose[0] << "," << targetPose[1] << "," << x_imu[0] << "," << x_imu[1]<< endl;
     numtime = numtime+1;
+
+}
+
+void SoftNeckControl::handleMovjNewClosedLoop(){
+    // new control
 
 }

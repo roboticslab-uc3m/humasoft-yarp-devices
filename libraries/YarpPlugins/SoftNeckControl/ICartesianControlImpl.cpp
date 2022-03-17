@@ -133,9 +133,9 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
         // equations to solve the transformation: inclnation-orientation -> roll-pitch
         if(controlType == "rpUncoupled"){
             double pitch = targetPose[0] * cos(targetPose[1] * M_PI/180); // pitch
-            double roll = targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
-            targetPose[0] = roll;
-            targetPose[1] = pitch;
+            double roll =  targetPose[0] * sin(targetPose[1] * M_PI/180); // roll
+            targetPose[0] = -roll;
+            targetPose[1] = -pitch;
         }
 
         else
