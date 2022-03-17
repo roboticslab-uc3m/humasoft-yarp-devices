@@ -16,8 +16,8 @@ void IMUdevice::run()
     if(output=="rp") //softneck output
     {
         // roll, pitch
-        data.addDouble(roll);
-        data.addDouble(pitch);
+        data.addDouble(roll*180/M_PI);
+        data.addDouble(pitch*180/M_PI);
     }
 
     if(output=="py") //softarm output
