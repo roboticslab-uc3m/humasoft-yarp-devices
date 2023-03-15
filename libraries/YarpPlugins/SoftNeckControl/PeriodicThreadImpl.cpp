@@ -33,10 +33,10 @@ void SoftNeckControl::run()
 
             !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
-        else if(controlType=="newControl"){
-            yInfo() <<"Starting NEW Control";
+        else if(controlType=="rpFCVel"){
+            yInfo() <<"Starting Roll Pitch Fractional Control in Velocity Mode";
 
-            !sensorPort.isClosed() ? handleMovjNewClosedLoop() : handleMovjOpenLoop();
+            !sensorPort.isClosed() ? handleMovjClosedLoopRPFCVel() : handleMovjOpenLoop();
         }
         else yInfo() <<"Control mode not defined. Running in open loop...";
         break;
@@ -291,14 +291,14 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     pitchError = targetPose[1] - x_imu[1];
 
     //Control process
-    rollCs = controllerRollFracc->OutputUpdate(rollError);
+    rollCs = fcRollPosition->OutputUpdate(rollError);
     if (!std::isnormal(rollCs))
     {
         rollCs = 0.0;
     }
     xd[0] = rollCs;
 
-    pitchCs = controllerPitchFracc->OutputUpdate(pitchError);
+    pitchCs = fcPitchPosition->OutputUpdate(pitchError);
     if (!std::isnormal(pitchCs))
     {
         pitchCs = 0.0;
@@ -347,7 +347,116 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
 }
 
-void SoftNeckControl::handleMovjNewClosedLoop(){
-    // new control
+// new FRACTIONAL CONTROL based in ROLL PITCH inputs using VELOCITY MODE
+void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
 
-}
+
+    double rollError, pitchError,
+           rollCs, pitchCs = 0.0;
+
+    std::vector<double> x_imu; //roll, pitch
+    std::vector<double> xd(2);
+
+    switch (sensorType) {
+        case '1':
+            if (!immu3dmgx510StreamResponder->getLastData(x_imu))
+            {
+                yWarning() <<"Outdated IMU 3dmgx510 stream data.";
+                iPositionControl->stop();
+            } break;
+        case '2':
+            if (!mocapStreamResponder->getLastData(x_imu))
+            {
+                yWarning() <<"Outdated Mocap stream data.";
+                iPositionControl->stop();
+            } break;
+    }
+
+
+    // cambio signo para igualar sentido de giro de los motores y del sensor
+    //pitch = - x_imu[0];
+    //roll  = - x_imu[1];
+
+    rollError = targetPose[0] - x_imu[0];
+    pitchError = targetPose[1] - x_imu[1];
+
+    //Control process
+    rollCs = fcRollVelocity->OutputUpdate(rollError);
+    if (!std::isnormal(rollCs))
+    {
+        rollCs = 0.0;
+    }
+
+
+    pitchCs = fcPitchVelocity->OutputUpdate(pitchError);
+    if (!std::isnormal(pitchCs))
+    {
+        pitchCs = 0.0;
+    }
+
+
+
+    // -----------------------------------
+
+    // ----- Controller of velocity in M0
+
+    double currentVelM0;
+    if (!iVelocityControl->getRefVelocity(0, &currentVelM0))
+        yError() <<"getRefVelocity failed of motor 0.";
+
+    //double currentVelM1 = m1.GetVelocity();
+    double velError0 = targetVel[0] - currentVelM0;
+
+    // Control process
+    double cS0 = cntrl0->OutputUpdate(velError0);
+
+    if (!std::isnormal(cS0))
+    {
+        cS0 = 0.0;
+    }
+
+    if (!iVelocityControl->velocityMove(0, cS0))
+        yError() <<"velocityMove failed of motor 0.";
+
+    // ------ Controller of velocity in M1
+
+    double currentVelM1;
+    if (!iVelocityControl->getRefVelocity(1, &currentVelM1))
+        yError() <<"getRefVelocity failed of motor 1.";
+
+    double velError1 = targetVel[1] - currentVelM1;
+
+    // Control process
+    double cS1 = cntrl1->OutputUpdate(velError1);
+
+    if (!std::isnormal(cS1))
+    {
+        cS1 = 0.0;
+    }
+
+    if (!iVelocityControl->velocityMove(1, cS1))
+        yError() <<"velocityMove failed of motor 1.";
+
+    // ------- Controller of velocity in M2
+
+    double currentVelM2;
+    if (!iVelocityControl->getRefVelocity(2, &currentVelM2))
+        yError() <<"getRefVelocity failed of motor 2.";
+
+    //double currentVelM1 = m1.GetVelocity();
+    double velError2 = targetVel[2] - currentVelM0;
+
+    // Control process
+    double cS2 = cntrl1->OutputUpdate(velError2);
+
+    if (!std::isnormal(cS2))
+    {
+        cS2 = 0.0;
+    }
+
+    if (!iVelocityControl->velocityMove(2, cS2))
+        yError() <<"velocityMove failed of motor 2.";
+
+    printf("pitch error: %f  roll error: %f \n", pitchError, rollError);
+
+} // end loop

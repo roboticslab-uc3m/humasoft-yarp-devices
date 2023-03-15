@@ -16,15 +16,21 @@ void SoftNeckControl::setupControllers()
     controllerPolar   = new FPDBlock(controlPolarKp, controlPolarKd, controlPolarExp, cmcPeriod);
     controllerAzimuth = new FPDBlock(controlAzimuthKp, controlAzimuthKd, controlAzimuthExp, cmcPeriod);
 
-    //controllerRoll = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
-    //controllerPitch = new PIDBlock(0.52,0.82,0.082,cmcPeriod);
-
-    controllerRollFracc   = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);
-    controllerPitchFracc = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);
-
-
     incon = new PIDBlock(0.5,0.1,0,cmcPeriod);
     orcon = new PIDBlock(0.05,0.0,0,cmcPeriod);
+
+    // Control fraccionario del sistema en posicion
+    fcRollPosition  = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);
+    fcPitchPosition = new FPDBlock(1.0659, 0.7593, -0.93, cmcPeriod);
+
+    // Control fraccionario del sistema en velocidad
+    fcRollVelocity  = new FPDBlock(2.6299, 3.2395, -0.8600, cmcPeriod);
+    fcPitchVelocity = new FPDBlock(2.5773, 3.2325, -0.8500, cmcPeriod);
+
+    // Control PID de los motores en velocidad
+    cntrl0 = new PIDBlock(0.015,36,0,cmcPeriod);
+    cntrl1 = new PIDBlock(0.015,36,0,cmcPeriod);
+    cntrl2 = new PIDBlock(0.015,36,0,cmcPeriod);
 }
 
 // -----------------------------------------------------------------------------

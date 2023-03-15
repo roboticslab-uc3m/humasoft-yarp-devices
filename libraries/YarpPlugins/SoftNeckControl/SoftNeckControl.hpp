@@ -225,7 +225,7 @@ private:
     void handleMovjClosedLoopIOCoupled();
     void handleMovjClosedLoopIOUncoupled();
     void handleMovjClosedLoopRPUncoupled();
-    void handleMovjNewClosedLoop();
+    void handleMovjClosedLoopRPFCVel();
 
     yarp::dev::PolyDriver robotDevice;
     yarp::dev::IControlMode * iControlMode;
@@ -263,10 +263,19 @@ private:
     double controlAzimuthKd;
     double controlAzimuthExp;
 
+    // System controllers
     FPDBlock * controllerPolar;
     FPDBlock * controllerAzimuth;
-    FPDBlock * controllerRollFracc;
-    FPDBlock * controllerPitchFracc;
+    FPDBlock * fcRollPosition;
+    FPDBlock * fcPitchPosition;
+    FPDBlock * fcRollVelocity;
+    FPDBlock * fcPitchVelocity;
+
+    // Motors controllers
+    PIDBlock * cntrl0;
+    PIDBlock * cntrl1;
+    PIDBlock * cntrl2;
+
 
     char sensorType;
 
@@ -274,6 +283,7 @@ private:
     PIDBlock  *orcon;
 
     std::vector<double> targetPose;
+    std::vector<double> targetVel;
 
     //In order to analyze obtained data
     //ofstream testingFile;

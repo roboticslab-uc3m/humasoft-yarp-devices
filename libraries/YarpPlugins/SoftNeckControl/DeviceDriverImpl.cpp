@@ -190,8 +190,10 @@ bool SoftNeckControl::close()
     yarp::os::PeriodicThread::stop();
     delete controllerPolar;
     delete controllerAzimuth;
-    delete controllerRollFracc;
-    delete controllerPitchFracc;
+    delete fcRollPosition;
+    delete fcPitchPosition;
+    delete fcRollVelocity;
+    delete fcPitchVelocity;
     delete serialStreamResponder;
     delete immu3dmgx510StreamResponder;
     robotDevice.close();
