@@ -91,7 +91,7 @@ bool SoftNeckControl::setControlModes(int mode)
 
         if (!iControlMode->setControlModes(jointIds.size(), jointIds.data(), modes.data()))
         {
-            yWarning("setControlModes failed (%s).\n", yarp::os::Vocab::decode(mode).c_str());
+            yWarning("setControlModes failed (%s).\n", yarp::os::Vocab32::decode(mode).c_str());
             return false;
         }
     }

@@ -32,8 +32,8 @@ void IMU3DMGX510StreamResponder::onRead(yarp::os::Bottle & b)
         return;
     }
 
-    x[0] = b.get(0).asDouble();
-    x[1] = b.get(1).asDouble();
+    x[0] = b.get(0).asFloat64();
+    x[1] = b.get(1).asFloat64();
 
     localArrivalTime = yarp::os::Time::now();
 

@@ -474,13 +474,13 @@ void MOCAPdevice::sendAnglesYarp(struct EulerAngles eulerAngles) {
     for (int i=0;i<outputYarpEuler.size();i++) {
         switch (outputYarpEuler[i]){
             case 'r':
-                bot.addDouble(eulerAngles.roll);
+                bot.addFloat64(eulerAngles.roll);
                 break;
             case 'p':
-                bot.addDouble(eulerAngles.pitch);
+                bot.addFloat64(eulerAngles.pitch);
                 break;
             case 'y':
-                bot.addDouble(eulerAngles.yaw);
+                bot.addFloat64(eulerAngles.yaw);
                 break;
         }
     }

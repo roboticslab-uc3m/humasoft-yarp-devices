@@ -16,15 +16,15 @@ void IMUdevice::run()
     if(output=="rp") //softneck output
     {
         // roll, pitch
-        data.addDouble(roll*180/M_PI);
-        data.addDouble(pitch*180/M_PI);
+        data.addFloat64(roll*180/M_PI);
+        data.addFloat64(pitch*180/M_PI);
     }
 
     if(output=="py") //softarm output
     {
         // pitch, yaw       
-        data.addDouble( pitch*180/M_PI); // pitch in degrees
-        data.addDouble( yaw*180/M_PI); // yaw in degrees
+        data.addFloat64( pitch*180/M_PI); // pitch in degrees
+        data.addFloat64( yaw*180/M_PI); // yaw in degrees
     }
 
     yarpPort.write(data);

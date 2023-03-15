@@ -329,7 +329,7 @@ bool SoftNeckControl::setParameter(int vocab, double value)
         streamingCommand = value;
         break;
     default:
-        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab32::decode(vocab).c_str());
         return false;
     }
 
@@ -355,7 +355,7 @@ bool SoftNeckControl::getParameter(int vocab, double * value)
         *value = streamingCommand;
         break;
     default:
-        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab::decode(vocab).c_str());
+        yError("Unrecognized or unsupported config parameter key: %s.\n", yarp::os::Vocab32::decode(vocab).c_str());
         return false;
     }
 

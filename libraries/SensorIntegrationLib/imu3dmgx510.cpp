@@ -957,7 +957,7 @@ double* IMU3DMGX510::EulerAngles() {
     if (reading.size() < 32){
 
 
-        EulerAngles[2]=0/0;
+        EulerAngles[2]=0.0;
         return EulerAngles;
     }
 
@@ -1000,9 +1000,9 @@ double* IMU3DMGX510::EulerAngles() {
     if (isnan(ax*ay*az*gx*gy*gz))
     {
         cout << ax*ay*az*gx*gy*gz << endl;
-        EulerAngles[0]=0/0; //rads
-        EulerAngles[1]=0/0; //rads
-        EulerAngles[2]=0/0;
+        EulerAngles[0]=0.0; //rads
+        EulerAngles[1]=0.0; //rads
+        EulerAngles[2]=0.0;
         return EulerAngles;
 
     }
