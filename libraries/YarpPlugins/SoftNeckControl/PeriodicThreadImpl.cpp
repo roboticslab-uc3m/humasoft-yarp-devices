@@ -296,14 +296,12 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     {
         rollCs = 0.0;
     }
-    xd[0] = rollCs;
 
     pitchCs = fcPitchPosition->OutputUpdate(pitchError);
     if (!std::isnormal(pitchCs))
     {
         pitchCs = 0.0;
     }
-    xd[1] = pitchCs;
 
     double p1 = - 0.001*(xd[1] / 1.5);
     double p2 = - 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
@@ -355,7 +353,7 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
            rollCs, pitchCs = 0.0;
 
     std::vector<double> x_imu; //roll, pitch
-    std::vector<double> xd(2);
+    std::vector<double> targetVel(3);
 
     switch (sensorType) {
         case '1':
@@ -387,13 +385,17 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
         rollCs = 0.0;
     }
 
-
     pitchCs = fcPitchVelocity->OutputUpdate(pitchError);
     if (!std::isnormal(pitchCs))
     {
         pitchCs = 0.0;
     }
 
+    // pitch, roll to velocity in meters/sec
+    double T  = DEFAULT_PLATFORM_RADIUS / DEFAULT_WINCH_RADIUS;
+    targetVel[0] =  pitchCs * T;
+    targetVel[1] =  rollCs * T * sin(2*M_PI/3) + pitchCs * T * cos(2*M_PI/3);
+    targetVel[2] =  rollCs * T * sin(4*M_PI/3) + pitchCs * T * cos(4*M_PI/3);
 
 
     // -----------------------------------

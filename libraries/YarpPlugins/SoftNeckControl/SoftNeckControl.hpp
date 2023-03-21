@@ -45,6 +45,7 @@
 #define DEFAULT_GEOM_B 0.052 // meters
 #define DEFAULT_GEOM_L0 0.1085 // meters
 #define DEFAULT_GEOM_LG0 0.003 // meters
+#define DEFAULT_PLATFORM_RADIUS 0.05 // meters
 #define DEFAULT_WINCH_RADIUS 0.0075 // meters
 
 #define DEFAULT_POLAR_CONTROLLER_KP 0.0
