@@ -112,6 +112,14 @@ bool SoftNeckControl::movj(const std::vector<double> & xd)
             return false;
         }
     }
+    else if(controlType=="rpFCVel")
+    {
+        if (!setControlModes(VOCAB_CM_VELOCITY))
+        {
+            yError() <<"Unable to set position mode.";
+            return false;
+        }
+    }
     else yError() <<"Control mode not defined";
 
 
@@ -187,6 +195,13 @@ bool SoftNeckControl::forc(const std::vector<double> & td)
 {
     yWarning() << "Not implemented.";
     return false;
+}
+
+// -----------------------------------------------------------------------------
+
+void SoftNeckControl::wrench(const std::vector<double> & w)
+{
+    yWarning() << "Not implemented.";
 }
 
 // -----------------------------------------------------------------------------

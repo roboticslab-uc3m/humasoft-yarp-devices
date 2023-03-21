@@ -188,6 +188,7 @@ public:
     virtual bool movv(const std::vector<double> & xdotd);
     virtual bool gcmp();
     virtual bool forc(const std::vector<double> & td);
+    virtual void wrench(const std::vector<double> &w);
     virtual bool stopControl();
     virtual bool wait(double timeout);
     virtual bool tool(const std::vector<double> & x);

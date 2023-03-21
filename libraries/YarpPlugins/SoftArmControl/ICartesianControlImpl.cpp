@@ -172,6 +172,13 @@ bool SoftArmControl::forc(const std::vector<double> & td)
 
 // -----------------------------------------------------------------------------
 
+void SoftArmControl::wrench(const std::vector<double> & w)
+{
+    yWarning() << "Not implemented.";
+}
+
+// -----------------------------------------------------------------------------
+
 bool SoftArmControl::stopControl()
 {
     if (!iPositionControl->stop())
