@@ -279,19 +279,16 @@ private:
     PIDBlock * cntrl2;
 
     // Inclination / orientation variables
-    double polarError,
-           azimuthError,
-           polarCs,
-           azimuthCs
+    double polarError, azimuthError,
+           polarCs, azimuthCs
            = 0.0;
 
     // Roll / Pitch viariables
 
-    double rollError,
-            pitchError,
-            rollCs,
-            pitchCs
-            = 0.0;
+    double roll, pitch,
+           rollError, pitchError,
+           rollCs, pitchCs
+           = 0.0;
 
     // Control variables
     std::vector<double> x_imu = {0,0}; //roll, pitch

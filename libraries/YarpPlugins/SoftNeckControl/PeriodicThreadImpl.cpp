@@ -21,24 +21,23 @@ void SoftNeckControl::run()
     {
     case VOCAB_CC_MOVJ_CONTROLLING:
         if(controlType=="ioCoupled"){
-            yInfo() <<"Starting Inclination Orientation Coupled Contro";
+            yInfo() <<" - Inclination Orientation Coupled Contro";
             !sensorPort.isClosed() ? handleMovjClosedLoopIOCoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="ioUncoupled"){
-            yInfo() <<"Starting Inclination Orientation Uncoupled Control";
+            yInfo() <<" - Inclination Orientation Uncoupled Control";
             !sensorPort.isClosed() ? handleMovjClosedLoopIOUncoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="rpUncoupled"){
-            yInfo() <<"Starting Roll Pitch Uncoupled Control";
-
+            yInfo() <<" - Roll Pitch Uncoupled Control";
             !sensorPort.isClosed() ? handleMovjClosedLoopRPUncoupled() : handleMovjOpenLoop();
         }
         else if(controlType=="rpFCVel"){
-            yInfo() <<"Starting Roll Pitch Fractional Control in Velocity Mode";
-
+            yInfo() <<" - Roll Pitch Fractional Control in Velocity Mode";
             !sensorPort.isClosed() ? handleMovjClosedLoopRPFCVel() : handleMovjOpenLoop();
         }
-        else yInfo() <<"Control mode not defined. Running in open loop...";
+        else
+            yInfo() <<" - Control mode not defined. Running in open loop...";
         break;
     default:
         break;
@@ -337,11 +336,12 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
 
 
     // cambio signo para igualar sentido de giro de los motores y del sensor
-    //pitch = - x_imu[0];
-    //roll  = - x_imu[1];
+    roll  = - x_imu[0];
+    pitch = - x_imu[1];
 
-    rollError = targetPose[0] - x_imu[0];
-    pitchError = targetPose[1] - x_imu[1];
+
+    rollError = targetPose[0] - roll;
+    pitchError = targetPose[1] - pitch;
 
     //Control process
     rollCs = fcRollVelocity->OutputUpdate(rollError);
@@ -417,12 +417,11 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
     cout << "-> Motor vel:  " << cSV0 <<" "<< cSV1 <<" "<< cSV2 << endl;
 
     auto end = chrono::steady_clock::now();
-    cout << "Elapsed time in milliseconds (per cycle): "
-         << chrono::duration_cast<chrono::milliseconds>(end - start).count()
-         << " ms" << endl;
-    if (chrono::duration_cast<chrono::milliseconds>(end - start).count() > DEFAULT_CMC_PERIOD )
-        cout << "Time exceded: "
-             << chrono::duration_cast<chrono::milliseconds>(end - start).count() - DEFAULT_CMC_PERIOD
-             << " ms" << endl;
+    cout << "Period: " << getPeriod() <<endl;
+    cout << "Estimated Period since last reset: " << getEstimatedPeriod() <<" sec"<<endl;
+    cout << "Elapsed time procesing iteration code : "
+         << chrono::duration_cast<chrono::milliseconds>(end - start).count() / 1000
+         << " sec" << endl;
+
 
 } // end loop
