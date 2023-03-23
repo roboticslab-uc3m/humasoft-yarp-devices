@@ -74,13 +74,6 @@ void SoftNeckControl::handleMovjOpenLoop()
 
 void SoftNeckControl::handleMovjClosedLoopIOCoupled()
 {
-    std::vector<double> x_imu;
-    double polarError,
-           azimuthError,
-           polarCs,
-           azimuthCs
-           = 0.0;
-
     switch (sensorType) {
         case '0':
             if (!serialStreamResponder->getLastData(x_imu))
@@ -100,9 +93,8 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
             } break;
     }
 
-    std::vector<double> xd = targetPose;   
-    polarError   = xd[0] - x_imu[0];
-    azimuthError = xd[1] - x_imu[1];
+    polarError   = targetPose[0] - x_imu[0];
+    azimuthError = targetPose[1] - x_imu[1];
 
     if(std::abs(azimuthError)> 180 )
     {
@@ -158,13 +150,6 @@ void SoftNeckControl::handleMovjClosedLoopIOCoupled()
 
 void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
 {
-    std::vector<double> x_imu;
-    double polarError,
-           azimuthError,
-           polarCs,
-           azimuthCs
-           = 0.0;
-
     double cs1; // motor izq
     double cs2; // motor der
     std::vector<int> m; // motor izq, der, tercero
@@ -257,16 +242,6 @@ void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
 
 void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 
-    double rollError,
-            pitchError,
-            rollCs,
-            pitchCs
-            = 0.0;
-
-    std::vector<double> x_imu;
-    std::vector<double> xd(2);
-    //std::vector<double> xd = targetPose;
-
     switch (sensorType) {
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
@@ -303,20 +278,17 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
         pitchCs = 0.0;
     }
 
-    double p1 = - 0.001*(xd[1] / 1.5);
-    double p2 = - 0.001*( (xd[0] / 1.732) - (xd[1] / 3) );
-    double p3 = - 0.001*( (xd[1] / -3) - (xd[0] / 1.732) );
+    mp[0] = - 0.001*(pitchCs / 1.5);
+    mp[1] = - 0.001*((rollCs / 1.732) - (pitchCs / 3));
+    mp[2] = - 0.001*((pitchCs / -3) - (rollCs / 1.732));
 
-    if (p3<0){
-        p3=p3*0.5;
+    for(int i=0; i<mp.size(); i++)
+    {
+       if(mp[i]<0)
+       {
+           mp[i] = mp[i]*0.5;
+       }
     }
-    if (p2<0){
-        p2=p2*0.5;
-    }
-    if (p1<0){
-        p1=p1*0.5;
-    }
-
 
     tprev = tnow;
     tnow = std::chrono::system_clock::now();
@@ -329,12 +301,10 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     //cout << "Inclination: " << io_imu[0] << "  Orientation: " << io_imu[1] << endl;
     cout << "Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
     cout << "-> RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
-    cout << "-> Motor positions >>>>> P1: " << p1 << " P2: " << p2 << " P3: " << p3 << endl;
+    cout << "-> Motor positions >>>>> P1: " << mp[0] << " P2: " << mp[1] << " P3: " << mp[2] << endl;
     cout << "-----------------------------\n" << endl;
 
-    std::vector<double> qd={p1,p2,p3};
-
-    if (!iPositionControl->positionMove(qd.data()))
+    if (!iPositionControl->positionMove(mp.data()))
     {
         yError() <<"positionMove failed.";
     }
@@ -348,12 +318,7 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 // new FRACTIONAL CONTROL based in ROLL PITCH inputs using VELOCITY MODE
 void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
 
-
-    double rollError, pitchError,
-           rollCs, pitchCs = 0.0;
-
-    std::vector<double> x_imu; //roll, pitch
-    std::vector<double> targetVel(3);
+    auto start = chrono::steady_clock::now();
 
     switch (sensorType) {
         case '1':
@@ -393,72 +358,71 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
 
     // pitch, roll to velocity in meters/sec
     double T  = DEFAULT_PLATFORM_RADIUS / DEFAULT_WINCH_RADIUS;
-    targetVel[0] =  pitchCs * T;
-    targetVel[1] =  rollCs * T * sin(2*M_PI/3) + pitchCs * T * cos(2*M_PI/3);
-    targetVel[2] =  rollCs * T * sin(4*M_PI/3) + pitchCs * T * cos(4*M_PI/3);
+    mv[0] =  pitchCs * T;
+    mv[1] =  rollCs * T * sin(2*M_PI/3) + pitchCs * T * cos(2*M_PI/3);
+    mv[2] =  rollCs * T * sin(4*M_PI/3) + pitchCs * T * cos(4*M_PI/3);
 
-
-    // -----------------------------------
 
     // ----- Controller of velocity in M0
 
-    double currentVelM0;
-    if (!iVelocityControl->getRefVelocity(0, &currentVelM0))
+    if (!iVelocityControl->getRefVelocity(0, &cmV0))
         yError() <<"getRefVelocity failed of motor 0.";
 
-    //double currentVelM1 = m1.GetVelocity();
-    double velError0 = targetVel[0] - currentVelM0;
+    velError0 = mv[0] - cmV0;
+    cSV0 = cntrl0->OutputUpdate(velError0);
 
-    // Control process
-    double cS0 = cntrl0->OutputUpdate(velError0);
-
-    if (!std::isnormal(cS0))
+    if (!std::isnormal(cSV0))
     {
-        cS0 = 0.0;
+        cSV0 = 0.0;
     }
 
-    if (!iVelocityControl->velocityMove(0, cS0))
+    if (!iVelocityControl->velocityMove(0, cSV0))
         yError() <<"velocityMove failed of motor 0.";
 
     // ------ Controller of velocity in M1
 
-    double currentVelM1;
-    if (!iVelocityControl->getRefVelocity(1, &currentVelM1))
+    if (!iVelocityControl->getRefVelocity(1, &cmV1))
         yError() <<"getRefVelocity failed of motor 1.";
 
-    double velError1 = targetVel[1] - currentVelM1;
+    velError1 = mv[1] - cmV1;
+    cSV1 = cntrl1->OutputUpdate(velError1);
 
-    // Control process
-    double cS1 = cntrl1->OutputUpdate(velError1);
-
-    if (!std::isnormal(cS1))
+    if (!std::isnormal(cSV1))
     {
-        cS1 = 0.0;
+        cSV1 = 0.0;
     }
 
-    if (!iVelocityControl->velocityMove(1, cS1))
+    if (!iVelocityControl->velocityMove(1, cSV1))
         yError() <<"velocityMove failed of motor 1.";
 
     // ------- Controller of velocity in M2
 
-    double currentVelM2;
-    if (!iVelocityControl->getRefVelocity(2, &currentVelM2))
+    if (!iVelocityControl->getRefVelocity(2, &cmV2))
         yError() <<"getRefVelocity failed of motor 2.";
 
-    //double currentVelM1 = m1.GetVelocity();
-    double velError2 = targetVel[2] - currentVelM0;
+    velError2 = mv[2] - cmV2;
+    cSV2 = cntrl1->OutputUpdate(velError2);
 
-    // Control process
-    double cS2 = cntrl1->OutputUpdate(velError2);
-
-    if (!std::isnormal(cS2))
+    if (!std::isnormal(cSV2))
     {
-        cS2 = 0.0;
+        cSV2 = 0.0;
     }
 
-    if (!iVelocityControl->velocityMove(2, cS2))
+    if (!iVelocityControl->velocityMove(2, cSV2))
         yError() <<"velocityMove failed of motor 2.";
 
-    printf("pitch error: %f  roll error: %f \n", pitchError, rollError);
+    cout << "-----------------------------\n" << endl;
+    cout << "Roll: " << x_imu[0] << "  Pitch: " << x_imu[1] << endl;
+    cout << "-> RollTarget: " << targetPose[0] << " PitchTarget:  " << targetPose[1] << " >>>>> RollError: " << rollError << "  PitchError: " << pitchError << endl;
+    cout << "-> Motor vel:  " << cSV0 <<" "<< cSV1 <<" "<< cSV2 << endl;
+
+    auto end = chrono::steady_clock::now();
+    cout << "Elapsed time in milliseconds (per cycle): "
+         << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+         << " ms" << endl;
+    if (chrono::duration_cast<chrono::milliseconds>(end - start).count() > DEFAULT_CMC_PERIOD )
+        cout << "Time exceded: "
+             << chrono::duration_cast<chrono::milliseconds>(end - start).count() - DEFAULT_CMC_PERIOD
+             << " ms" << endl;
 
 } // end loop

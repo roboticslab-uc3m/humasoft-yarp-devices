@@ -278,13 +278,35 @@ private:
     PIDBlock * cntrl1;
     PIDBlock * cntrl2;
 
+    // Inclination / orientation variables
+    double polarError,
+           azimuthError,
+           polarCs,
+           azimuthCs
+           = 0.0;
+
+    // Roll / Pitch viariables
+
+    double rollError,
+            pitchError,
+            rollCs,
+            pitchCs
+            = 0.0;
+
+    // Control variables
+    std::vector<double> x_imu = {0,0}; //roll, pitch
+    std::vector<double> mp = {0,0,0};  // target motor pos
+    std::vector<double> mv = {0,0,0};  // target motor vel
+    double cmV0, cmV1, cmV2 = 0.0; // current motor vels
+    double velError0, velError1, velError2 = 0;
+    double cSV0, cSV1, cSV2 = 0; // control signal (velocity)
 
     char sensorType;
 
     PIDBlock  *incon;
     PIDBlock  *orcon;
 
-    std::vector<double> targetPose;
+    std::vector<double> xd, targetPose;
     std::vector<double> targetVel;
 
     //In order to analyze obtained data
