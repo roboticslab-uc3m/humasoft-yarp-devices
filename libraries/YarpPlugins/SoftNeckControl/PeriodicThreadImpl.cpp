@@ -204,7 +204,7 @@ void SoftNeckControl::handleMovjClosedLoopIOUncoupled()
         m={1,2,0}; //m={2,0,1};
     }
 
-    polarCs   = polarError*M_1_PI/180   > *incon;
+    polarCs   = polarError*M_1_PI/180   > *incon; //radianes
     azimuthCs = azimuthError*M_1_PI/180 > *orcon;
 
     if (!std::isnormal(polarCs)) polarCs = 0;
@@ -317,8 +317,6 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
 // new FRACTIONAL CONTROL based in ROLL PITCH inputs using VELOCITY MODE
 void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
 
-    auto start = chrono::steady_clock::now();
-
     switch (sensorType) {
         case '1':
             if (!immu3dmgx510StreamResponder->getLastData(x_imu))
@@ -334,16 +332,14 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
             } break;
     }
 
-    // cambio signo para igualar sentido de giro de los motores y del sensor
-    roll  = - x_imu[0] * M_PI/180;
-    pitch = - x_imu[1] * M_PI/180;
+    // degrees
+    rollError  = targetPose[0] - x_imu[0];
+    pitchError = targetPose[1] - x_imu[1];
 
-    // transormacion de grados a radianes
-    targetPose[0] = targetPose[0] * M_PI/180;
-    targetPose[1] = targetPose[1] * M_PI/180;
+    // deg -> rad
+    rollError = rollError*M_PI/180;
+    pitchError = pitchError*M_PI/180;
 
-    rollError = targetPose[0] - roll;
-    pitchError = targetPose[1] - pitch;
 
     //Control process
     rollCs = fcRollVelocity->OutputUpdate(rollError);
@@ -358,12 +354,16 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
         pitchCs = 0.0;
     }
 
-    // pitch, roll to velocity in meters/sec
+    // pitch, roll to velocity in rad/sec
     double T  = DEFAULT_PLATFORM_RADIUS / DEFAULT_WINCH_RADIUS;
     mv[0] =  pitchCs * T;
     mv[1] =  rollCs * T * sin(2*M_PI/3) + pitchCs * T * cos(2*M_PI/3);
     mv[2] =  rollCs * T * sin(4*M_PI/3) + pitchCs * T * cos(4*M_PI/3);
 
+    // rad/sec -> m/s
+    mv[0] = geomL0 + geomL0 - winchRadius * mv[0];
+    mv[1] = geomL0 + geomL0 - winchRadius * mv[1];
+    mv[2] = geomL0 + geomL0 - winchRadius * mv[2];
 
     // ----- Controller of velocity in M0
 
@@ -377,6 +377,7 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
     {
         cSV0 = 0.0;
     }
+
 
     if (!iVelocityControl->velocityMove(0, cSV0))
         yError() <<"velocityMove failed of motor 0.";
@@ -411,21 +412,19 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
     }
 
     if (!iVelocityControl->velocityMove(2, cSV2))
-        yError() <<"velocityMove failed of motor 2.";
+       yError() <<"velocityMove failed of motor 2.";
 
 
-    printf("Pitch target/sensor: %.4f / %.4f\n",  targetPose[0], pitch); // pitch target, pitch sensor
-    printf("Roll target/sensor: %.4f / %.4f\n",  targetPose[1], roll); // roll target,  roll sensor
+    printf("Roll  target/sensor: %.4f / %.4f (err %.4f)\n",  targetPose[0], x_imu[0], rollCs); // roll target, pitch sensor
+    printf("Pitch target/sensor: %.4f / %.4f (err %.4f)\n",  targetPose[1], x_imu[1], pitchCs); // pitch target,  roll sensor
+    printf("Target speed motors: %f %f %f\n", mv[0], mv[1], mv[2]);
+    printf("Current speed encoders: %f %f %f\n", cmV0, cmV1, cmV2);
     printf("Vel error : %.4f, %.4f, %.4f\n", velError0, velError1, velError2); // roll target,  roll sensor
     printf("Vel motors: %.4f, %.4f, %.4f\n", cmV0, cmV1, cmV2); // roll target,  roll sensor
-
-    auto end = chrono::steady_clock::now();
     cout << "Period: " << getPeriod() <<" sec" <<endl;
     cout << "Estimated Period since last reset: " << getEstimatedPeriod() <<" sec"<<endl;
-    cout << "Elapsed time procesing iteration code : "
-         << chrono::duration_cast<chrono::milliseconds>(end - start).count()
-         << " ms " << endl;
     printf("------------------------------------\n");
+
 
 
 } // end loop

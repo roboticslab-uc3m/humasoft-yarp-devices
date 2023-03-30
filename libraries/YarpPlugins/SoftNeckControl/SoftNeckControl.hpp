@@ -285,8 +285,7 @@ private:
 
     // Roll / Pitch viariables
 
-    double roll, pitch,
-           rollError, pitchError,
+    double rollError, pitchError,
            rollCs, pitchCs
            = 0.0;
 
