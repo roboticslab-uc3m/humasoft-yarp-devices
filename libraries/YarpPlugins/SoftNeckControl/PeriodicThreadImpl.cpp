@@ -257,7 +257,7 @@ void SoftNeckControl::handleMovjClosedLoopRPUncoupled(){
     }
 
     // transform [roll.pitch] to [inc, ori]
-    std::vector<double> io_imu(2); // inc, ori
+    //std::vector<double> io_imu(2); // inc, ori
     //io_imu[0] = sqrt(pow(x_imu[1], 2) + pow(x_imu[0], 2));
     //io_imu[1] = fmod( (360 - (atan2(-x_imu[0], x_imu[1])) * 180/M_PI), 360);
 
@@ -371,15 +371,15 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
         yError() <<"getRefVelocity failed of motor 0.";
 
     velError0 = mv[0] - cmV0;
-    cSV0 = cntrl0->OutputUpdate(velError0);
+    csV0 = cntrl0->OutputUpdate(velError0);
 
-    if (!std::isnormal(cSV0))
+    if (!std::isnormal(csV0))
     {
-        cSV0 = 0.0;
+        csV0 = 0.0;
     }
 
 
-    if (!iVelocityControl->velocityMove(0, cSV0))
+    if (!iVelocityControl->velocityMove(0, csV0))
         yError() <<"velocityMove failed of motor 0.";
 
     // ------ Controller of velocity in M1
@@ -388,14 +388,14 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
         yError() <<"getRefVelocity failed of motor 1.";
 
     velError1 = mv[1] - cmV1;
-    cSV1 = cntrl1->OutputUpdate(velError1);
+    csV1 = cntrl1->OutputUpdate(velError1);
 
-    if (!std::isnormal(cSV1))
+    if (!std::isnormal(csV1))
     {
-        cSV1 = 0.0;
+        csV1 = 0.0;
     }
 
-    if (!iVelocityControl->velocityMove(1, cSV1))
+    if (!iVelocityControl->velocityMove(1, csV1))
         yError() <<"velocityMove failed of motor 1.";
 
     // ------- Controller of velocity in M2
@@ -404,14 +404,14 @@ void SoftNeckControl::handleMovjClosedLoopRPFCVel(){
         yError() <<"getRefVelocity failed of motor 2.";
 
     velError2 = mv[2] - cmV2;
-    cSV2 = cntrl1->OutputUpdate(velError2);
+    csV2 = cntrl2->OutputUpdate(velError2);
 
-    if (!std::isnormal(cSV2))
+    if (!std::isnormal(csV2))
     {
-        cSV2 = 0.0;
+        csV2 = 0.0;
     }
 
-    if (!iVelocityControl->velocityMove(2, cSV2))
+    if (!iVelocityControl->velocityMove(2, csV2))
        yError() <<"velocityMove failed of motor 2.";
 
 

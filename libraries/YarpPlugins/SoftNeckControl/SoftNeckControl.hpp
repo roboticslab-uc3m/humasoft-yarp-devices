@@ -36,7 +36,7 @@
 
 #define DEFAULT_PREFIX "/SoftNeckControl"
 #define DEFAULT_REMOTE_ROBOT "/teo/head"
-#define DEFAULT_CONTROL_TYPE "docked" //docked (acoplado), undocked (desacoplado)
+#define DEFAULT_CONTROL_TYPE "rpFCVel"
 #define DEFAULT_SERIAL_TIMEOUT 0.1 // seconds
 #define DEFAULT_CMC_PERIOD 0.02 // seconds  // tiempo de lectura del sensor (periodo hilo)
 #define DEFAULT_WAIT_PERIOD 0.01 // seconds
@@ -279,23 +279,27 @@ private:
     PIDBlock * cntrl2;
 
     // Inclination / orientation variables
-    double polarError, azimuthError,
-           polarCs, azimuthCs
-           = 0.0;
+    double polarError=0.0,
+           azimuthError=0.0,
+           polarCs=0.0, azimuthCs=0.0;
 
     // Roll / Pitch viariables
-
-    double rollError, pitchError,
-           rollCs, pitchCs
-           = 0.0;
+    double rollError=0.0, pitchError=0.0,
+           rollCs=0.0, pitchCs=0.0;
 
     // Control variables
     std::vector<double> x_imu = {0,0}; //roll, pitch
     std::vector<double> mp = {0,0,0};  // target motor pos
     std::vector<double> mv = {0,0,0};  // target motor vel
-    double cmV0, cmV1, cmV2 = 0.0; // current motor vels
-    double velError0, velError1, velError2 = 0;
-    double cSV0, cSV1, cSV2 = 0; // control signal (velocity)
+    double cmV0=0.0,        // current motor vels
+           cmV1=0.0,
+           cmV2=0.0;
+    double velError0=0.0,   // control error
+           velError1=0.0,
+           velError2=0.0;
+    double csV0=0.0,        // control signal (velocity)
+           csV1=0.0,
+           csV2=0.0;
 
     char sensorType;
 
