@@ -192,9 +192,9 @@ public:
     virtual bool wait(double timeout);
     virtual bool tool(const std::vector<double> & x);
     virtual bool act(int command);
-    virtual void twist(const std::vector<double> & xdot);
-    virtual void pose(const std::vector<double> & x, double interval);
     virtual void movi(const std::vector<double> & x);
+    virtual void twist(const std::vector<double> & xdot);
+    virtual void wrench(const std::vector<double> & f);
     virtual bool setParameter(int vocab, double value);
     virtual bool getParameter(int vocab, double * value);
     virtual bool setParameters(const std::map<int, double> & params);

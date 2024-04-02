@@ -249,20 +249,6 @@ bool SoftNeckControl::act(int command)
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::twist(const std::vector<double> & xdot)
-{
-    yWarning() << "Not implemented.";
-}
-
-// -----------------------------------------------------------------------------
-
-void SoftNeckControl::pose(const std::vector<double> & x, double interval)
-{
-    yWarning() << "Not implemented.";
-}
-
-// -----------------------------------------------------------------------------
-
 void SoftNeckControl::movi(const std::vector<double> & x)
 {
     if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
@@ -283,6 +269,20 @@ void SoftNeckControl::movi(const std::vector<double> & x)
     {
         yError() <<"setPositions failed.";
     }
+}
+
+// -----------------------------------------------------------------------------
+
+void SoftNeckControl::twist(const std::vector<double> & xdot)
+{
+    yWarning() << "Not implemented.";
+}
+
+// -----------------------------------------------------------------------------
+
+void SoftNeckControl::wrench(const std::vector<double> & f)
+{
+    yWarning() << "Not implemented.";
 }
 
 // -----------------------------------------------------------------------------
