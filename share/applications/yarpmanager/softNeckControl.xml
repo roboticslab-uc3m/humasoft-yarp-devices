@@ -10,7 +10,7 @@
     </module>
 
     <module>
-        <name>oneCanBusOneWrapper</name>
+        <name>launchCanBus</name>
         <parameters>--from softNeck.ini</parameters>
         <node>localhost</node>
     </module>
