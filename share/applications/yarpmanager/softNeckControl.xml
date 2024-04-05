@@ -13,6 +13,7 @@
         <name>launchCanBus</name>
         <parameters>--from softNeck.ini</parameters>
         <node>localhost</node>
+        <environment>YARP_ROBOT_NAME=teoSoftNeck</environment>
     </module>
 
     <module>
