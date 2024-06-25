@@ -249,9 +249,9 @@ bool SoftNeckControl::act(int command)
 
 // -----------------------------------------------------------------------------
 
-void SoftNeckControl::movi(const std::vector<double> & x)
+void SoftNeckControl::pose(const std::vector<double> & x)
 {
-    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
+    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_POSE)
     {
         yError() <<"Streaming command not preset.";
         return;

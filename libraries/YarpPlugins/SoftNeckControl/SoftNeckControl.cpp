@@ -51,7 +51,7 @@ bool SoftNeckControl::presetStreamingCommand(int command)
 
     switch (command)
     {
-    case VOCAB_CC_MOVI:
+    case VOCAB_CC_POSE:
         return setControlModes(VOCAB_CM_POSITION_DIRECT);
     case VOCAB_CC_TWIST:
         return setControlModes(VOCAB_CM_VELOCITY);
