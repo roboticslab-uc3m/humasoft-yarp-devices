@@ -24,7 +24,7 @@ sudo chmod 666 /dev/ttyUSB0 # To get permissions to access to /dev/ttyUSB0
 yarpdev --device Imu --period 0.02
 ```
 
-* **MOCAP:** 
+* **MOCAP:**
 ```bash
 yarpdev --device Mocap --serverIP 2.2.2.103 --rigidBodyID 6
 ```
@@ -45,8 +45,8 @@ launchCanBus --from softNeck.ini
     ```
     * Terminal 2: to send commands
     ```bash
-    yarp rpc /SoftNeckControl/rpc_transform:s    
-    > movj 20 10 # to move it in 20º inclination and 10º orientation    
+    yarp rpc /SoftNeckControl/rpc_transform:s
+    > movj 20 10 # to move it in 20º inclination and 10º orientation
     ```
     Additionally you can connect this module with the **SpaceMouse Wireless**:
     * Terminal 3: to open new yarp ports where you are going to publish the mouse position outputs
@@ -55,10 +55,10 @@ launchCanBus --from softNeck.ini
     ```
     * Terminal 4: module that connects the data output published by the mouse with the soft-neck-control in open loop
     ```bash
-    streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --movi --gain 0.1 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.01
+    streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftNeckControl --pose --gain 0.1 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.01
     ```
-    
-* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop  
+
+* **soft-neck-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop
   - With **Sparkfun IMU** sensor:
       * Terminal 1: closed loop Coupled Control module using Sparkfun IMU (inclination-orientation)
       ```bash
@@ -71,23 +71,23 @@ launchCanBus --from softNeck.ini
       * Terminal 2: to send commands to coupled or uncoupled control module using Sparkfun IMU (inclination-orientation)
       ```bash
       yarp rpc /SoftNeckControl/rpc_transform:s
-      > stat        # to know the current IMU position 
-      > movj 20 10  # to move it in 20º inclination and 10º orientation 
-      ```   
-  - With **3DMGX510 IMU** sensor:    
+      > stat        # to know the current IMU position
+      > movj 20 10  # to move it in 20º inclination and 10º orientation
+      ```
+  - With **3DMGX510 IMU** sensor:
       * Terminal 1: closed loop Uncoupled Control module using 3DMGX510 IMU (roll-pitch)
       ```bash
       yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Imu3DMGX510 /softimu/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled --cmcPeriod 0.02
-      ```    
+      ```
       * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (roll-pitch)
       ```bash
       yarp rpc /SoftNeckControl/rpc_transform:s
       > stat        # to know the current IMU position (roll pitch)
-      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      > movj 20 10  # to move it in 20º inclination and 10º orientation
       ```
       * Terminal 3: you can check the differents [demostration programs](https://github.com/HUMASoft/yarp-devices/tree/develop/programs) to test the control and obtain system results.
 
-  - With **MOCAP** system: 
+  - With **MOCAP** system:
       * Terminal 1: closed loop Uncoupled Control module using MOCAP system (roll-pitch)
       ```bash
       yarpdev --device SoftNeckControl --name /SoftNeckControl --remoteRobot /softneck --Mocap /softmocap/out --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --controlType rpUncoupled --cmcPeriod 0.02
@@ -96,6 +96,5 @@ launchCanBus --from softNeck.ini
       ```bash
       yarp rpc /SoftNeckControl/rpc_transform:s
       > stat        # to know the current MOCAP rigid body position (roll pitch)
-      > movj 20 10  # to move it in 20º inclination and 10º orientation 
+      > movj 20 10  # to move it in 20º inclination and 10º orientation
       ```
-

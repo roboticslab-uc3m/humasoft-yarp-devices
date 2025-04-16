@@ -10,7 +10,7 @@ yarp server
 
 ### Sensors:
 
-* **3DMGX510 IMU:** 
+* **3DMGX510 IMU:**
 ```bash
 sudo yarpdev --device Imu --output py --freq 50
 ```
@@ -31,8 +31,8 @@ launchCanBus --from softArm.ini
     ```
     * Terminal 2: to send commands
     ```bash
-    yarp rpc /SoftArmControl/rpc_transform:s    
-    > movj 20 10 # to move it in 20º inclination and 10º orientation    
+    yarp rpc /SoftArmControl/rpc_transform:s
+    > movj 20 10 # to move it in 20º inclination and 10º orientation
     ```
     This is deal for controlling with the SpaceMouse Wireless without using the IMU sensor. You can connect this module with the **SpaceMouse Wireless**:
     * Terminal 3: to open new yarp ports where you are going to publish the mouse position outputs
@@ -41,18 +41,18 @@ launchCanBus --from softArm.ini
     ```
     * Terminal 4: module that connects the data output published by the mouse with the soft-arm-control in open loop
     ```bash
-    streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftArmControl --movi --gain 0.03 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.02
+    streamingDeviceController --streamingDevice SpaceNavigator --remoteCartesian /SoftArmControl --pose --gain 0.03 --SpaceNavigator::fixedAxes "(x y z rotz)" --period 0.02
     ```
-    
-* **soft-arm-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop. Note: internally, both the sensor and the control loop, work with pitch and yaw. Instead, the user will always enter *inclination and orientation* values into the system to indicate the position of the arm. 
-  - With **3DMGX510 IMU** sensor:    
+
+* **soft-arm-control in closed-loop control**: It will reach the commanded position, using the IMU sensor to close the control loop. Note: internally, both the sensor and the control loop, work with pitch and yaw. Instead, the user will always enter *inclination and orientation* values into the system to indicate the position of the arm.
+  - With **3DMGX510 IMU** sensor:
       * Terminal 1: closed loop Uncoupled Control module using 3DMGX510 IMU (pitch-yaw)
       ```bash
       yarpdev --device SoftArmControl --name /SoftArmControl --remoteRobot /softarm --remoteSensor /softimu/sensor:o --coordRepr none --angleRepr polarAzimuth --angularUnits degrees --cmcPeriod 0.02
-      ```    
+      ```
       * Terminal 2: to send commands to Uncoupled control module using 3DMGX510 IMU (pitch-yaw)
       ```bash
       yarp rpc /SoftArmControl/rpc_transform:s
       > stat        # to know the current IMU position (inclination orientation)
-      > movj 20 90  # to move it in 20º inclination and 10º orientation 
+      > movj 20 90  # to move it in 20º inclination and 10º orientation
       ```

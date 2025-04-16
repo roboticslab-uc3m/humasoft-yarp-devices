@@ -83,17 +83,17 @@ int main(int argc, char *argv[])
     iCartesianControl->wait(3);
 
     yInfo() << "Step 2: make a circumference";
-    
+
     // Configuration Position Direct
     double period = 0.005; // 5ms
     iCartesianControl->setParameter(VOCAB_CC_CONFIG_CMC_PERIOD, period);
-    iCartesianControl->setParameter(VOCAB_CC_CONFIG_STREAMING_CMD, VOCAB_CC_MOVI);
-    
+    iCartesianControl->setParameter(VOCAB_CC_CONFIG_STREAMING_CMD, VOCAB_CC_POSE);
+
 
     for(double ori=0.0; ori<=360; ori+=0.1)
     {
         yInfo() <<"orientation degrees: "<< ori;
-        iCartesianControl->movi(encPose({40,ori}));
+        iCartesianControl->pose(encPose({40,ori}));
         yarp::os::Time::delay(period);
     }
 

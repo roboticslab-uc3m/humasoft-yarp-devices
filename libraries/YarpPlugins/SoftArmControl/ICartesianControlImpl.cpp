@@ -230,23 +230,9 @@ bool SoftArmControl::act(int command)
 
 // -----------------------------------------------------------------------------
 
-void SoftArmControl::twist(const std::vector<double> & xdot)
+void SoftArmControl::pose(const std::vector<double> & x)
 {
-    yWarning() << "Not implemented.";
-}
-
-// -----------------------------------------------------------------------------
-
-void SoftArmControl::pose(const std::vector<double> & x, double interval)
-{
-    yWarning() << "Not implemented.";
-}
-
-// -----------------------------------------------------------------------------
-
-void SoftArmControl::movi(const std::vector<double> & x)
-{
-    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_MOVI)
+    if (getCurrentState() != VOCAB_CC_NOT_CONTROLLING || streamingCommand != VOCAB_CC_POSE)
     {
         yError() <<"Streaming command not preset.";
         return;
@@ -264,6 +250,13 @@ void SoftArmControl::movi(const std::vector<double> & x)
     {
         yError() <<"setPositions failed.";
     }
+}
+
+// -----------------------------------------------------------------------------
+
+void SoftArmControl::twist(const std::vector<double> & xdot)
+{
+    yWarning() << "Not implemented.";
 }
 
 // -----------------------------------------------------------------------------
