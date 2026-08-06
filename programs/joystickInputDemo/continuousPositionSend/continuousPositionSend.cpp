@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
 
     yarp::os::Property snoptions;
     snoptions.put("device", "CartesianControlClient"); // our device (a dynamically loaded library)
-    snoptions.put("cartesianRemote", "/SoftNeckControl"); // remote port through which we'll talk to the server
-    snoptions.put("cartesianLocal", "/ClosedLoopExample");
+    snoptions.put("remote", "/SoftNeckControl"); // remote port through which we'll talk to the server
+    snoptions.put("local", "/ClosedLoopExample");
     snoptions.put("transform", 1);  // Was yarp::os::Value::getNullValue()
 
     yarp::dev::PolyDriver device(snoptions);
